@@ -14,6 +14,7 @@ const emptyForm = {
   whatsapp_number: "",
   maps_link: "",
   tags: [],
+  weather_policy: "",
 };
 
 export default function PartnerDashboard() {
@@ -243,6 +244,23 @@ export default function PartnerDashboard() {
               placeholder="255700000000"
               className="w-full border border-slate-300 rounded-lg px-4 py-2.5"
             />
+          </div>
+
+          <div>
+            <label className="block text-sm font-semibold text-slate-700 mb-1">
+              Weather / Cancellation Policy <span className="text-slate-400 font-normal">(optional)</span>
+            </label>
+            <textarea
+              rows={3}
+              value={form.weather_policy}
+              onChange={(e) => setForm({ ...form, weather_policy: e.target.value })}
+              placeholder="e.g. If it rains, we reschedule for free or refund in full within 24 hours."
+              className="w-full border border-slate-300 rounded-lg px-4 py-2.5"
+            />
+            <p className="text-xs text-slate-500 mt-1">
+              Especially important for tours, boat trips, and outdoor experiences — travelers ask about this
+              before booking. Clear policies build trust.
+            </p>
           </div>
 
           {message && <p className="text-sm text-teal-700 font-medium">{message}</p>}

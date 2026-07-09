@@ -186,6 +186,7 @@ export default function AdminDashboard() {
       whatsapp_number: l.whatsapp_number || "",
       maps_link: l.maps_link || "",
       tags: l.tags || [],
+      weather_policy: l.weather_policy || "",
     });
     setEditMessage("");
   }
@@ -631,6 +632,19 @@ export default function AdminDashboard() {
                 <input
                   value={editForm.maps_link}
                   onChange={(e) => setEditForm({ ...editForm, maps_link: e.target.value })}
+                  className="w-full border border-slate-300 rounded-lg px-4 py-2.5"
+                />
+              </div>
+
+              <div>
+                <label className="block text-sm font-semibold text-slate-700 mb-1">
+                  Weather / Cancellation Policy <span className="text-slate-400 font-normal">(optional)</span>
+                </label>
+                <textarea
+                  rows={3}
+                  value={editForm.weather_policy || ""}
+                  onChange={(e) => setEditForm({ ...editForm, weather_policy: e.target.value })}
+                  placeholder="e.g. If it rains, we reschedule for free or refund in full within 24 hours."
                   className="w-full border border-slate-300 rounded-lg px-4 py-2.5"
                 />
               </div>

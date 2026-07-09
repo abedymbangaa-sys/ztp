@@ -5,7 +5,7 @@ import { buildRichInquiryLink, SITE_CONTACT_NUMBER } from "../lib/whatsapp";
 import { sendNotificationEmail } from "../lib/email";
 import { supabase } from "../lib/supabase";
 import { SectionIcon } from "../lib/icons";
-import { MapPin, MessageCircle, ExternalLink, ShieldCheck, BadgeCheck } from "lucide-react";
+import { MapPin, MessageCircle, ExternalLink, ShieldCheck, BadgeCheck, CloudRain } from "lucide-react";
 import ReviewsSection from "../components/ReviewsSection";
 import RelatedListings from "../components/RelatedListings";
 import PhotoGallery from "../components/PhotoGallery";
@@ -132,6 +132,16 @@ export default function SectionDetail() {
             </>
           );
         })()}
+
+        {item.weather_policy && (
+          <div className="mt-6 bg-sky-50 border border-sky-100 rounded-xl p-4 flex gap-3">
+            <CloudRain className="w-5 h-5 text-sky-600 shrink-0 mt-0.5" />
+            <div>
+              <p className="text-sm font-semibold text-slate-900 mb-0.5">Weather / Cancellation Policy</p>
+              <p className="text-sm text-slate-600">{item.weather_policy}</p>
+            </div>
+          </div>
+        )}
 
         {item.maps_link && (
           <a
