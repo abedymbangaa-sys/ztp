@@ -1,0 +1,56 @@
+[
+  {
+    "id": "the-rock-restaurant",
+    "title": "The Rock Restaurant",
+    "location": "Michamvi Pingwe, East Zanzibar",
+    "description": "World-famous culinary destination perched on an iconic ocean rock rising from the turquoise Indian Ocean. At low tide walk across the sand; at high tide, arrive by romantic boat transfer. Experience world-class seafood surrounded by breathtaking 360-degree ocean views as the tide changes around you. Five exclusive sittings daily — reservations essential.",
+    "maps_link": "https://www.google.com/maps/search/?api=1&query=-6.1520657,39.5194093",
+    "image": "/images/restaurants/the-rock-restaurant.jpeg",
+    "image_is_placeholder": false
+  },
+  {
+    "id": "emerson-spice-tea-house",
+    "title": "Emerson Spice Tea House",
+    "location": "Emerson Spice Hotel, Stone Town",
+    "description": "Just 25 guests per evening enjoy a seven-course seafood tasting menu under the stars, with sweeping views over Stone Town. Sunset cocktails from 6pm; dinner served at 7pm sharp. Advance reservation required.",
+    "maps_link": "https://www.google.com/maps/search/?api=1&query=-6.161221,39.1920628",
+    "image": "/images/restaurants/emerson-spice-tea-house.jpeg",
+    "image_is_placeholder": false
+  },
+  {
+    "id": "emerson-spice-secret-garden",
+    "title": "Emerson Spice Secret Garden",
+    "location": "Emerson Spice, Stone Town",
+    "description": "Secluded in a walled garden, this romantic restaurant is a magical haven from Stone Town's bustle. Live taarab music on Wednesday and Friday evenings. Open for lunch and dinner with a la carte Zanzibari cuisine.",
+    "maps_link": "https://www.google.com/maps/search/?api=1&query=-6.161221,39.1920628",
+    "image": "/images/restaurants/emerson-spice-secret-garden.jpeg",
+    "image_is_placeholder": false
+  },
+  {
+    "id": "forodhani-night-market",
+    "title": "Forodhani Night Market",
+    "location": "Forodhani Gardens, Stone Town",
+    "description": "Zanzibar's most iconic food experience. Every evening at sunset, the waterfront gardens fill with vendors serving Zanzibar pizza, urojo (sour broth soup), fresh seafood grills, sugar cane juice, and Swahili street food at local prices.",
+    "maps_link": "https://www.google.com/maps/search/?api=1&query=-6.1603409,39.189002599999995",
+    "image": "/images/restaurants/forodhani-night-market.jpeg",
+    "image_is_placeholder": false
+  },
+  {
+    "id": "6-degrees-south",
+    "title": "6 Degrees South",
+    "location": "Shangani Waterfront, Stone Town",
+    "description": "One of Stone Town's largest and most vibrant restaurants, named after Zanzibar's latitude. Features a street terrace and two-storey glass interior with sunset views over Shangani Waterfront. Cosmopolitan menu with Swahili specialties.",
+    "maps_link": "https://www.google.com/maps/search/?api=1&query=-6.164266,39.1868457",
+    "image": "/images/restaurants/6-degrees-south.jpeg",
+    "image_is_placeholder": false
+  },
+  {
+    "id": "the-silk-route",
+    "title": "The Silk Route",
+    "location": "Near Forodhani, Stone Town",
+    "description": "A long-standing Stone Town favourite near Forodhani Gardens with breezy rooftop seating. Specialties include whole fish from the tandoor, coconut curries, biryanis, and Chinese fusion. Reliable, well-priced, and vegetarian-friendly.",
+    "maps_link": "https://www.google.com/maps/search/?api=1&query=-6.161604,39.188085",
+    "image": "https://images.unsplash.com/photo-1519046904884-53103b34b206?w=1000&q=80",
+    "image_is_placeholder": true
+  }
+]

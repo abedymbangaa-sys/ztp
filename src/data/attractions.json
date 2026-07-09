@@ -1,0 +1,83 @@
+[
+  {
+    "id": "the-old-fort-ngome-kongwe",
+    "title": "The Old Fort (Ngome Kongwe)",
+    "location": "Historical Site – Stone Town",
+    "description": "Built by Omani Arabs in the early 18th century, this is the oldest surviving structure in Stone Town. Now an arts and cultural centre hosting live performances, the open-air amphitheatre hosts the annual Zanzibar International Film Festival.",
+    "maps_link": "https://www.google.com/maps/search/?api=1&query=-6.161438599999999,39.1888708",
+    "image": "/images/attractions/the-old-fort-ngome-kongwe.jpeg",
+    "image_is_placeholder": false
+  },
+  {
+    "id": "palace-museum-beit-al-sahel",
+    "title": "Palace Museum (Beit Al-Sahel)",
+    "location": "Museum – Stone Town",
+    "description": "The former royal residence of the Sultans of Zanzibar, Beit Al-Sahel stands proudly on the Stone Town waterfront as one of East Africa's most important historical monuments. The museum houses an extraordinary collection of Omani royal artefacts including intricately carved royal furniture, ceremonial swords, personal treasures, and historical photographs that chronicle the entire sultanate era. The oceanfront setting, framed by ancient carved wooden doors and whitewashed coral-stone walls, offers a deeply atmospheric window into centuries of Zanzibari royal life and Arab maritime heritage.",
+    "maps_link": "https://www.google.com/maps/search/?api=1&query=-6.1600521,39.1905176",
+    "image": "/images/attractions/palace-museum-beit-al-sahel.jpeg",
+    "image_is_placeholder": false
+  },
+  {
+    "id": "slave-market-amp-anglican-cathedral",
+    "title": "Slave Market & Anglican Cathedral",
+    "location": "Historical Site – Stone Town",
+    "description": "One of Africa's most sobering and important historical sites. The last open slave market in East Africa was abolished in 1873. The Anglican Cathedral built on its site includes a memorial chamber and the original underground slave chambers.",
+    "maps_link": "https://www.google.com/maps/search/?api=1&query=-6.162839600000001,39.192550399999995",
+    "image": "/images/attractions/slave-market-amp-anglican-cathedral.jpeg",
+    "image_is_placeholder": false
+  },
+  {
+    "id": "jozani-chwaka-bay-national-park",
+    "title": "Jozani-Chwaka Bay National Park",
+    "location": "National Park – Central Zanzibar",
+    "description": "Zanzibar's only national park and a critically important conservation area. The 50km² forest is home to the endangered Zanzibar Red Colobus Monkey – found nowhere else on Earth. Mangrove boardwalks, ancient mahogany trees, and rare birds.",
+    "maps_link": "https://www.google.com/maps/search/?api=1&query=-6.241557299999999,39.4139504",
+    "image": "/images/attractions/jozani-chwaka-bay-national-park.jpeg",
+    "image_is_placeholder": false
+  },
+  {
+    "id": "forodhani-gardens",
+    "title": "Forodhani Gardens",
+    "location": "Cultural Site – Stone Town",
+    "description": "Also known as Jubilee Gardens, this waterfront park is calm by day and vibrant by night. Historically the ceremonial ground of Zanzibar's sultans, now the social heart of Stone Town with harbour views, the night food market, and live dhow watching.",
+    "maps_link": "https://www.google.com/maps/search/?api=1&query=-6.1603409,39.189002599999995",
+    "image": "/images/attractions/forodhani-gardens.jpeg",
+    "image_is_placeholder": false
+  },
+  {
+    "id": "mnemba-atoll-marine-reserve",
+    "title": "Mnemba Atoll Marine Reserve",
+    "location": "Marine Conservation – North East",
+    "description": "A private conservation island surrounded by one of the Indian Ocean's richest coral ecosystems. The atoll is a sanctuary for green turtles, dolphins, whale sharks, and over 400 fish species. World-class diving and snorkelling.",
+    "maps_link": "https://www.google.com/maps/search/?api=1&query=-5.8204983,39.383505",
+    "image": "/images/attractions/mnemba-atoll-marine-reserve.jpeg",
+    "image_is_placeholder": false
+  },
+  {
+    "id": "maruhubi-palace-ruins",
+    "title": "Maruhubi Palace Ruins",
+    "location": "Historical Ruins – North of Stone Town",
+    "description": "Hauntingly beautiful and deeply atmospheric, the Maruhubi Palace Ruins stand as a testament to Zanzibar's opulent sultanate era. Constructed in 1880 by the powerful Sultan Barghash bin Said to house his royal household, the palace once featured grand domed baths, ornate carved stone pillars, elaborate fish ponds fed by fresh springs, and majestic reception chambers. Tragically destroyed by fire in 1899, what remains today — delicate carved columns rising above ancient fish ponds, surrounded by the shade of towering mango and baobab trees — is one of the most romantically evocative archaeological sites on the East African coast.",
+    "maps_link": "https://www.google.com/maps/search/?api=1&query=Maruhubi+Palace+Ruins+Zanzibar",
+    "image": "/images/attractions/maruhubi-palace-ruins.jpeg",
+    "image_is_placeholder": false
+  },
+  {
+    "id": "kidichi-persian-baths-amp-spice-farm",
+    "title": "Kidichi Persian Baths & Spice Farm",
+    "location": "Cultural Site – Central Zanzibar",
+    "description": "One of Zanzibar's most romantic historical treasures, the Kidichi Baths were commissioned in 1850 by Sultan Seyyid Said as an intimate gift for his beloved Persian wife, Binte Irich Mirza. Designed by Persian craftsmen and decorated with remarkably preserved stucco relief carvings depicting geometric and floral patterns, these are the finest and oldest Persian baths surviving in East Africa. The adjacent working spice gardens envelop visitors in an intoxicating sensory journey — warm clove trees, fragrant cinnamon bark, vanilla orchids climbing wooden frames, and cardamom pods glistening in the equatorial light — connecting you directly to the agricultural heritage that made Zanzibar the legendary \"Spice Island.\"",
+    "maps_link": "https://www.google.com/maps/search/?api=1&query=Persian+Baths+Kidichi+Zanzibar",
+    "image": "/images/attractions/kidichi-persian-baths-amp-spice-farm.jpeg",
+    "image_is_placeholder": false
+  },
+  {
+    "id": "zanzibar-butterfly-centre",
+    "title": "Zanzibar Butterfly Centre",
+    "location": "Nature Centre – Pete Village, Central Zanzibar",
+    "description": "Tucked within lush tropical forest near Pete village in central Zanzibar, the Butterfly Centre is one of the island's most enchanting and meaningful experiences. This award-winning community conservation project invites visitors to walk through large screened enclosures where hundreds of indigenous free-flying butterflies — including rare swallowtails, vivid citrus yellows, and iridescent blue species — dance among flowering plants native to the archipelago. Managed and run by local Zanzibari families, the centre provides sustainable livelihoods while educating visitors on butterfly ecology, indigenous plant species, and the vital role of forest conservation in protecting Zanzibar's unique biodiversity.",
+    "maps_link": "https://www.google.com/maps/search/?api=1&query=Zanzibar+Butterfly+Centre",
+    "image": "/images/attractions/zanzibar-butterfly-centre.jpeg",
+    "image_is_placeholder": false
+  }
+]

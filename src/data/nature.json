@@ -1,0 +1,20 @@
+[
+  {
+    "id": "mangrove-forests",
+    "title": "Mangrove Forests",
+    "location": "Menai Bay & Coastal Inlets",
+    "description": "Zanzibar's mangrove forests are among the most ecologically rich ecosystems in the Indian Ocean region, sheltering juvenile fish, crabs, kingfishers, and migratory birds within a labyrinth of tangled roots and tidal channels. Glide silently by kayak or traditional dugout canoe through Menai Bay's winding waterways at sunrise — a meditation in green, gold, and still water. These vital forests also protect Zanzibar's coastline from erosion, making them guardians of the island itself.",
+    "maps_link": "https://www.google.com/maps/search/?api=1&query=-6.292431499999999,39.4278062",
+    "image": "/images/nature/mangrove-forests.jpeg",
+    "image_is_placeholder": false
+  },
+  {
+    "id": "red-colobus-monkey-experience",
+    "title": "Red Colobus Monkey Experience",
+    "location": "Jozani Forest, Central Zanzibar",
+    "description": "The Kirk's Red Colobus — Zanzibar's most iconic and beloved wild resident — exists nowhere else on Earth. Found only in the ancient groves of Jozani Chwaka Bay National Park, these stunning rust-and-black primates swing through the forest canopy with effortless grace, often descending close to visitors with remarkable calm. Walking quietly along forest trails among resident troops is one of Zanzibar's most profoundly moving wildlife encounters. Guided walks are available daily, and your visit supports vital conservation efforts protecting this endangered endemic species.",
+    "maps_link": "https://www.google.com/maps/search/?api=1&query=-6.241557299999999,39.4139504",
+    "image": "/images/nature/red-colobus-monkey-experience.jpeg",
+    "image_is_placeholder": false
+  }
+]

@@ -1,0 +1,38 @@
+[
+  {
+    "id": "kuza-cave",
+    "title": "Kuza Cave",
+    "location": "South Coast, Zanzibar",
+    "description": "A breathtaking natural freshwater cave pool hidden beneath the coral landscape of the south coast. Crystal-clear waters cascade into an underground chamber adorned with ancient stalactites — a surreal swimming experience cherished by locals and travellers alike. Revered as a sacred site by the local community, Kuza Cave offers a rare blend of natural wonder and cultural spirituality.",
+    "maps_link": "https://www.google.com/maps/search/?api=1&query=-6.3034491,39.533964999999995",
+    "image": "/images/caves/kuza-cave.jpeg",
+    "image_is_placeholder": false
+  },
+  {
+    "id": "maalum-cave",
+    "title": "Maalum Cave",
+    "location": "Southeast Zanzibar",
+    "description": "Meaning \"known\" in Swahili, Maalum Cave is famous among those in the know — a stunning natural rock pool nestled within a coral cave, where you can swim in serene turquoise waters surrounded by towering limestone walls. Sunlight pierces through the cave opening at midday, casting a magical glow across the water. A true hidden gem of Zanzibar's southeast coast.",
+    "maps_link": "https://www.google.com/maps/search/?api=1&query=-6.277524199999999,39.5308595",
+    "image": "/images/caves/maalum-cave.jpeg",
+    "image_is_placeholder": false
+  },
+  {
+    "id": "mangapwani-coral-cave",
+    "title": "Mangapwani Coral Cave",
+    "location": "North of Stone Town",
+    "description": "A hauntingly beautiful cave carved into Zanzibar's ancient coral rock, bearing silent witness to one of history's darkest chapters. Once used as a holding chamber for enslaved people after the official abolition of slavery, this cave carries immense historical weight. Today it stands as a site of solemn remembrance and extraordinary natural architecture — its cathedral-like coral chambers echoing with both beauty and memory.",
+    "maps_link": "https://www.google.com/maps/search/?api=1&query=-6.00175,39.1912222",
+    "image": "/images/caves/mangapwani-coral-cave.jpeg",
+    "image_is_placeholder": false
+  },
+  {
+    "id": "kiwengwa-caves",
+    "title": "Kiwengwa Caves",
+    "location": "Kiwengwa, East Coast",
+    "description": "Stretching along Zanzibar's scenic east coast, the Kiwengwa Caves are a dramatic series of coral rock formations sculpted by centuries of ocean erosion. Wander through arched tunnels, narrow passages, and open chambers where light filters dramatically through coral ceilings. Combine a cave visit with the pristine white sands of Kiwengwa Beach for a perfect half-day adventure off the beaten path.",
+    "maps_link": "https://www.google.com/maps/search/?api=1&query=-5.998107699999999,39.3594794",
+    "image": "/images/caves/kiwengwa-caves.jpeg",
+    "image_is_placeholder": false
+  }
+]

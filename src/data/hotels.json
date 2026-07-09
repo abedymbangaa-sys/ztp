@@ -1,0 +1,110 @@
+[
+  {
+    "id": "park-hyatt",
+    "title": "Park Hyatt Zanzibar",
+    "location": "Shangani, Stone Town",
+    "description": "Wake up inside a UNESCO World Heritage Site, where Stone Town's historic streets meet sweeping Indian Ocean views. Two pools and celebrated dining make this one of Tanzania's most refined island stays.",
+    "image": "https://images.unsplash.com/photo-1566073771259-6a8506099945?w=800&q=80",
+    "category": "Luxury",
+    "image_is_placeholder": true
+  },
+  {
+    "id": "emerson-spice",
+    "title": "Emerson Spice Hotel",
+    "location": "Stone Town, Zanzibar",
+    "description": "A centuries-old merchant's house turned romantic hideaway, with 11 individually designed rooms and a legendary rooftop Tea House. Featured among Cond\u00e9 Nast Traveler's most distinctive stays.",
+    "image": "/images/hotels/emerson-spice.jpeg",
+    "category": "Boutique",
+    "image_is_placeholder": false
+  },
+  {
+    "id": "essque-zalu",
+    "title": "Essque Zalu Zanzibar",
+    "location": "Nungwi, North Zanzibar",
+    "description": "Bold and distinctive resort featuring the highest makuti thatched roof on the island, with two restaurants, three bars and a lagoon-style pool just steps from the beach.",
+    "image": "https://images.unsplash.com/photo-1571003123894-1f0594d2b5d9?w=800&q=80",
+    "category": "Luxury",
+    "image_is_placeholder": true
+  },
+  {
+    "id": "z-hotel",
+    "title": "The Z Hotel Zanzibar",
+    "location": "Nungwi Beach, Zanzibar",
+    "description": "Tanzania's first designer hotel, featuring furniture by Philippe Starck just steps from Nungwi Beach \u2014 rated among the world's 25 most beautiful beaches.",
+    "image": "https://images.unsplash.com/photo-1542314831-068cd1dbfeeb?w=800&q=80",
+    "category": "Boutique",
+    "image_is_placeholder": true
+  },
+  {
+    "id": "nungwi-dreams",
+    "title": "Nungwi Dreams by Mantis",
+    "location": "Nungwi, North Tip, Zanzibar",
+    "description": "Beachfront boutique resort on Zanzibar's highest-rated beach, blending contemporary architecture with Swahili and Arabic design touches.",
+    "image": "/images/hotels/nungwi-dreams.jpeg",
+    "category": "Boutique",
+    "image_is_placeholder": false
+  },
+  {
+    "id": "canary-nungwi",
+    "title": "Canary Nungwi Hotel & Spa",
+    "location": "Nungwi Beach, Zanzibar",
+    "description": "Beachfront resort with spacious king-size rooms and private balconies, paired with a world-class spa and easy access to Nungwi's best dive sites.",
+    "image": "/images/hotels/canary-nungwi.jpeg",
+    "category": "Beachfront",
+    "image_is_placeholder": false
+  },
+  {
+    "id": "jafferji",
+    "title": "Jafferji House",
+    "location": "Stone Town, Zanzibar",
+    "description": "An exquisitely restored heritage property tucked into Stone Town's winding lanes, blending old Zanzibar architecture with elegant modern comfort.",
+    "image": "/images/hotels/jafferji.jpeg",
+    "category": "Heritage",
+    "image_is_placeholder": false
+  },
+  {
+    "id": "sharazad",
+    "title": "Sharaz\u0101d Wonders Boutique",
+    "location": "Stone Town, Zanzibar",
+    "description": "Recognised as the most sustainable luxury boutique hotel in East Africa, featured among Cond\u00e9 Nast Traveler's best hotels for its design and cuisine.",
+    "image": "/images/hotels/sharazad.jpeg",
+    "category": "Boutique",
+    "image_is_placeholder": false
+  },
+  {
+    "id": "zanzibar-serena",
+    "title": "Zanzibar Serena Hotel",
+    "location": "Shangani, Stone Town",
+    "description": "A beautifully restored 19th-century merchant's house on the Stone Town seafront, combining authentic Swahili architecture with ocean views.",
+    "image": "/images/hotels/zanzibar-serena.jpeg",
+    "category": "Heritage",
+    "image_is_placeholder": false
+  },
+  {
+    "id": "baraza",
+    "title": "Baraza Resort & Spa",
+    "location": "Bwejuu, South East Zanzibar",
+    "description": "All-inclusive luxury on Zanzibar's serene south-east coast, with Arabian-themed architecture, private plunge pools and the award-winning Frangipani Spa.",
+    "image": "https://images.unsplash.com/photo-1582719508461-905c673771fd?w=800&q=80",
+    "category": "Luxury",
+    "image_is_placeholder": true
+  },
+  {
+    "id": "breezes",
+    "title": "Breezes Beach Club & Spa",
+    "location": "Bwejuu, East Coast Zanzibar",
+    "description": "A classic east-coast resort with beachfront bungalows, a PADI dive centre and four restaurants \u2014 a well-loved base for divers, snorkellers and families alike.",
+    "image": "https://images.unsplash.com/photo-1520250497591-112f2f40a3f4?w=800&q=80",
+    "category": "Beachfront",
+    "image_is_placeholder": true
+  },
+  {
+    "id": "kilindi",
+    "title": "Kilindi Zanzibar",
+    "location": "Kendwa, North West Zanzibar",
+    "description": "One of Zanzibar's most exclusive resorts \u2014 just 15 open-plan pavilions with private pools, adults-only and all-inclusive on a pristine north-western beach.",
+    "image": "https://images.unsplash.com/photo-1540541338287-41700207dee6?w=800&q=80",
+    "category": "Luxury",
+    "image_is_placeholder": true
+  }
+]

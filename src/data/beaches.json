@@ -1,0 +1,83 @@
+[
+  {
+    "id": "nungwi-beach",
+    "title": "Nungwi Beach",
+    "location": "North Zanzibar",
+    "description": "Rated among the world's 25 most beautiful beaches. Faces west for spectacular sunsets. Lively atmosphere with resorts, restaurants, diving schools. The island's most popular beach destination.",
+    "maps_link": "https://www.google.com/maps/search/?api=1&query=-5.7305969999999995,39.291610999999996",
+    "image": "/images/beaches/nungwi-beach.jpeg",
+    "image_is_placeholder": false
+  },
+  {
+    "id": "kendwa-rocks-beach",
+    "title": "Kendwa Rocks Beach",
+    "location": "North West Zanzibar",
+    "description": "Home to Zanzibar's most beautiful deep-water beach, where you can swim at any tide without the ocean retreating. Renowned for its powdery soft sands, glamorous sunset views, world-famous full-moon beach parties, and elite beach resort experiences that attract discerning travellers from across the globe.",
+    "maps_link": "https://www.google.com/maps/search/?api=1&query=-5.7522834000000005,39.2881644",
+    "image": "/images/beaches/kendwa-rocks-beach.jpeg",
+    "image_is_placeholder": false
+  },
+  {
+    "id": "paje-beach-kite-surfing-hub",
+    "title": "Paje Beach – Kite Surfing Hub",
+    "location": "East Coast, Zanzibar",
+    "description": "A vibrant paradise for active travellers. Famous worldwide for its shallow turquoise lagoons, perfectly consistent trade winds, world-class kite surfing schools, and a lively beachside culture. Whether you are a seasoned rider or a first-time learner, Paje delivers the ultimate east coast adventure.",
+    "maps_link": "https://www.google.com/maps/search/?api=1&query=-6.2801542,39.536949799999995",
+    "image": "/images/beaches/paje-beach-kite-surfing-hub.jpeg",
+    "image_is_placeholder": false
+  },
+  {
+    "id": "matemwe-beach",
+    "title": "Matemwe Beach",
+    "location": "North East Zanzibar",
+    "description": "One of the most alluring beaches on Unguja Island – long, peaceful, and fringed by coconut palms. Facing the Mnemba Atoll, it's a prime spot for snorkelling, sunrise walks, and authentic village life. Tranquil and unspoiled.",
+    "maps_link": "https://www.google.com/maps/search/?api=1&query=-5.8204983,39.383505",
+    "image": "/images/beaches/matemwe-beach.jpeg",
+    "image_is_placeholder": false
+  },
+  {
+    "id": "kizimkazi-beach",
+    "title": "Kizimkazi Beach",
+    "location": "South Coast, Zanzibar",
+    "description": "A secluded fishing village on Zanzibar's south coast, world-famous for wild dolphin sightings. Different from the typical palm-backed lagoon – dramatic coral cliffs and tidal pools make this a unique coastal landscape.",
+    "maps_link": "https://www.google.com/maps/search/?api=1&query=-6.4549068,39.4725821",
+    "image": "/images/beaches/kizimkazi-beach.jpeg",
+    "image_is_placeholder": false
+  },
+  {
+    "id": "jambiani-beach",
+    "title": "Jambiani Beach",
+    "location": "South East Coast, Zanzibar",
+    "description": "An authentic fishing village on the south-east coast with a long pristine beach. Famous for seaweed farming – a unique cultural sight. Quieter and more traditional than the north, perfect for those seeking real Zanzibari life.",
+    "maps_link": "https://www.google.com/maps/search/?api=1&query=-6.3208173,39.5485543",
+    "image": "/images/beaches/jambiani-beach.jpeg",
+    "image_is_placeholder": false
+  },
+  {
+    "id": "fumba-beach",
+    "title": "Fumba Beach",
+    "location": "South West Zanzibar",
+    "description": "A secluded peninsula beach on Zanzibar's south west, accessible via a scenic drive through mangroves. Calm turquoise waters, spectacular dhow sunsets, and significantly fewer crowds than the north. Departure point for Safari Blue excursions.",
+    "maps_link": "https://www.google.com/maps/search/?api=1&query=Fumba+Beach+Zanzibar",
+    "image": "/images/beaches/fumba-beach.jpeg",
+    "image_is_placeholder": false
+  },
+  {
+    "id": "mangapwani-beach",
+    "title": "Mangapwani Beach",
+    "location": "North West Zanzibar",
+    "description": "A peaceful beach north of Stone Town with historical significance – nearby are the Mangapwani Slave Cave and coral caves used in the 19th century slave trade. Calm waters, soft sand, and a fascinating blend of history and nature.",
+    "maps_link": "https://www.google.com/maps/search/?api=1&query=Mangapwani+Beach+Zanzibar",
+    "image": "/images/beaches/mangapwani-beach.jpeg",
+    "image_is_placeholder": false
+  },
+  {
+    "id": "bwejuu-beach",
+    "title": "Bwejuu Beach",
+    "location": "South East Coast, Zanzibar",
+    "description": "An unspoiled and remote stretch of beach on Zanzibar's south east coast. Shallow tidal flats reveal fascinating marine life at low tide. Home to traditional dhow building and the quietest, most authentic east coast experience.",
+    "maps_link": "https://www.google.com/maps/search/?api=1&query=Bwejuu+Beach+Zanzibar",
+    "image": "/images/beaches/bwejuu-beach.jpeg",
+    "image_is_placeholder": false
+  }
+]

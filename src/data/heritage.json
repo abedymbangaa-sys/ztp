@@ -1,0 +1,56 @@
+[
+  {
+    "id": "stone-town",
+    "title": "Stone Town",
+    "location": "UNESCO World Heritage Site – Stone Town",
+    "description": "A UNESCO World Heritage Site and the historic heart of Zanzibar City. Wander narrow winding alleys lined with coral-stone buildings, ornately carved wooden doors, and centuries of Swahili, Arab, Persian, Indian and European architectural influence.",
+    "maps_link": "https://www.google.com/maps/search/?api=1&query=Stone+Town+Zanzibar",
+    "image": "/images/heritage/stone-town.jpeg",
+    "image_is_placeholder": false
+  },
+  {
+    "id": "old-fort-ngome-kongwe",
+    "title": "Old Fort (Ngome Kongwe)",
+    "location": "Historical Site – Stone Town",
+    "description": "Built by Omani Arabs in the early 18th century, this is the oldest surviving structure in Stone Town. Now an arts and cultural centre hosting live performances and the annual Zanzibar International Film Festival.",
+    "maps_link": "https://www.google.com/maps/search/?api=1&query=-6.161438599999999,39.1888708",
+    "image": "/images/heritage/old-fort-ngome-kongwe.jpeg",
+    "image_is_placeholder": false
+  },
+  {
+    "id": "house-of-wonders-beit-al-ajaib",
+    "title": "House of Wonders (Beit al-Ajaib)",
+    "location": "Historic Palace – Stone Town",
+    "description": "Once the tallest building in East Africa and the first in the region with electric lighting and an elevator. Built in 1883 as a ceremonial palace for Sultan Barghash, it remains an iconic landmark of the Stone Town waterfront.",
+    "maps_link": "https://www.google.com/maps/search/?api=1&query=House+of+Wonders+Zanzibar",
+    "image": "/images/heritage/house-of-wonders-beit-al-ajaib.jpeg",
+    "image_is_placeholder": false
+  },
+  {
+    "id": "palace-museum-beit-al-sahel",
+    "title": "Palace Museum (Beit Al-Sahel)",
+    "location": "Museum – Stone Town",
+    "description": "The former royal residence of the Sultans of Zanzibar, standing on the Stone Town waterfront as one of East Africa's most important historical monuments, with royal furniture, ceremonial swords and historical photographs.",
+    "maps_link": "https://www.google.com/maps/search/?api=1&query=-6.1600521,39.1905176",
+    "image": "/images/heritage/palace-museum-beit-al-sahel.jpeg",
+    "image_is_placeholder": false
+  },
+  {
+    "id": "maruhubi-palace-ruins",
+    "title": "Maruhubi Palace Ruins",
+    "location": "Historical Ruins – North of Stone Town",
+    "description": "Constructed in 1880 by Sultan Barghash bin Said to house his royal household, this hauntingly beautiful site once featured grand domed baths and ornate carved pillars. Carved columns now rise above ancient fish ponds shaded by baobab trees.",
+    "maps_link": "https://www.google.com/maps/search/?api=1&query=Maruhubi+Palace+Ruins+Zanzibar",
+    "image": "/images/heritage/maruhubi-palace-ruins.jpeg",
+    "image_is_placeholder": false
+  },
+  {
+    "id": "hamamni-persian-baths",
+    "title": "Hamamni Persian Baths",
+    "location": "Historic Bathhouse – Stone Town",
+    "description": "Built in the 1880s by Sultan Barghash, Hamamni (\"place of the baths\") was Zanzibar's first public Persian-style bathhouse. Its domed chambers, steam rooms and original plumbing offer a glimpse into 19th-century Stone Town daily life.",
+    "maps_link": "https://www.google.com/maps/search/?api=1&query=Hamamni+Persian+Baths+Zanzibar",
+    "image": "/images/heritage/hamamni-persian-baths.jpeg",
+    "image_is_placeholder": false
+  }
+]

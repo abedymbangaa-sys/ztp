@@ -1,0 +1,38 @@
+[
+  {
+    "id": "the-rock-restaurant",
+    "title": "The Rock Restaurant",
+    "location": "Michamvi, East Zanzibar",
+    "description": "World-famous culinary destination perched on an iconic ocean rock. Experience world-class seafood surrounded by 360-degree Indian Ocean views as the tide changes. Arrive by boat at high tide for a truly cinematic entrance.",
+    "maps_link": "https://www.google.com/maps/search/?api=1&query=-6.1520657,39.5194093",
+    "image": "/images/experiences/the-rock-restaurant.jpeg",
+    "image_is_placeholder": false
+  },
+  {
+    "id": "paje-beach-kite-surfing-hub",
+    "title": "Paje Beach – Kite Surfing Hub",
+    "location": "Paje, East Coast Zanzibar",
+    "description": "A vibrant paradise for active travelers. Famous worldwide for its shallow turquoise lagoons, steady trade winds, world-class kite surfing schools, and lively beachside culture. The east coast's ultimate adventure destination.",
+    "maps_link": "https://www.google.com/maps/search/?api=1&query=-6.2801542,39.536949799999995",
+    "image": "/images/experiences/paje-beach-kite-surfing-hub.jpeg",
+    "image_is_placeholder": false
+  },
+  {
+    "id": "nakupenda-sandbank-tour",
+    "title": "Nakupenda Sandbank Tour",
+    "location": "Nakupenda Island, Zanzibar",
+    "description": "A breathtaking full-day excursion to a pristine, disappearing white sandbank. Enjoy sunbathing, premium snorkelling among vibrant coral reefs, and a lavish beachside live-cooked seafood buffet with the Indian Ocean as your dining room.",
+    "maps_link": "https://www.google.com/maps/search/?api=1&query=Nakupenda+Beach+Zanzibar",
+    "image": "/images/experiences/nakupenda-sandbank-tour.jpeg",
+    "image_is_placeholder": false
+  },
+  {
+    "id": "kendwa-rocks-beach",
+    "title": "Kendwa Rocks Beach",
+    "location": "Kendwa, North West Zanzibar",
+    "description": "Home to Zanzibar's most beautiful deep-water beach, where you can swim at any tide. Renowned for its powdery soft sands, glamorous sunset views, and elite beach resort experiences that make every moment unforgettable.",
+    "maps_link": "https://www.google.com/maps/search/?api=1&query=-5.7522834000000005,39.2881644",
+    "image": "/images/experiences/kendwa-rocks-beach.jpeg",
+    "image_is_placeholder": false
+  }
+]

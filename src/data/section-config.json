@@ -1,0 +1,51 @@
+[
+  {
+    "key": "beaches",
+    "title": "Zanzibar Beaches",
+    "tag": "Paradise Shores",
+    "path": "/beaches",
+    "emoji": "🏖️"
+  },
+  {
+    "key": "restaurants",
+    "title": "Popular Restaurants",
+    "tag": "Culinary Zanzibar",
+    "path": "/restaurants",
+    "emoji": "🍽️"
+  },
+  {
+    "key": "attractions",
+    "title": "Zanzibar Attractions",
+    "tag": "Must-See Places",
+    "path": "/attractions",
+    "emoji": "🗺️"
+  },
+  {
+    "key": "heritage",
+    "title": "Stone Town Heritage",
+    "tag": "Heritage Sites",
+    "path": "/heritage",
+    "emoji": "🏛️"
+  },
+  {
+    "key": "experiences",
+    "title": "Unique Experiences",
+    "tag": "Unique Experiences",
+    "path": "/experiences",
+    "emoji": "✨"
+  },
+  {
+    "key": "caves",
+    "title": "Zanzibar Caves",
+    "tag": "Hidden Caves",
+    "path": "/caves",
+    "emoji": "🕳️"
+  },
+  {
+    "key": "nature",
+    "title": "Zanzibar Nature",
+    "tag": "Nature & Wildlife",
+    "path": "/nature",
+    "emoji": "🌿"
+  }
+]

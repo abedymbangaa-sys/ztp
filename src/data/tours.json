@@ -1,0 +1,164 @@
+[
+  {
+    "id": "stone-town-heritage-tour",
+    "title": "Stone Town Heritage Tour",
+    "location": "Stone Town, Zanzibar",
+    "description": "Step back in time exploring the rich cultural tapestry of Stone Town – a UNESCO World Heritage Site. Visit Forodhani Gardens, the Palace Museum, the Old Fort, and narrow historic alleyways adorned with intricately carved Omani wooden doors, with expert local guides.",
+    "maps_link": "https://www.google.com/maps/search/?api=1&query=-6.162222,39.1920735",
+    "image": "https://images.unsplash.com/photo-1589308078059-be1415eab4c3?w=900&h=600&q=80",
+    "image_is_placeholder": true
+  },
+  {
+    "id": "mnemba-atoll-snorkelling",
+    "title": "Mnemba Atoll Snorkelling",
+    "location": "Mnemba Island, North East Zanzibar",
+    "description": "Snorkel and dive in the world-famous Mnemba Atoll Marine Conservation Area. One of the Indian Ocean's most vibrant coral ecosystems – home to sea turtles, dolphins, and hundreds of tropical fish species.",
+    "maps_link": "https://www.google.com/maps/search/?api=1&query=-5.8204983,39.383505",
+    "image": "/images/tours/mnemba-atoll-snorkelling.jpeg",
+    "image_is_placeholder": false
+  },
+  {
+    "id": "kidichi-spice-farm-tour",
+    "title": "Kidichi Spice Farm Tour",
+    "location": "Spice Region, Central Zanzibar",
+    "description": "Discover why Zanzibar is called the \"Spice Island.\" Taste and smell fresh cloves, cinnamon, vanilla, nutmeg, cardamom and ylang-ylang directly from lush green plants. Combine with a visit to the historic Kidichi Persian Baths for a complete sensory and cultural journey.",
+    "maps_link": "https://www.google.com/maps/search/?api=1&query=-6.090785899999999,39.2413537",
+    "image": "/images/tours/kidichi-spice-farm-tour.jpeg",
+    "image_is_placeholder": false
+  },
+  {
+    "id": "dhow-sunset-cruise",
+    "title": "Dhow Sunset Cruise",
+    "location": "Nungwi / Stone Town Harbor",
+    "description": "Sail on a traditional Zanzibari wooden dhow as the sun dips below the Indian Ocean horizon. A quintessential Zanzibar experience with sundowners, seafood snacks, and the golden light of an equatorial sunset painting the sky.",
+    "maps_link": "https://www.google.com/maps/search/?api=1&query=-5.7229228999999995,39.3014952",
+    "image": "/images/tours/dhow-sunset-cruise.jpeg",
+    "image_is_placeholder": false
+  },
+  {
+    "id": "prison-island-excursion",
+    "title": "Prison Island Excursion",
+    "location": "Changuu Island, Zanzibar",
+    "description": "Visit Changuu (Prison Island), a small island 5.6km northwest of Stone Town. Home to giant Aldabra tortoises, historic colonial buildings, and some of Zanzibar's finest crystal-clear snorkelling waters just 20 minutes by boat.",
+    "maps_link": "https://www.google.com/maps/search/?api=1&query=-6.119531800000001,39.166396999999996",
+    "image": "/images/tours/prison-island-excursion.jpeg",
+    "image_is_placeholder": false
+  },
+  {
+    "id": "jozani-forest-amp-red-colobus",
+    "title": "Jozani Forest & Red Colobus",
+    "location": "Jozani-Chwaka Bay National Park",
+    "description": "Visit Zanzibar's only national park, home to the rare and endemic Zanzibar Red Colobus Monkey. Walk mangrove boardwalks through ancient mahogany forest, spot bushbabies and rare bird species on guided nature walks.",
+    "maps_link": "https://www.google.com/maps/search/?api=1&query=-6.241557299999999,39.4139504",
+    "image": "/images/tours/jozani-forest-amp-red-colobus.jpeg",
+    "image_is_placeholder": false
+  },
+  {
+    "id": "kizimkazi-dolphin-tour",
+    "title": "Kizimkazi Dolphin Tour",
+    "location": "Kizimkazi, South Coast Zanzibar",
+    "description": "Swim and snorkel alongside wild bottlenose and humpback dolphins in their natural habitat off Zanzibar's south coast. The village of Kizimkazi is world-famous for dolphin sightings, with daily resident dolphin pods.",
+    "maps_link": "https://www.google.com/maps/search/?api=1&query=-6.4537162,39.4717759",
+    "image": "https://images.unsplash.com/photo-1591025207163-942350e47db2?w=900&h=600&q=80",
+    "image_is_placeholder": true
+  },
+  {
+    "id": "forodhani-night-food-tour",
+    "title": "Forodhani Night Food Tour",
+    "location": "Forodhani Gardens, Stone Town",
+    "description": "At sunset, Forodhani Gardens transforms into Zanzibar's most vibrant open-air food market. Sample Zanzibar pizza, urojo soup, sugar cane juice, mishkaki grills, and fresh seafood with a local expert guide.",
+    "maps_link": "https://www.google.com/maps/search/?api=1&query=-6.1603409,39.189002599999995",
+    "image": "/images/tours/forodhani-night-food-tour.jpeg",
+    "image_is_placeholder": false
+  },
+  {
+    "id": "safari-blue",
+    "title": "Safari Blue",
+    "location": "Fumba, South West Zanzibar",
+    "description": "Zanzibar's most celebrated full-day sailing excursion. Sail a traditional dhow through mangroves, snorkel over coral gardens, visit a secluded sandbank for lunch, and return with sundowners. A complete Zanzibar ocean experience.",
+    "maps_link": "https://www.google.com/maps/search/?api=1&query=Safari+Blue+Experience+Zanzibar",
+    "image": "/images/tours/safari-blue.jpeg",
+    "image_is_placeholder": false
+  },
+  {
+    "id": "zantours",
+    "title": "ZanTours",
+    "location": "Stone Town, Zanzibar",
+    "description": "One of Zanzibar's longest-established and most reputable tour operators. Offering a full range of island excursions including spice tours, dolphin tours, snorkelling, cultural tours, and custom itineraries for independent travellers.",
+    "maps_link": "https://www.google.com/maps/search/?api=1&query=ZanTours+Zanzibar",
+    "image": "/images/tours/zantours.jpeg",
+    "image_is_placeholder": false
+  },
+  {
+    "id": "chumbe-island-coral-park",
+    "title": "Chumbe Island Coral Park",
+    "location": "Chumbe Island, South West Zanzibar",
+    "description": "A world-renowned marine conservation area and eco-lodge on a pristine uninhabited island. Snorkel one of the most biologically diverse coral reef sanctuaries in East Africa. Day trips and overnight stays available.",
+    "maps_link": "https://www.google.com/maps/search/?api=1&query=Chumbe+Island+Coral+Park+Zanzibar",
+    "image": "/images/tours/chumbe-island-coral-park.jpeg",
+    "image_is_placeholder": false
+  },
+  {
+    "id": "nakupenda-sandbank-tour",
+    "title": "Nakupenda Sandbank Tour",
+    "location": "Nakupenda, Stone Town Waters",
+    "description": "A breathtaking full-day excursion to a pristine, disappearing white sandbank rising from the turquoise Indian Ocean. Enjoy sunbathing, premium snorkelling among vibrant coral reefs, and a lavish beachside live-cooked seafood buffet as the tide swirls around you.",
+    "maps_link": "https://www.google.com/maps/search/?api=1&query=Nakupenda+Beach+Zanzibar",
+    "image": "/images/tours/nakupenda-sandbank-tour.jpeg",
+    "image_is_placeholder": false
+  },
+  {
+    "id": "nungwi-turtle-aquarium-amp-village-tour",
+    "title": "Nungwi Turtle Aquarium & Village Tour",
+    "location": "Nungwi, North Zanzibar",
+    "description": "Visit the famous Mnarani Natural Aquarium in Nungwi — a tidal pool sanctuary home to endangered sea turtles rescued by the local community. Swim alongside the turtles, learn about the conservation programme, and explore the traditional fishing village of Nungwi with a local guide. A unique combination of marine conservation and authentic Zanzibari village life.",
+    "maps_link": "https://www.google.com/maps/search/?api=1&query=Mnarani+Aquarium+Nungwi+Zanzibar",
+    "image": "https://images.unsplash.com/photo-1591025207163-942350e47db2?w=700&h=500&q=80",
+    "image_is_placeholder": true
+  },
+  {
+    "id": "swahili-cooking-class",
+    "title": "Swahili Cooking Class",
+    "location": "Stone Town, Zanzibar",
+    "description": "An immersive hands-on Swahili cooking experience led by a local Zanzibari chef. Begin with a visit to the Darajani market to select fresh spices, coconut, and seafood. Then cook a traditional three-course Zanzibari meal — pilau, coconut fish curry, and cardamom tea — and sit down to enjoy the feast you've prepared. Perfect for food lovers and culture seekers.",
+    "maps_link": "https://www.google.com/maps/search/?api=1&query=Darajani+Market+Stone+Town+Zanzibar",
+    "image": "https://images.unsplash.com/photo-1556909114-f6e7ad7d3136?w=700&h=500&q=80",
+    "image_is_placeholder": true
+  },
+  {
+    "id": "mangrove-kayaking-amp-eco-tour",
+    "title": "Mangrove Kayaking & Eco Tour",
+    "location": "Chwaka Bay, East Zanzibar",
+    "description": "Paddle through the ancient mangrove forests of Chwaka Bay — one of East Africa's most important coastal ecosystems. A local ecology guide leads you through winding waterways where kingfishers dart overhead, crabs scuttle below, and the canopy creates a cathedral of green. Includes a stop at a traditional fishing community and a beachside seafood lunch. A tranquil, off-the-beaten-track Zanzibar experience.",
+    "maps_link": "https://www.google.com/maps/search/?api=1&query=Chwaka+Bay+Zanzibar",
+    "image": "https://images.unsplash.com/photo-1544551763-46a013bb70d5?w=700&h=500&q=80",
+    "image_is_placeholder": true
+  },
+  {
+    "id": "north-coast-full-day-explorer",
+    "title": "North Coast Full-Day Explorer",
+    "location": "Nungwi · Kendwa · Matemwe",
+    "description": "A guided full-day road trip along Zanzibar's stunning north coast — the most scenic stretch of the island. Visit the postcard-perfect beaches of Nungwi and Kendwa, stop at the Nungwi Turtle Aquarium, explore the quiet coral-sand shores of Matemwe, and enjoy a fresh seafood lunch at a beachside grill. Includes air-conditioned transport, a knowledgeable local guide, and flexible stops along the route.",
+    "maps_link": "https://www.google.com/maps/search/?api=1&query=Nungwi+Beach+Zanzibar",
+    "image": "https://images.unsplash.com/photo-1559827260-dc66d52bef19?w=700&h=500&q=80",
+    "image_is_placeholder": true
+  },
+  {
+    "id": "pemba-island-day-excursion",
+    "title": "Pemba Island Day Excursion",
+    "location": "Pemba Island, Tanzania",
+    "description": "Escape the crowds and discover Pemba — Zanzibar's wilder, greener, and lesser-visited sister island. Famous among divers for its dramatic underwater walls and pristine reefs, Pemba also offers lush clove plantations, mangrove-lined creeks, and an authentic, unhurried pace of life. A day trip from Stone Town by light aircraft or speedboat. Ideal for divers, nature lovers, and travellers seeking the road less travelled.",
+    "maps_link": "https://www.google.com/maps/search/?api=1&query=Pemba+Island+Tanzania",
+    "image": "https://images.unsplash.com/photo-1504701954957-2010ec3bcec1?w=700&h=500&q=80",
+    "image_is_placeholder": true
+  },
+  {
+    "id": "sunrise-fishing-with-local-fishermen",
+    "title": "Sunrise Fishing with Local Fishermen",
+    "location": "Nungwi / Matemwe, Zanzibar",
+    "description": "Set sail before dawn aboard a traditional Zanzibari ngalawa outrigger with local fishermen who have worked these waters for generations. Cast hand lines, watch the sun rise over the Indian Ocean in colours that defy description, and bring your catch back to shore for a fresh-grilled breakfast on the beach. An intimate, authentic glimpse into Zanzibari fishing life — far removed from tourist routes.",
+    "maps_link": "https://www.google.com/maps/search/?api=1&query=Nungwi+Beach+Zanzibar",
+    "image": "https://images.unsplash.com/photo-1508739773434-c26b3d09e071?w=700&h=500&q=80",
+    "image_is_placeholder": true
+  }
+]
