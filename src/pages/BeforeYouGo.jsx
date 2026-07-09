@@ -1,3 +1,13 @@
+import { Stamp, ShieldCheck, CircleDollarSign, Sun, Briefcase } from "lucide-react";
+
+function SectionIcon({ icon: Icon }) {
+  return (
+    <div className="w-11 h-11 rounded-xl bg-teal-50 text-teal-700 flex items-center justify-center shrink-0">
+      <Icon className="w-5 h-5" strokeWidth={2.2} />
+    </div>
+  );
+}
+
 export default function BeforeYouGo() {
   return (
     <div className="max-w-3xl mx-auto px-4 py-14">
@@ -11,7 +21,10 @@ export default function BeforeYouGo() {
 
         {/* VISA */}
         <section>
-          <h2 className="text-xl font-bold text-slate-900 mb-3">🛂 Visa</h2>
+          <div className="flex items-center gap-3 mb-3">
+            <SectionIcon icon={Stamp} />
+            <h2 className="text-xl font-bold text-slate-900">Visa</h2>
+          </div>
           <p className="mb-3">
             Zanzibar is part of Tanzania, so most international visitors — including travelers from Europe, the
             UK, and North America — need a visa to enter. You have two main options:
@@ -35,7 +48,10 @@ export default function BeforeYouGo() {
 
         {/* INSURANCE */}
         <section>
-          <h2 className="text-xl font-bold text-slate-900 mb-3">🩺 Mandatory Travel Insurance</h2>
+          <div className="flex items-center gap-3 mb-3">
+            <SectionIcon icon={ShieldCheck} />
+            <h2 className="text-xl font-bold text-slate-900">Mandatory Travel Insurance</h2>
+          </div>
           <p className="mb-3">
             This catches a lot of first-time visitors off guard: <strong>all international travelers to Zanzibar
             are required to purchase Zanzibar Insurance Corporation (ZIC) travel insurance</strong>, either in
@@ -49,7 +65,10 @@ export default function BeforeYouGo() {
 
         {/* MONEY */}
         <section>
-          <h2 className="text-xl font-bold text-slate-900 mb-3">💵 Money & Currency</h2>
+          <div className="flex items-center gap-3 mb-3">
+            <SectionIcon icon={CircleDollarSign} />
+            <h2 className="text-xl font-bold text-slate-900">Money & Currency</h2>
+          </div>
           <ul className="list-disc pl-6 space-y-2">
             <li>The local currency is the <strong>Tanzanian Shilling (TZS)</strong>, but <strong>US Dollars</strong>{" "}
               are widely accepted for hotels, tours, and visa fees.</li>
@@ -64,7 +83,10 @@ export default function BeforeYouGo() {
 
         {/* WHEN TO GO */}
         <section>
-          <h2 className="text-xl font-bold text-slate-900 mb-3">☀️ Best Time to Visit</h2>
+          <div className="flex items-center gap-3 mb-3">
+            <SectionIcon icon={Sun} />
+            <h2 className="text-xl font-bold text-slate-900">Best Time to Visit</h2>
+          </div>
           <p>
             Zanzibar is warm and tropical year-round, but the long rains typically fall from March to May, and
             short rains around November. Most travelers find June–October and December–February the most
@@ -75,7 +97,10 @@ export default function BeforeYouGo() {
 
         {/* PRACTICAL TIPS */}
         <section>
-          <h2 className="text-xl font-bold text-slate-900 mb-3">🧳 Quick Practical Tips</h2>
+          <div className="flex items-center gap-3 mb-3">
+            <SectionIcon icon={Briefcase} />
+            <h2 className="text-xl font-bold text-slate-900">Quick Practical Tips</h2>
+          </div>
           <ul className="list-disc pl-6 space-y-2">
             <li>Zanzibar is predominantly Muslim — modest dress is appreciated outside of resort beaches,
               especially in Stone Town and villages.</li>
