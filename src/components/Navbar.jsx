@@ -15,6 +15,7 @@ const MAIN_LINKS = [
 // The rest are placed inside the "Explore More" dropdown so the navbar
 // doesn't get cramped or overflow the screen on desktop widths
 const MORE_LINKS = [
+  { to: "/before-you-go", label: "Before You Go" },
   { to: "/beaches", label: "Beaches" },
   { to: "/restaurants", label: "Restaurants" },
   { to: "/attractions", label: "Attractions" },

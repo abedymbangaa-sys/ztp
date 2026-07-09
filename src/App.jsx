@@ -24,6 +24,7 @@ const Itinerary = lazy(() => import("./pages/Itinerary"));
 const ThingsToDo = lazy(() => import("./pages/ThingsToDo"));
 const ForTanzanians = lazy(() => import("./pages/ForTanzanians"));
 const About = lazy(() => import("./pages/About"));
+const BeforeYouGo = lazy(() => import("./pages/BeforeYouGo"));
 const Privacy = lazy(() => import("./pages/Privacy"));
 const Terms = lazy(() => import("./pages/Terms"));
 const DataSource = lazy(() => import("./pages/DataSource"));
@@ -53,6 +54,7 @@ export default function App() {
             <Route path="/blog/:slug" element={<BlogPost />} />
             <Route path="/itinerary" element={<Itinerary />} />
             <Route path="/about" element={<About />} />
+            <Route path="/before-you-go" element={<BeforeYouGo />} />
             <Route path="/privacy" element={<Privacy />} />
             <Route path="/terms" element={<Terms />} />
             <Route path="/data-source" element={<DataSource />} />
