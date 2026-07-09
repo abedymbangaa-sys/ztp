@@ -83,88 +83,97 @@ export default function SectionDetail() {
     <div>
       <PhotoGallery coverImage={item.image_url} galleryImages={item.gallery_images} />
 
-      <div className="max-w-4xl mx-auto px-4 py-10">
+      <div className="max-w-6xl mx-auto px-4 py-10">
         <Link to={`/${sectionKey}`} className="text-sm text-teal-700 font-semibold hover:underline">
           ← Back to {config?.title || sectionKey}
         </Link>
 
-        <div className="flex flex-wrap items-start justify-between gap-4 mt-4 mb-6">
-          <div>
-            <span className="inline-flex items-center gap-1.5 bg-teal-100 text-teal-800 text-xs font-semibold px-3 py-1 rounded-full mb-2">
-              <SectionIcon sectionKey={sectionKey} className="w-3.5 h-3.5" />
-              {config?.tag || ""}
-            </span>
-            <h1 className="text-3xl md:text-4xl font-bold text-slate-900 flex items-center gap-2 flex-wrap">
-              {item.title}
-              {item.is_verified && (
-                <span className="inline-flex items-center gap-1 bg-teal-100 text-teal-800 text-xs font-semibold px-2.5 py-1 rounded-full align-middle">
-                  <BadgeCheck className="w-3.5 h-3.5" /> Verified
-                </span>
-              )}
-            </h1>
-            {item.location && (
-              <p className="text-slate-500 mt-1 flex items-center gap-1">
-                <MapPin className="w-4 h-4" /> {item.location}
-              </p>
+        <div className="mt-4 mb-6">
+          <span className="inline-flex items-center gap-1.5 bg-teal-100 text-teal-800 text-xs font-semibold px-3 py-1 rounded-full mb-2">
+            <SectionIcon sectionKey={sectionKey} className="w-3.5 h-3.5" />
+            {config?.tag || ""}
+          </span>
+          <h1 className="text-3xl md:text-4xl font-bold text-slate-900 flex items-center gap-2 flex-wrap">
+            {item.title}
+            {item.is_verified && (
+              <span className="inline-flex items-center gap-1 bg-teal-100 text-teal-800 text-xs font-semibold px-2.5 py-1 rounded-full align-middle">
+                <BadgeCheck className="w-3.5 h-3.5" /> Verified
+              </span>
             )}
-          </div>
-          <div className="flex flex-col items-end gap-2">
-            <button
-              onClick={() => setInquiryOpen(true)}
-              className="bg-green-600 hover:bg-green-700 transition text-white font-bold px-6 py-3 rounded-full whitespace-nowrap"
-            >
-              <MessageCircle className="w-4 h-4 inline mr-1.5" /> Send Enquiry
-            </button>
-          </div>
+          </h1>
+          {item.location && (
+            <p className="text-slate-500 mt-1 flex items-center gap-1">
+              <MapPin className="w-4 h-4" /> {item.location}
+            </p>
+          )}
         </div>
 
-        {(() => {
-          const translated = language !== "en" ? item[`description_${language}`] : null;
-          return (
-            <>
-              <p className="text-slate-700 text-lg leading-relaxed">{translated || item.description}</p>
-              {translated && (
-                <p className="text-xs text-slate-400 mt-1">
-                  Automatically shown in {language === "it" ? "Italian" : "German"}. Original description is in
-                  English.
-                </p>
-              )}
-            </>
-          );
-        })()}
+        {/* Two-column layout: main story on the left, a compact info card
+            pinned on the right so contact/location details stay in view
+            while reading - the page no longer feels like one long stack of
+            full-width blocks. */}
+        <div className="grid grid-cols-1 lg:grid-cols-3 gap-10">
+          <div className="lg:col-span-2">
+            {(() => {
+              const translated = language !== "en" ? item[`description_${language}`] : null;
+              return (
+                <>
+                  <p className="text-slate-700 text-lg leading-relaxed">{translated || item.description}</p>
+                  {translated && (
+                    <p className="text-xs text-slate-400 mt-1">
+                      Automatically shown in {language === "it" ? "Italian" : "German"}. Original description is in
+                      English.
+                    </p>
+                  )}
+                </>
+              );
+            })()}
 
-        {item.weather_policy && (
-          <div className="mt-6 bg-sky-50 border border-sky-100 rounded-xl p-4 flex gap-3">
-            <CloudRain className="w-5 h-5 text-sky-600 shrink-0 mt-0.5" />
-            <div>
-              <p className="text-sm font-semibold text-slate-900 mb-0.5">Weather / Cancellation Policy</p>
-              <p className="text-sm text-slate-600">{item.weather_policy}</p>
+            <div className="mt-8 pt-4 border-t border-slate-100">
+              <button
+                onClick={() => setClaimOpen(true)}
+                className="text-xs text-slate-400 hover:text-teal-700 hover:underline flex items-center gap-1"
+              >
+                <ShieldCheck className="w-3.5 h-3.5" /> Own this business? Claim, edit or request removal
+              </button>
+            </div>
+
+            <ReviewsSection listingId={item.id} />
+          </div>
+
+          <div className="lg:col-span-1">
+            <div className="lg:sticky lg:top-24 bg-white border border-slate-100 rounded-2xl shadow-sm p-5 space-y-4">
+              <button
+                onClick={() => setInquiryOpen(true)}
+                className="w-full bg-green-600 hover:bg-green-700 transition text-white font-bold px-6 py-3 rounded-full"
+              >
+                <MessageCircle className="w-4 h-4 inline mr-1.5" /> Send Enquiry
+              </button>
+
+              {item.weather_policy && (
+                <div className="bg-sky-50 border border-sky-100 rounded-xl p-4 flex gap-3">
+                  <CloudRain className="w-5 h-5 text-sky-600 shrink-0 mt-0.5" />
+                  <div>
+                    <p className="text-sm font-semibold text-slate-900 mb-0.5">Weather / Cancellation Policy</p>
+                    <p className="text-sm text-slate-600">{item.weather_policy}</p>
+                  </div>
+                </div>
+              )}
+
+              {item.maps_link && (
+                <a
+                  href={item.maps_link}
+                  target="_blank"
+                  rel="noreferrer"
+                  className="flex items-center gap-1.5 text-teal-700 font-semibold hover:underline text-sm pt-1"
+                >
+                  <MapPin className="w-4 h-4" /> View on Google Maps{" "}
+                  <ExternalLink className="w-3.5 h-3.5" />
+                </a>
+              )}
             </div>
           </div>
-        )}
-
-        {item.maps_link && (
-          <a
-            href={item.maps_link}
-            target="_blank"
-            rel="noreferrer"
-            className="inline-block mt-6 text-teal-700 font-semibold hover:underline"
-          >
-            <MapPin className="w-4 h-4 inline mr-1" /> View on Google Maps{" "}
-            <ExternalLink className="w-3.5 h-3.5 inline ml-1" />
-          </a>
-        )}
-
-        <div className="mt-8 pt-4 border-t border-slate-100">
-          <button
-            onClick={() => setClaimOpen(true)}
-            className="text-xs text-slate-400 hover:text-teal-700 hover:underline flex items-center gap-1"
-          >
-            <ShieldCheck className="w-3.5 h-3.5" /> Own this business? Claim, edit or request removal
-          </button>
         </div>
-
-        <ReviewsSection listingId={item.id} />
 
         <RelatedListings categoryKey={sectionKey} excludeId={item.id} />
       </div>

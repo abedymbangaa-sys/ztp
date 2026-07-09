@@ -34,44 +34,49 @@ export default function AdDetail() {
     <div>
       <PhotoGallery coverImage={ad.image_url} galleryImages={ad.gallery_images} />
 
-      <div className="max-w-4xl mx-auto px-4 py-10">
+      <div className="max-w-6xl mx-auto px-4 py-10">
         <Link to="/" className="text-sm text-teal-700 font-semibold hover:underline">
           ← Back to Home
         </Link>
 
-        <div className="flex flex-wrap items-start justify-between gap-4 mt-4 mb-6">
-          <div>
-            <span className="inline-flex items-center gap-1.5 bg-amber-100 text-amber-800 text-xs font-semibold px-3 py-1 rounded-full mb-2">
-              <Megaphone className="w-3.5 h-3.5" />
-              {ad.category}
-            </span>
-            <h1 className="text-3xl md:text-4xl font-bold text-slate-900">{ad.business_name}</h1>
-          </div>
-          <div className="flex flex-col items-end gap-2">
-            <a
-              href={`https://wa.me/${ad.whatsapp_number}?text=${message}`}
-              target="_blank"
-              rel="noreferrer"
-              className="bg-amber-500 hover:bg-amber-600 transition text-white font-bold px-6 py-3 rounded-full whitespace-nowrap"
-            >
-              <MessageCircle className="w-4 h-4 inline mr-1.5" /> Chat on WhatsApp
-            </a>
-          </div>
+        <div className="mt-4 mb-6">
+          <span className="inline-flex items-center gap-1.5 bg-amber-100 text-amber-800 text-xs font-semibold px-3 py-1 rounded-full mb-2">
+            <Megaphone className="w-3.5 h-3.5" />
+            {ad.category}
+          </span>
+          <h1 className="text-3xl md:text-4xl font-bold text-slate-900">{ad.business_name}</h1>
         </div>
 
-        <p className="text-slate-700 text-lg leading-relaxed">{ad.description}</p>
+        <div className="grid grid-cols-1 lg:grid-cols-3 gap-10">
+          <div className="lg:col-span-2">
+            <p className="text-slate-700 text-lg leading-relaxed">{ad.description}</p>
+          </div>
 
-        {ad.maps_link && (
-          <a
-            href={ad.maps_link}
-            target="_blank"
-            rel="noreferrer"
-            className="inline-block mt-6 text-teal-700 font-semibold hover:underline"
-          >
-            <MapPin className="w-4 h-4 inline mr-1" /> View on Google Maps{" "}
-            <ExternalLink className="w-3.5 h-3.5 inline ml-1" />
-          </a>
-        )}
+          <div className="lg:col-span-1">
+            <div className="lg:sticky lg:top-24 bg-white border border-slate-100 rounded-2xl shadow-sm p-5 space-y-4">
+              <a
+                href={`https://wa.me/${ad.whatsapp_number}?text=${message}`}
+                target="_blank"
+                rel="noreferrer"
+                className="block text-center bg-amber-500 hover:bg-amber-600 transition text-white font-bold px-6 py-3 rounded-full"
+              >
+                <MessageCircle className="w-4 h-4 inline mr-1.5" /> Chat on WhatsApp
+              </a>
+
+              {ad.maps_link && (
+                <a
+                  href={ad.maps_link}
+                  target="_blank"
+                  rel="noreferrer"
+                  className="flex items-center gap-1.5 text-teal-700 font-semibold hover:underline text-sm pt-1"
+                >
+                  <MapPin className="w-4 h-4" /> View on Google Maps{" "}
+                  <ExternalLink className="w-3.5 h-3.5" />
+                </a>
+              )}
+            </div>
+          </div>
+        </div>
       </div>
     </div>
   );
