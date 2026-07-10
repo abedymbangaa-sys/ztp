@@ -4,6 +4,7 @@ import { useListings, useCategories, useSettings } from "../data/hooks";
 import GenericCard from "../components/GenericCard";
 import { SectionIcon } from "../lib/icons";
 import StatsCounter from "../components/StatsCounter";
+import { useT } from "../lib/i18n";
 // Leaflet + react-leaflet is a heavy library (~150kB). Lazy-loading it
 // means visitors who never scroll down to the map never download it.
 const ZanzibarMap = lazy(() => import("../components/ZanzibarMap"));
@@ -13,6 +14,7 @@ import PaymentInstructions from "../components/PaymentInstructions";
 
 export default function Home() {
   const location = useLocation();
+  const t = useT();
   const { categories } = useCategories();
   const { listings: hotels } = useListings("hotels");
   const { listings: allApproved } = useListings();
@@ -52,13 +54,12 @@ export default function Home() {
             Welcome to Zanzibar
           </p>
           <h1 className="font-serif text-5xl sm:text-6xl md:text-8xl font-bold mb-6 leading-[0.98] tracking-tight drop-shadow-2xl">
-            Discover the
+            {t("Discover the")}
             <br />
-            <span className="italic text-amber-200">Real</span> Zanzibar
+            <span className="italic text-amber-200">{t("Real")}</span> {t("Zanzibar")}
           </h1>
           <p className="max-w-2xl mx-auto text-slate-100/90 text-base sm:text-xl mb-10 px-2 font-light">
-            A trusted directory of hotels, tours, and attractions in Zanzibar —
-            built by people who know this island well.
+            {t("A trusted directory of hotels, tours, and attractions in Zanzibar — built by people who know this island well.")}
           </p>
 
           <form
@@ -72,14 +73,14 @@ export default function Home() {
             <input
               name="heroSearch"
               type="text"
-              placeholder="Search hotels, tours, beaches..."
+              placeholder={t("Search hotels, tours, beaches...")}
               className="flex-1 bg-transparent text-slate-800 placeholder-slate-400 px-5 py-3 text-sm sm:text-base focus:outline-none"
             />
             <button
               type="submit"
               className="bg-amber-500 hover:bg-amber-400 transition text-slate-900 font-bold px-6 sm:px-7 py-3 rounded-full text-sm sm:text-base whitespace-nowrap shadow-md"
             >
-              Search
+              {t("Search")}
             </button>
           </form>
 
@@ -88,13 +89,13 @@ export default function Home() {
               to="/things-to-do"
               className="bg-amber-500 hover:bg-amber-400 transition text-slate-900 font-bold px-7 py-3.5 rounded-full shadow-lg"
             >
-              Things to Do
+              {t("Things to Do")}
             </Link>
             <Link
               to="/hotels"
               className="bg-white text-teal-900 font-bold px-7 py-3.5 rounded-full hover:bg-amber-50 transition shadow-lg"
             >
-              View Hotels
+              {t("View Hotels")}
             </Link>
             <a
               href="https://wa.me/255635442732"

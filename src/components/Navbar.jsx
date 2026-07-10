@@ -3,6 +3,7 @@ import { Link } from "react-router-dom";
 import { Menu, X, ChevronDown } from "lucide-react";
 import Logo from "./Logo";
 import { useLanguage, SUPPORTED_LANGUAGES } from "../lib/LanguageContext";
+import { useT } from "../lib/i18n";
 
 // Main links shown directly on the navbar
 const MAIN_LINKS = [
@@ -32,6 +33,7 @@ export default function Navbar() {
   const [open, setOpen] = useState(false);
   const [moreOpen, setMoreOpen] = useState(false);
   const { language, setLanguage } = useLanguage();
+  const t = useT();
 
   return (
     <header className="sticky top-0 z-50 bg-white/95 backdrop-blur border-b border-slate-200">
@@ -44,19 +46,19 @@ export default function Navbar() {
         <nav className="hidden md:flex items-center gap-4 text-sm font-medium text-slate-700 whitespace-nowrap">
           {MAIN_LINKS.map((l) => (
             <Link key={l.to} to={l.to} className="hover:text-teal-700">
-              {l.label}
+              {t(l.label)}
             </Link>
           ))}
 
           <div className="relative" onMouseEnter={() => setMoreOpen(true)} onMouseLeave={() => setMoreOpen(false)}>
             <button className="flex items-center gap-1 hover:text-teal-700">
-              Explore More <ChevronDown className="w-3.5 h-3.5" />
+              {t("Explore More")} <ChevronDown className="w-3.5 h-3.5" />
             </button>
             {moreOpen && (
               <div className="absolute top-full left-0 bg-white border border-slate-200 rounded-xl shadow-lg py-2 min-w-[160px]">
                 {MORE_LINKS.map((l) => (
                   <Link key={l.to} to={l.to} className="block px-4 py-2 hover:bg-slate-50 hover:text-teal-700">
-                    {l.label}
+                    {t(l.label)}
                   </Link>
                 ))}
               </div>
@@ -81,7 +83,7 @@ export default function Navbar() {
             to="/partner/login"
             className="hidden lg:block text-sm font-semibold text-teal-700 hover:underline whitespace-nowrap"
           >
-            Own a business? Log in
+            {t("Own a business? Log in")}
           </Link>
           <a
             href="https://wa.me/255635442732"
@@ -89,7 +91,7 @@ export default function Navbar() {
             rel="noreferrer"
             className="bg-teal-700 text-white text-xs sm:text-sm font-semibold px-3 sm:px-4 py-2 rounded-full hover:bg-teal-800 transition whitespace-nowrap"
           >
-            WhatsApp Us
+            {t("WhatsApp Us")}
           </a>
 
           {/* Mobile menu toggle */}
@@ -107,7 +109,7 @@ export default function Navbar() {
       {open && (
         <nav className="md:hidden border-t border-slate-200 bg-white px-4 py-4 flex flex-col gap-1 text-slate-700 font-medium">
           <div className="flex items-center gap-2 py-2.5 border-b border-slate-100">
-            <span className="text-sm text-slate-500">Language:</span>
+            <span className="text-sm text-slate-500">{t("Language:")}</span>
             {SUPPORTED_LANGUAGES.map((l) => (
               <button
                 key={l.code}
@@ -130,11 +132,11 @@ export default function Navbar() {
               onClick={() => setOpen(false)}
               className="py-2.5 border-b border-slate-100"
             >
-              {l.label}
+              {t(l.label)}
             </Link>
           ))}
           <Link to="/partner/login" onClick={() => setOpen(false)} className="py-2.5 text-teal-700 font-semibold">
-            Own a business? Log in
+            {t("Own a business? Log in")}
           </Link>
         </nav>
       )}

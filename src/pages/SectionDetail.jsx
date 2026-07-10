@@ -11,6 +11,7 @@ import RelatedListings from "../components/RelatedListings";
 import PhotoGallery from "../components/PhotoGallery";
 import InquiryModal from "../components/InquiryModal";
 import ClaimListingModal from "../components/ClaimListingModal";
+import { useT } from "../lib/i18n";
 import { useLanguage } from "../lib/LanguageContext";
 
 export default function SectionDetail() {
@@ -21,6 +22,7 @@ export default function SectionDetail() {
   const [inquiryOpen, setInquiryOpen] = useState(false);
   const [claimOpen, setClaimOpen] = useState(false);
   const { language } = useLanguage();
+  const t = useT();
 
   if (loading) {
     return <div className="max-w-3xl mx-auto px-4 py-24 text-center">Loading...</div>;
@@ -85,7 +87,7 @@ export default function SectionDetail() {
 
       <div className="max-w-6xl mx-auto px-4 py-10">
         <Link to={`/${sectionKey}`} className="text-sm text-teal-700 font-semibold hover:underline">
-          ← Back to {config?.title || sectionKey}
+          ← {t("Back to")} {config?.title || sectionKey}
         </Link>
 
         <div className="mt-4 mb-6">
@@ -134,7 +136,7 @@ export default function SectionDetail() {
                 onClick={() => setClaimOpen(true)}
                 className="text-xs text-slate-400 hover:text-teal-700 hover:underline flex items-center gap-1"
               >
-                <ShieldCheck className="w-3.5 h-3.5" /> Own this business? Claim, edit or request removal
+                <ShieldCheck className="w-3.5 h-3.5" /> {t("Own this business? Claim, edit or request removal")}
               </button>
             </div>
 
@@ -147,14 +149,14 @@ export default function SectionDetail() {
                 onClick={() => setInquiryOpen(true)}
                 className="w-full bg-green-600 hover:bg-green-700 transition text-white font-bold px-6 py-3 rounded-full"
               >
-                <MessageCircle className="w-4 h-4 inline mr-1.5" /> Send Enquiry
+                <MessageCircle className="w-4 h-4 inline mr-1.5" /> {t("Send Enquiry")}
               </button>
 
               {item.weather_policy && (
                 <div className="bg-sky-50 border border-sky-100 rounded-xl p-4 flex gap-3">
                   <CloudRain className="w-5 h-5 text-sky-600 shrink-0 mt-0.5" />
                   <div>
-                    <p className="text-sm font-semibold text-slate-900 mb-0.5">Weather / Cancellation Policy</p>
+                    <p className="text-sm font-semibold text-slate-900 mb-0.5">{t("Weather / Cancellation Policy")}</p>
                     <p className="text-sm text-slate-600">{item.weather_policy}</p>
                   </div>
                 </div>
@@ -167,7 +169,7 @@ export default function SectionDetail() {
                   rel="noreferrer"
                   className="flex items-center gap-1.5 text-teal-700 font-semibold hover:underline text-sm pt-1"
                 >
-                  <MapPin className="w-4 h-4" /> View on Google Maps{" "}
+                  <MapPin className="w-4 h-4" /> {t("View on Google Maps")}{" "}
                   <ExternalLink className="w-3.5 h-3.5" />
                 </a>
               )}

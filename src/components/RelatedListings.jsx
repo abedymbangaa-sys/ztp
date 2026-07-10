@@ -1,6 +1,7 @@
 import { Link } from "react-router-dom";
 import { MapPin, BadgeCheck, ArrowRight } from "lucide-react";
 import { useRelatedListings } from "../data/hooks";
+import { useT } from "../lib/i18n";
 
 // "Explore Nearby" - a horizontally-scrolling strip of other listings in the
 // same category, shown at the bottom of a detail page. Compact cards keep
@@ -9,18 +10,19 @@ import { useRelatedListings } from "../data/hooks";
 // on top of each other.
 export default function RelatedListings({ categoryKey, excludeId, title = "Explore Nearby" }) {
   const { related, loading } = useRelatedListings(categoryKey, excludeId, 8);
+  const t = useT();
 
   if (loading || related.length === 0) return null;
 
   return (
     <div className="mt-14 pt-10 border-t border-slate-100">
       <div className="flex items-center justify-between mb-5">
-        <h2 className="text-2xl font-bold text-slate-900">{title}</h2>
+        <h2 className="text-2xl font-bold text-slate-900">{t(title)}</h2>
         <Link
           to={`/${categoryKey}`}
           className="hidden sm:inline-flex items-center gap-1 text-sm font-semibold text-teal-700 hover:underline"
         >
-          See all <ArrowRight className="w-3.5 h-3.5" />
+          {t("See all")} <ArrowRight className="w-3.5 h-3.5" />
         </Link>
       </div>
 
@@ -41,7 +43,7 @@ export default function RelatedListings({ categoryKey, excludeId, title = "Explo
               {item.is_verified && (
                 <span className="absolute top-2 left-2 inline-flex items-center gap-1 bg-white/95 text-teal-700 text-[10px] font-semibold px-2 py-0.5 rounded-full shadow-sm">
                   <BadgeCheck className="w-3 h-3" />
-                  Verified
+                  {t("Verified")}
                 </span>
               )}
             </div>
