@@ -42,7 +42,7 @@ function escapeHtml(str) {
     .replace(/"/g, "&quot;");
 }
 
-const SITE_URL = "https://viteconfig-1-zeta.vercel.app";
+const SITE_URL = "https://visitzanzibarparadise.com";
 const DEFAULT_SHARE_IMAGE = `${SITE_URL}/images/beaches/nungwi-beach.jpeg`;
 
 function absoluteUrl(maybeRelative) {
@@ -129,6 +129,7 @@ async function main() {
   }
 
   let generated = 0;
+  const sitemapRoutes = ["/", "/things-to-do", "/kwa-watanzania"];
 
   for (const cat of categories) {
     const catListings = listings.filter((l) => l.category_key === cat.key);
@@ -151,6 +152,7 @@ async function main() {
     } catch (err) {
       console.warn(`[prerender] Failed to write category page /${cat.key}:`, err.message);
     }
+    sitemapRoutes.push(`/${cat.key}`);
 
     for (const l of catListings) {
       try {
@@ -179,6 +181,7 @@ async function main() {
       } catch (err) {
         console.warn(`[prerender] Failed to write listing page /${cat.key}/${l.id}:`, err.message);
       }
+      sitemapRoutes.push(`/${cat.key}/${l.id}`);
     }
   }
 
@@ -234,12 +237,31 @@ async function main() {
           bodyHtml: `<h1>${escapeHtml(post.title)}</h1><div>${escapeHtml(post.content || "")}</div>`,
         });
         generated++;
+        sitemapRoutes.push(`/blog/${post.slug}`);
       } catch (err) {
         console.warn(`[prerender] Failed to write blog post /blog/${post.slug}:`, err.message);
       }
     }
   } catch (err) {
     console.warn("[prerender] Could not load blog posts, skipping blog prerender:", err.message);
+  }
+
+  // ---- sitemap.xml ----
+  // Built from the exact same route list search engines are told about above,
+  // so it can never drift out of sync with what actually exists on the site.
+  try {
+    const urlEntries = sitemapRoutes
+      .map((route) => `  <url><loc>${SITE_URL}${route}</loc></url>`)
+      .join("\n");
+    const sitemapXml = `<?xml version="1.0" encoding="UTF-8"?>\n<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">\n${urlEntries}\n</urlset>\n`;
+    fs.writeFileSync(path.join(DIST_DIR, "sitemap.xml"), sitemapXml, "utf8");
+
+    const robotsTxt = `User-agent: *\nAllow: /\n\nSitemap: ${SITE_URL}/sitemap.xml\n`;
+    fs.writeFileSync(path.join(DIST_DIR, "robots.txt"), robotsTxt, "utf8");
+
+    console.log(`[prerender] Wrote sitemap.xml with ${sitemapRoutes.length} URLs.`);
+  } catch (err) {
+    console.warn("[prerender] Failed to write sitemap.xml:", err.message);
   }
 
   console.log(`[prerender] Done — generated ${generated} static page(s) for search engines.`);
