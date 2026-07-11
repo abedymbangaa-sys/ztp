@@ -45,6 +45,32 @@ export default function AdminDashboard() {
   });
   const [guideMessage, setGuideMessage] = useState("");
   const [newCat, setNewCat] = useState({ key: "", title: "", tag: "" });
+  const emptyNewListing = {
+    category_key: "hotels",
+    title: "",
+    location: "",
+    description: "",
+    image_url: "",
+    gallery_images: [],
+    whatsapp_number: "",
+    maps_link: "",
+    tags: [],
+  };
+  const [newListing, setNewListing] = useState(emptyNewListing);
+  const [newListingSaving, setNewListingSaving] = useState(false);
+  const [newListingMessage, setNewListingMessage] = useState("");
+  const emptyNewAd = {
+    business_name: "",
+    category: "",
+    description: "",
+    image_url: "",
+    gallery_images: [],
+    whatsapp_number: "",
+    maps_link: "",
+  };
+  const [newAd, setNewAd] = useState(emptyNewAd);
+  const [newAdSaving, setNewAdSaving] = useState(false);
+  const [newAdMessage, setNewAdMessage] = useState("");
   const [message, setMessage] = useState("");
   const [editingListing, setEditingListing] = useState(null);
   const [editForm, setEditForm] = useState(null);
@@ -232,6 +258,57 @@ export default function AdminDashboard() {
       .from("advertisements")
       .update({ status: "approved", active_until: thirtyDaysFromNow })
       .eq("id", id);
+    loadAll();
+  }
+
+  // Admin-added listing: goes straight into the directory as "approved" -
+  // no partner account or approval step needed, since the admin is the one
+  // adding it (e.g. after onboarding a hotel manually via Instagram/email).
+  async function handleAddListing(e) {
+    e.preventDefault();
+    setNewListingSaving(true);
+    setNewListingMessage("");
+    const { error } = await supabase.from("listings").insert({
+      ...newListing,
+      partner_id: null,
+      status: "approved",
+    });
+    setNewListingSaving(false);
+    if (error) {
+      setNewListingMessage("Error: " + error.message);
+      return;
+    }
+    setNewListingMessage("Listing published!");
+    setNewListing(emptyNewListing);
+    loadAll();
+  }
+
+  function toggleNewListingTag(key) {
+    setNewListing((f) => ({
+      ...f,
+      tags: f.tags.includes(key) ? f.tags.filter((t) => t !== key) : [...f.tags, key],
+    }));
+  }
+
+  // Admin-added advertisement: published live immediately for 30 days,
+  // skipping the pending/payment-confirmation step used for self-submitted ads.
+  async function handleAddAd(e) {
+    e.preventDefault();
+    setNewAdSaving(true);
+    setNewAdMessage("");
+    const thirtyDaysFromNow = new Date(Date.now() + 30 * 24 * 60 * 60 * 1000).toISOString();
+    const { error } = await supabase.from("advertisements").insert({
+      ...newAd,
+      status: "approved",
+      active_until: thirtyDaysFromNow,
+    });
+    setNewAdSaving(false);
+    if (error) {
+      setNewAdMessage("Error: " + error.message);
+      return;
+    }
+    setNewAdMessage("Advertisement published!");
+    setNewAd(emptyNewAd);
     loadAll();
   }
 
@@ -491,6 +568,120 @@ export default function AdminDashboard() {
 
       {tab === "listings" && (
         <div className="space-y-3">
+          <div className="bg-teal-50 border border-teal-200 rounded-2xl p-6 mb-2">
+            <h2 className="font-bold text-lg mb-4 text-slate-900">Add New Listing (published instantly)</h2>
+            {newListingMessage && (
+              <p className={"text-sm mb-3 " + (newListingMessage.startsWith("Error") ? "text-red-600" : "text-teal-700")}>
+                {newListingMessage}
+              </p>
+            )}
+            <form onSubmit={handleAddListing} className="space-y-4">
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                <div>
+                  <label className="block text-sm font-semibold text-slate-700 mb-1">Type</label>
+                  <select
+                    value={newListing.category_key}
+                    onChange={(e) => setNewListing({ ...newListing, category_key: e.target.value })}
+                    className="w-full border border-slate-300 rounded-lg px-4 py-2.5"
+                  >
+                    {categories.map((c) => (
+                      <option key={c.key} value={c.key}>
+                        {c.emoji} {c.title}
+                      </option>
+                    ))}
+                  </select>
+                </div>
+                <div>
+                  <label className="block text-sm font-semibold text-slate-700 mb-1">Listing Name</label>
+                  <input
+                    required
+                    value={newListing.title}
+                    onChange={(e) => setNewListing({ ...newListing, title: e.target.value })}
+                    className="w-full border border-slate-300 rounded-lg px-4 py-2.5"
+                  />
+                </div>
+              </div>
+              <div>
+                <label className="block text-sm font-semibold text-slate-700 mb-1">Location</label>
+                <input
+                  required
+                  value={newListing.location}
+                  onChange={(e) => setNewListing({ ...newListing, location: e.target.value })}
+                  placeholder="e.g. Nungwi, North Zanzibar"
+                  className="w-full border border-slate-300 rounded-lg px-4 py-2.5"
+                />
+              </div>
+              <div>
+                <label className="block text-sm font-semibold text-slate-700 mb-1">Description</label>
+                <textarea
+                  required
+                  rows={4}
+                  value={newListing.description}
+                  onChange={(e) => setNewListing({ ...newListing, description: e.target.value })}
+                  className="w-full border border-slate-300 rounded-lg px-4 py-2.5"
+                />
+              </div>
+              <SinglePhotoUploader
+                label="Main Photo"
+                value={newListing.image_url}
+                onChange={(url) => setNewListing({ ...newListing, image_url: url })}
+              />
+              <MultiPhotoUploader
+                label="Extra Photos (optional)"
+                value={newListing.gallery_images}
+                onChange={(urls) => setNewListing({ ...newListing, gallery_images: urls })}
+              />
+              <div>
+                <label className="block text-sm font-semibold text-slate-700 mb-1">Amenities / Tags</label>
+                <div className="flex flex-wrap gap-2">
+                  {TAG_OPTIONS.map((tag) => (
+                    <button
+                      key={tag.key}
+                      type="button"
+                      onClick={() => toggleNewListingTag(tag.key)}
+                      className={
+                        "inline-flex items-center gap-1.5 text-sm font-medium px-3.5 py-1.5 rounded-full border transition " +
+                        (newListing.tags.includes(tag.key)
+                          ? "bg-teal-700 border-teal-700 text-white"
+                          : "bg-white border-slate-300 text-slate-600 hover:border-teal-600")
+                      }
+                    >
+                      <tag.icon className="w-3.5 h-3.5" strokeWidth={2} />
+                      {tag.label}
+                    </button>
+                  ))}
+                </div>
+              </div>
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                <div>
+                  <label className="block text-sm font-semibold text-slate-700 mb-1">WhatsApp Number</label>
+                  <input
+                    required
+                    value={newListing.whatsapp_number}
+                    onChange={(e) => setNewListing({ ...newListing, whatsapp_number: e.target.value })}
+                    placeholder="255700000000"
+                    className="w-full border border-slate-300 rounded-lg px-4 py-2.5"
+                  />
+                </div>
+                <div>
+                  <label className="block text-sm font-semibold text-slate-700 mb-1">Google Maps Link (optional)</label>
+                  <input
+                    value={newListing.maps_link}
+                    onChange={(e) => setNewListing({ ...newListing, maps_link: e.target.value })}
+                    className="w-full border border-slate-300 rounded-lg px-4 py-2.5"
+                  />
+                </div>
+              </div>
+              <button
+                type="submit"
+                disabled={newListingSaving}
+                className="bg-teal-700 hover:bg-teal-800 transition text-white font-bold px-6 py-2.5 rounded-full disabled:opacity-50"
+              >
+                {newListingSaving ? "Publishing..." : "Publish Listing"}
+              </button>
+            </form>
+          </div>
+
           {listings.length === 0 && <p className="text-slate-500">No listings yet.</p>}
           {listings.map((l) => (
             <div key={l.id} className="bg-white border border-slate-200 rounded-xl p-4 flex flex-col sm:flex-row sm:items-center justify-between gap-3">
@@ -703,6 +894,85 @@ export default function AdminDashboard() {
 
       {tab === "advertisements" && (
         <div className="space-y-3">
+          <div className="bg-amber-50 border border-amber-200 rounded-2xl p-6 mb-2">
+            <h2 className="font-bold text-lg mb-4 text-slate-900">Add New Advertisement (live instantly, 30 days)</h2>
+            {newAdMessage && (
+              <p className={"text-sm mb-3 " + (newAdMessage.startsWith("Error") ? "text-red-600" : "text-amber-700")}>
+                {newAdMessage}
+              </p>
+            )}
+            <form onSubmit={handleAddAd} className="space-y-4">
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                <div>
+                  <label className="block text-sm font-semibold text-slate-700 mb-1">Business Name</label>
+                  <input
+                    required
+                    value={newAd.business_name}
+                    onChange={(e) => setNewAd({ ...newAd, business_name: e.target.value })}
+                    className="w-full border border-slate-300 rounded-lg px-4 py-2.5"
+                  />
+                </div>
+                <div>
+                  <label className="block text-sm font-semibold text-slate-700 mb-1">Category</label>
+                  <input
+                    required
+                    value={newAd.category}
+                    onChange={(e) => setNewAd({ ...newAd, category: e.target.value })}
+                    placeholder="e.g. Restaurant, Hotel, Tour"
+                    className="w-full border border-slate-300 rounded-lg px-4 py-2.5"
+                  />
+                </div>
+              </div>
+              <div>
+                <label className="block text-sm font-semibold text-slate-700 mb-1">Description</label>
+                <textarea
+                  required
+                  rows={3}
+                  value={newAd.description}
+                  onChange={(e) => setNewAd({ ...newAd, description: e.target.value })}
+                  className="w-full border border-slate-300 rounded-lg px-4 py-2.5"
+                />
+              </div>
+              <SinglePhotoUploader
+                label="Main Photo"
+                value={newAd.image_url}
+                onChange={(url) => setNewAd({ ...newAd, image_url: url })}
+              />
+              <MultiPhotoUploader
+                label="Extra Photos (optional)"
+                value={newAd.gallery_images}
+                onChange={(urls) => setNewAd({ ...newAd, gallery_images: urls })}
+              />
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                <div>
+                  <label className="block text-sm font-semibold text-slate-700 mb-1">WhatsApp Number</label>
+                  <input
+                    required
+                    value={newAd.whatsapp_number}
+                    onChange={(e) => setNewAd({ ...newAd, whatsapp_number: e.target.value })}
+                    placeholder="255700000000"
+                    className="w-full border border-slate-300 rounded-lg px-4 py-2.5"
+                  />
+                </div>
+                <div>
+                  <label className="block text-sm font-semibold text-slate-700 mb-1">Google Maps Link (optional)</label>
+                  <input
+                    value={newAd.maps_link}
+                    onChange={(e) => setNewAd({ ...newAd, maps_link: e.target.value })}
+                    className="w-full border border-slate-300 rounded-lg px-4 py-2.5"
+                  />
+                </div>
+              </div>
+              <button
+                type="submit"
+                disabled={newAdSaving}
+                className="bg-amber-600 hover:bg-amber-700 transition text-white font-bold px-6 py-2.5 rounded-full disabled:opacity-50"
+              >
+                {newAdSaving ? "Publishing..." : "Publish Advertisement"}
+              </button>
+            </form>
+          </div>
+
           <div className="bg-amber-50 border border-amber-200 rounded-xl p-4 flex flex-wrap items-end gap-3">
             <div>
               <label className="block text-sm font-semibold text-slate-700 mb-1">
