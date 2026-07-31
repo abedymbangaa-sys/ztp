@@ -20,6 +20,9 @@ export default function Home() {
   const { listings: allApproved } = useListings();
   const { settings } = useSettings();
   const adPrice = Number(settings.ad_price_usd) || 15;
+  const heroImageUrl =
+    settings.hero_image_url ||
+    "https://images.unsplash.com/photo-1559827260-dc66d52bef19?w=2400&q=85&auto=format&fit=crop";
   const topHotels = hotels.slice(0, 6);
 
   const [adFormOpen, setAdFormOpen] = useState(false);
@@ -39,7 +42,7 @@ export default function Home() {
       {/* Hero */}
       <section className="relative text-white overflow-hidden min-h-[640px] flex items-center bg-gradient-to-br from-teal-900 via-teal-800 to-slate-900">
         <img
-          src="https://images.unsplash.com/photo-1559827260-dc66d52bef19?w=2400&q=85&auto=format&fit=crop"
+          src={heroImageUrl}
           alt="Zanzibar coastline"
           className="absolute inset-0 w-full h-full object-cover scale-105"
           onError={(e) => {

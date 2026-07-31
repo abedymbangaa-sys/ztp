@@ -7,6 +7,7 @@ import { SinglePhotoUploader, MultiPhotoUploader } from "../components/ImageUplo
 import { TAG_OPTIONS } from "../lib/tags";
 
 const TABS = [
+  { key: "homepage", label: "Homepage" },
   { key: "listings", label: "Listings" },
   { key: "claims", label: "Claims" },
   { key: "advertisements", label: "Advertisements" },
@@ -31,6 +32,9 @@ export default function AdminDashboard() {
   const [ads, setAds] = useState([]);
   const [adPriceInput, setAdPriceInput] = useState("");
   const [adPriceSaving, setAdPriceSaving] = useState(false);
+  const [heroImageInput, setHeroImageInput] = useState("");
+  const [heroImageSaving, setHeroImageSaving] = useState(false);
+  const [heroImageMessage, setHeroImageMessage] = useState("");
   const [blogPosts, setBlogPosts] = useState([]);
   const [newPost, setNewPost] = useState({ title: "", excerpt: "", content: "", cover_image: "", language: "en" });
   const [postMessage, setPostMessage] = useState("");
@@ -152,6 +156,9 @@ export default function AdminDashboard() {
     const { data: settingsData } = await supabase.from("settings").select("*").eq("key", "ad_price_usd").single();
     setAdPriceInput(settingsData?.value || "15");
 
+    const { data: heroData } = await supabase.from("settings").select("*").eq("key", "hero_image_url").single();
+    setHeroImageInput(heroData?.value || "");
+
     const { data: postData } = await supabase
       .from("blog_posts")
       .select("*")
@@ -243,6 +250,18 @@ export default function AdminDashboard() {
     setAdPriceSaving(true);
     await supabase.from("settings").upsert({ key: "ad_price_usd", value: adPriceInput });
     setAdPriceSaving(false);
+  }
+
+  async function saveHeroImage() {
+    setHeroImageSaving(true);
+    setHeroImageMessage("");
+    const { error } = await supabase.from("settings").upsert({ key: "hero_image_url", value: heroImageInput });
+    setHeroImageSaving(false);
+    if (error) {
+      setHeroImageMessage("Error: " + error.message);
+      return;
+    }
+    setHeroImageMessage("Hero image imesaviwa! Angalia homepage baada ya sekunde chache.");
   }
 
   async function updateAdStatus(id, status) {
@@ -565,6 +584,33 @@ export default function AdminDashboard() {
           </button>
         ))}
       </div>
+
+      {tab === "homepage" && (
+        <div className="bg-white border border-slate-200 rounded-2xl p-6 max-w-xl">
+          <h2 className="font-bold text-lg mb-2 text-slate-900">Hero Image (Homepage)</h2>
+          <p className="text-sm text-slate-500 mb-4">
+            Hii ndiyo picha kubwa inayoonekana juu kabisa ya homepage yako. Pakia picha mpya hapa chini - itaonekana
+            moja kwa moja kwenye site bila kuhitaji deployment yoyote.
+          </p>
+          <SinglePhotoUploader
+            label="Hero Image"
+            value={heroImageInput}
+            onChange={(url) => setHeroImageInput(url)}
+          />
+          <button
+            onClick={saveHeroImage}
+            disabled={heroImageSaving}
+            className="mt-4 bg-teal-700 hover:bg-teal-800 transition text-white font-bold px-6 py-2.5 rounded-full disabled:opacity-50"
+          >
+            {heroImageSaving ? "Inasave..." : "Save Hero Image"}
+          </button>
+          {heroImageMessage && (
+            <p className={"text-sm mt-3 " + (heroImageMessage.startsWith("Error") ? "text-red-600" : "text-teal-700")}>
+              {heroImageMessage}
+            </p>
+          )}
+        </div>
+      )}
 
       {tab === "listings" && (
         <div className="space-y-3">
