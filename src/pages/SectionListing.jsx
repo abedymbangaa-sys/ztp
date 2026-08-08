@@ -2,9 +2,11 @@ import { useState } from "react";
 import { useParams, useSearchParams } from "react-router-dom";
 import { useListings, useCategories } from "../data/hooks";
 import GenericCard from "../components/GenericCard";
+import ListingsMap from "../components/ListingsMap";
 import { SectionIcon } from "../lib/icons";
 import { TAG_OPTIONS } from "../lib/tags";
 import { LOCATION_OPTIONS, locationMatches } from "../lib/locations";
+import { Map, List } from "lucide-react";
 
 export default function SectionListing() {
   const { sectionKey } = useParams();
@@ -12,6 +14,7 @@ export default function SectionListing() {
   const [query, setQuery] = useState(searchParams.get("q") || "");
   const [activeTags, setActiveTags] = useState([]);
   const [activeLocation, setActiveLocation] = useState("");
+  const [view, setView] = useState("list"); // "list" | "map"
   const { categories } = useCategories();
   const { listings, loading } = useListings(sectionKey);
   const config = categories.find((c) => c.key === sectionKey);
@@ -59,6 +62,29 @@ export default function SectionListing() {
             </option>
           ))}
         </select>
+
+        <div className="flex gap-1 border border-slate-300 rounded-full p-1 w-fit">
+          <button
+            type="button"
+            onClick={() => setView("list")}
+            className={
+              "flex items-center gap-1.5 px-4 py-1.5 rounded-full text-sm font-medium transition " +
+              (view === "list" ? "bg-teal-700 text-white" : "text-slate-600")
+            }
+          >
+            <List className="w-4 h-4" /> List
+          </button>
+          <button
+            type="button"
+            onClick={() => setView("map")}
+            className={
+              "flex items-center gap-1.5 px-4 py-1.5 rounded-full text-sm font-medium transition " +
+              (view === "map" ? "bg-teal-700 text-white" : "text-slate-600")
+            }
+          >
+            <Map className="w-4 h-4" /> Map
+          </button>
+        </div>
       </div>
 
       <div className="flex flex-wrap gap-2 mb-8">
@@ -84,6 +110,8 @@ export default function SectionListing() {
         <p className="text-slate-500 text-center py-16">Loading...</p>
       ) : filtered.length === 0 ? (
         <p className="text-slate-500 text-center py-16">Nothing found.</p>
+      ) : view === "map" ? (
+        <ListingsMap listings={filtered} sectionKey={sectionKey} />
       ) : (
         <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-6">
           {filtered.map((item) => (
