@@ -4,15 +4,16 @@ import { useListings, useCategories } from "../data/hooks";
 import GenericCard from "../components/GenericCard";
 import { SectionIcon } from "../lib/icons";
 import { TAG_OPTIONS } from "../lib/tags";
+import { LOCATION_OPTIONS, locationMatches } from "../lib/locations";
 
 export default function SectionListing() {
   const { sectionKey } = useParams();
   const [searchParams] = useSearchParams();
   const [query, setQuery] = useState(searchParams.get("q") || "");
   const [activeTags, setActiveTags] = useState([]);
+  const [activeLocation, setActiveLocation] = useState("");
   const { categories } = useCategories();
   const { listings, loading } = useListings(sectionKey);
-
   const config = categories.find((c) => c.key === sectionKey);
 
   function toggleTag(key) {
@@ -23,7 +24,8 @@ export default function SectionListing() {
     (i) =>
       (i.title.toLowerCase().includes(query.toLowerCase()) ||
         (i.location || "").toLowerCase().includes(query.toLowerCase())) &&
-      (activeTags.length === 0 || activeTags.every((t) => (i.tags || []).includes(t)))
+      (activeTags.length === 0 || activeTags.every((t) => (i.tags || []).includes(t))) &&
+      (!activeLocation || locationMatches(i.location, activeLocation))
   );
 
   return (
@@ -36,13 +38,28 @@ export default function SectionListing() {
         </h1>
       </div>
 
-      <input
-        type="text"
-        placeholder="Search..."
-        value={query}
-        onChange={(e) => setQuery(e.target.value)}
-        className="w-full sm:w-96 border border-slate-300 rounded-full px-5 py-2.5 mb-4 focus:outline-none focus:ring-2 focus:ring-teal-600"
-      />
+      <div className="flex flex-col sm:flex-row gap-3 mb-4">
+        <input
+          type="text"
+          placeholder="Search..."
+          value={query}
+          onChange={(e) => setQuery(e.target.value)}
+          className="w-full sm:w-96 border border-slate-300 rounded-full px-5 py-2.5 focus:outline-none focus:ring-2 focus:ring-teal-600"
+        />
+
+        <select
+          value={activeLocation}
+          onChange={(e) => setActiveLocation(e.target.value)}
+          className="w-full sm:w-56 border border-slate-300 rounded-full px-5 py-2.5 bg-white text-slate-700 focus:outline-none focus:ring-2 focus:ring-teal-600"
+        >
+          <option value="">All Locations</option>
+          {LOCATION_OPTIONS.map((loc) => (
+            <option key={loc.key} value={loc.key}>
+              {loc.label}
+            </option>
+          ))}
+        </select>
+      </div>
 
       <div className="flex flex-wrap gap-2 mb-8">
         {TAG_OPTIONS.map((t) => (
