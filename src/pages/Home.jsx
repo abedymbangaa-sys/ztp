@@ -5,6 +5,7 @@ import GenericCard from "../components/GenericCard";
 import { SectionIcon } from "../lib/icons";
 import StatsCounter from "../components/StatsCounter";
 import DealsSection from "../components/DealsSection";
+import SearchAutocomplete from "../components/SearchAutocomplete";
 import { useT } from "../lib/i18n";
 // Leaflet + react-leaflet is a heavy library (~150kB). Lazy-loading it
 // means visitors who never scroll down to the map never download it.
@@ -66,27 +67,11 @@ export default function Home() {
             {t("A trusted directory of hotels, tours, and attractions in Zanzibar — built by people who know this island well.")}
           </p>
 
-          <form
-            onSubmit={(e) => {
-              e.preventDefault();
-              const q = e.target.elements.heroSearch.value.trim();
-              window.location.href = q ? `/hotels?q=${encodeURIComponent(q)}` : "/hotels";
-            }}
-            className="max-w-xl mx-auto mb-10 flex items-center bg-white/95 backdrop-blur-md rounded-full shadow-2xl ring-1 ring-white/20 p-1.5 sm:p-2"
-          >
-            <input
-              name="heroSearch"
-              type="text"
-              placeholder={t("Search hotels, tours, beaches...")}
-              className="flex-1 bg-transparent text-slate-800 placeholder-slate-400 px-5 py-3 text-sm sm:text-base focus:outline-none"
-            />
-            <button
-              type="submit"
-              className="bg-amber-500 hover:bg-amber-400 transition text-slate-900 font-bold px-6 sm:px-7 py-3 rounded-full text-sm sm:text-base whitespace-nowrap shadow-md"
-            >
-              {t("Search")}
-            </button>
-          </form>
+          <SearchAutocomplete
+            listings={allApproved}
+            placeholder={t("Search hotels, tours, beaches...")}
+            className="max-w-xl mx-auto mb-10"
+          />
 
           <div className="flex flex-col sm:flex-row justify-center gap-3 sm:gap-4 px-4 sm:px-0">
             <Link
