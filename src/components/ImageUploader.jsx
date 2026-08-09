@@ -4,11 +4,64 @@ import { Upload, X, Loader2 } from "lucide-react";
 
 const BUCKET = "listing-photos";
 
+// Resizes/compresses an image in the browser before upload, so large phone
+// photos (often 4-8MB) become small, fast-loading JPEGs (typically under
+// 300KB) without a visible quality difference at the sizes we display them.
+// Falls back to the original file if anything goes wrong.
+function compressImage(file, { maxWidth = 1600, maxHeight = 1600, quality = 0.8 } = {}) {
+  return new Promise((resolve) => {
+    if (!file.type.startsWith("image/") || file.type === "image/gif" || file.type === "image/svg+xml") {
+      resolve(file); // don't touch animated GIFs or vector SVGs
+      return;
+    }
+
+    const objectUrl = URL.createObjectURL(file);
+    const img = new Image();
+
+    img.onload = () => {
+      let { width, height } = img;
+      if (width > maxWidth || height > maxHeight) {
+        const scale = Math.min(maxWidth / width, maxHeight / height);
+        width = Math.round(width * scale);
+        height = Math.round(height * scale);
+      }
+
+      const canvas = document.createElement("canvas");
+      canvas.width = width;
+      canvas.height = height;
+      const ctx = canvas.getContext("2d");
+      ctx.drawImage(img, 0, 0, width, height);
+
+      canvas.toBlob(
+        (blob) => {
+          URL.revokeObjectURL(objectUrl);
+          if (!blob) {
+            resolve(file);
+            return;
+          }
+          const newName = file.name.replace(/\.[^.]+$/, "") + ".jpg";
+          resolve(new File([blob], newName, { type: "image/jpeg" }));
+        },
+        "image/jpeg",
+        quality
+      );
+    };
+
+    img.onerror = () => {
+      URL.revokeObjectURL(objectUrl);
+      resolve(file); // couldn't decode - upload the original rather than fail
+    };
+
+    img.src = objectUrl;
+  });
+}
+
 async function uploadFile(file) {
-  const ext = (file.name.split(".").pop() || "jpg").toLowerCase();
+  const compressed = await compressImage(file);
+  const ext = (compressed.name.split(".").pop() || "jpg").toLowerCase();
   const path = `${Date.now()}-${Math.random().toString(36).slice(2, 8)}.${ext}`;
 
-  const { error } = await supabase.storage.from(BUCKET).upload(path, file, {
+  const { error } = await supabase.storage.from(BUCKET).upload(path, compressed, {
     cacheControl: "3600",
     upsert: false,
   });

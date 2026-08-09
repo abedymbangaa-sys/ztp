@@ -31,6 +31,7 @@ export default function DealsSection() {
                   src={item.image_url || "https://images.unsplash.com/photo-1571003123894-1f0594d2b5d9?w=800&q=80"}
                   alt={item.title}
                   className="w-full h-full object-cover"
+                  loading="lazy"
                 />
                 {item.deal_label && (
                   <span className="absolute top-3 left-3 bg-amber-500 text-white text-xs font-bold px-3 py-1 rounded-full shadow">
