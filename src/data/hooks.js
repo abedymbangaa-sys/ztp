@@ -56,6 +56,36 @@ export function useListings(categoryKey) {
   return { listings, loading };
 }
 
+// Load approved listings currently marked as a "deal" (is_deal = true),
+// for the homepage "Special Deals" section.
+export function useDeals(limit = 6) {
+  const [deals, setDeals] = useState([]);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    let mounted = true;
+    setLoading(true);
+    supabase
+      .from("listings")
+      .select("*")
+      .eq("status", "approved")
+      .eq("is_deal", true)
+      .order("created_at", { ascending: false })
+      .limit(limit)
+      .then(({ data }) => {
+        if (mounted) {
+          setDeals(data || []);
+          setLoading(false);
+        }
+      });
+    return () => {
+      mounted = false;
+    };
+  }, [limit]);
+
+  return { deals, loading };
+}
+
 // ── Advertisements (paid) ────────────────────────────────────────────────
 // Completely separate from `listings`. A business can be listed for free in
 // the normal directory (hotels/tours/etc) AND, if they choose, pay to also
