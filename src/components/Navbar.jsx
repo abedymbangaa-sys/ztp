@@ -91,7 +91,7 @@ export default function Navbar() {
             rel="noreferrer"
             className="bg-teal-700 text-white text-xs sm:text-sm font-semibold px-3 sm:px-4 py-2 rounded-full hover:bg-teal-800 transition whitespace-nowrap"
           >
-            {t("WhatsApp Us")}
+            {t("Chat with a Zanzibar Expert")}
           </a>
 
           {/* Mobile menu toggle */}
