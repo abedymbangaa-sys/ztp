@@ -1,4 +1,4 @@
-import { Stamp, ShieldCheck, CircleDollarSign, Sun, Briefcase } from "lucide-react";
+import { Stamp, ShieldCheck, CircleDollarSign, Sun, Briefcase, Shirt, MessageCircle, Car } from "lucide-react";
 
 function SectionIcon({ icon: Icon }) {
   return (
@@ -7,6 +7,17 @@ function SectionIcon({ icon: Icon }) {
     </div>
   );
 }
+
+const SWAHILI_PHRASES = [
+  { sw: "Jambo / Hujambo", en: "Hello / How are you", note: "Friendly greeting, works anywhere" },
+  { sw: "Karibu", en: "Welcome", note: "You'll hear this constantly — it's genuine" },
+  { sw: "Asante (sana)", en: "Thank you (very much)", note: "Always appreciated" },
+  { sw: "Bei gani?", en: "What's the price?", note: "Useful at markets and with taxis" },
+  { sw: "Pole pole", en: "Slowly, slowly", note: "The island's unofficial motto — take it easy" },
+  { sw: "Hakuna matata", en: "No problem / No worries", note: "Yes, it's a real phrase, not just from the movie" },
+  { sw: "Tafadhali", en: "Please", note: "Goes a long way when asking for anything" },
+  { sw: "Kwaheri", en: "Goodbye", note: "Simple send-off" },
+];
 
 export default function BeforeYouGo() {
   return (
@@ -81,7 +92,7 @@ export default function BeforeYouGo() {
           </ul>
         </section>
 
-        {/* WHEN TO GO */}
+        {/* BEST TIME */}
         <section>
           <div className="flex items-center gap-3 mb-3">
             <SectionIcon icon={Sun} />
@@ -93,6 +104,88 @@ export default function BeforeYouGo() {
             reliable for sunshine. If you're booking a tour during the rainy season, ask your operator how they
             handle weather delays — a good operator will explain their reschedule or refund policy upfront.
           </p>
+        </section>
+
+        {/* DRESS CODE */}
+        <section>
+          <div className="flex items-center gap-3 mb-3">
+            <SectionIcon icon={Shirt} />
+            <h2 className="text-xl font-bold text-slate-900">Dress Code: Stone Town vs. the Beach</h2>
+          </div>
+          <p className="mb-3">
+            Zanzibar is predominantly Muslim, and what's comfortable on a resort beach isn't always appropriate
+            a few kilometers away in town. A simple rule: <strong>cover up off the beach.</strong>
+          </p>
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 mt-4">
+            <div className="border border-slate-200 rounded-xl p-4">
+              <p className="font-semibold text-slate-900 mb-2">Stone Town & villages</p>
+              <ul className="list-disc pl-5 space-y-1.5 text-sm">
+                <li>Shoulders and knees covered for both men and women</li>
+                <li>Loose, lightweight clothing works best in the heat</li>
+                <li>Swimwear should stay at the beach or pool, not in the streets</li>
+                <li>A light scarf is handy if you plan to visit a mosque</li>
+              </ul>
+            </div>
+            <div className="border border-slate-200 rounded-xl p-4">
+              <p className="font-semibold text-slate-900 mb-2">Resort beaches</p>
+              <ul className="list-disc pl-5 space-y-1.5 text-sm">
+                <li>Swimwear is fine directly on hotel/resort beach fronts</li>
+                <li>Public or village-adjacent beaches call for more modesty</li>
+                <li>Bring a cover-up or sarong for walking between beach and town</li>
+              </ul>
+            </div>
+          </div>
+        </section>
+
+        {/* SWAHILI LEXICON */}
+        <section>
+          <div className="flex items-center gap-3 mb-3">
+            <SectionIcon icon={MessageCircle} />
+            <h2 className="text-xl font-bold text-slate-900">Mini Swahili Lexicon</h2>
+          </div>
+          <p className="mb-4">
+            English and Swahili are both widely understood in tourist areas, but a few local phrases go a long
+            way — Zanzibaris warm up fast to visitors who make the effort.
+          </p>
+          <div className="border border-slate-200 rounded-xl divide-y divide-slate-100 overflow-hidden">
+            {SWAHILI_PHRASES.map((p) => (
+              <div key={p.sw} className="flex flex-col sm:flex-row sm:items-center gap-1 sm:gap-4 px-4 py-3">
+                <span className="font-semibold text-teal-700 w-full sm:w-40 shrink-0">{p.sw}</span>
+                <span className="text-slate-700 sm:w-40 shrink-0">{p.en}</span>
+                <span className="text-slate-400 text-sm">{p.note}</span>
+              </div>
+            ))}
+          </div>
+        </section>
+
+        {/* SAFETY & GETTING AROUND */}
+        <section>
+          <div className="flex items-center gap-3 mb-3">
+            <SectionIcon icon={Car} />
+            <h2 className="text-xl font-bold text-slate-900">Getting Around & Safety</h2>
+          </div>
+          <ul className="list-disc pl-6 space-y-2">
+            <li>
+              <strong>Dala-dala (shared minibus):</strong> The cheapest way to get around and a genuine local
+              experience, but slower and crowded — best if you're not in a hurry and want to travel like a local.
+            </li>
+            <li>
+              <strong>Taxi:</strong> More comfortable and direct. Agree the price with the driver before you get
+              in, since meters aren't standard — your hotel or listing host can usually tell you a fair rate.
+            </li>
+            <li>
+              <strong>Private transfer / tour driver:</strong> The easiest option for airport pickups and day
+              trips, especially arranged through a verified operator on this site.
+            </li>
+            <li>
+              Zanzibar is generally safe for tourists, but use normal precautions: agree prices upfront, keep
+              valuables out of sight, and stick to licensed guides and operators rather than unsolicited street
+              offers.
+            </li>
+            <li>
+              Tap water isn't recommended for drinking — bottled or filtered water is cheap and widely available.
+            </li>
+          </ul>
         </section>
 
         {/* PRACTICAL TIPS */}
