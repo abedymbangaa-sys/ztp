@@ -91,7 +91,8 @@ export default function Navbar() {
             rel="noreferrer"
             className="bg-teal-700 text-white text-xs sm:text-sm font-semibold px-3 sm:px-4 py-2 rounded-full hover:bg-teal-800 transition whitespace-nowrap"
           >
-            {t("Chat with a Zanzibar Expert")}
+            <span className="sm:hidden">{t("Chat Now")}</span>
+            <span className="hidden sm:inline">{t("Chat with a Zanzibar Expert")}</span>
           </a>
 
           {/* Mobile menu toggle */}
