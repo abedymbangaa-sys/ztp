@@ -3,7 +3,7 @@ import { X, Star } from "lucide-react";
 import { supabase } from "../lib/supabase";
 
 const SESSION_KEY = "zpt_site_review_prompted";
-const SHOW_AFTER_MS = 45000; // 45 seconds of browsing
+const FALLBACK_MS = 45000; // safety net: shows even if no exit signal fires
 
 export default function SiteReviewPrompt() {
   const [visible, setVisible] = useState(false);
@@ -18,11 +18,35 @@ export default function SiteReviewPrompt() {
     // Don't show again this session if already prompted, dismissed, or submitted
     if (sessionStorage.getItem(SESSION_KEY)) return;
 
-    const timer = setTimeout(() => {
+    function trigger() {
+      if (sessionStorage.getItem(SESSION_KEY)) return;
       setVisible(true);
-    }, SHOW_AFTER_MS);
+    }
 
-    return () => clearTimeout(timer);
+    // 1) Desktop: mouse leaves toward the top of the window (classic exit-intent)
+    function handleMouseOut(e) {
+      if (e.clientY <= 0) trigger();
+    }
+
+    // 2) Mobile/tablet: user presses the back button.
+    // We push one extra history entry so the first "back" press fires
+    // popstate here instead of immediately leaving the page.
+    window.history.pushState({ zptReviewGuard: true }, "");
+    function handlePopState() {
+      trigger();
+    }
+
+    // 3) Fallback for anyone who leaves another way (closing the tab, etc.)
+    const fallbackTimer = setTimeout(trigger, FALLBACK_MS);
+
+    document.addEventListener("mouseout", handleMouseOut);
+    window.addEventListener("popstate", handlePopState);
+
+    return () => {
+      document.removeEventListener("mouseout", handleMouseOut);
+      window.removeEventListener("popstate", handlePopState);
+      clearTimeout(fallbackTimer);
+    };
   }, []);
 
   function dismiss() {
@@ -55,7 +79,7 @@ export default function SiteReviewPrompt() {
 
   return (
     <div
-      className="fixed bottom-5 right-5 z-50 w-[300px] bg-white rounded-2xl shadow-2xl border border-slate-200 p-4 animate-in fade-in slide-in-from-bottom-4"
+      className="fixed bottom-5 right-5 z-50 w-[300px] max-w-[calc(100vw-2.5rem)] bg-white rounded-2xl shadow-2xl border border-slate-200 p-4 animate-in fade-in slide-in-from-bottom-4"
       role="dialog"
       aria-label="Website review prompt"
     >
@@ -73,7 +97,7 @@ export default function SiteReviewPrompt() {
         </p>
       ) : !expanded ? (
         <>
-          <p className="font-bold text-slate-900 text-sm mb-1">Enjoying Zanzibar Paradise Tours?</p>
+          <p className="font-bold text-slate-900 text-sm mb-1">Before you go...</p>
           <p className="text-xs text-slate-500 mb-3">Tap a star to leave a quick review of our site.</p>
           <div className="flex gap-1">
             {[1, 2, 3, 4, 5].map((n) => (
