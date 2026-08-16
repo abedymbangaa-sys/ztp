@@ -1,5 +1,4 @@
 import { useLanguage } from "./LanguageContext";
-
 // Central dictionary for UI strings shown to visitors (nav, buttons, common
 // labels). Listing-specific content (descriptions) is translated separately
 // per-listing in Supabase (description_it / description_de columns) since
@@ -26,7 +25,6 @@ const STRINGS = {
   "Own a business? Log in": { it: "Hai un'attività? Accedi", de: "Unternehmer? Anmelden" },
   "WhatsApp Us": { it: "WhatsApp", de: "WhatsApp" },
   "Language:": { it: "Lingua:", de: "Sprache:" },
-
   // Home hero
   "Discover the": { it: "Scopri lo", de: "Entdecke das" },
   "Real": { it: "Vero", de: "Echte" },
@@ -38,11 +36,9 @@ const STRINGS = {
   "Search hotels, tours, beaches...": { it: "Cerca hotel, tour, spiagge...", de: "Hotels, Touren, Strände suchen..." },
   "Search": { it: "Cerca", de: "Suchen" },
   "View Hotels": { it: "Vedi Hotel", de: "Hotels Ansehen" },
-
   // Cards / listings
   "Verified": { it: "Verificato", de: "Verifiziert" },
   "View Details": { it: "Vedi Dettagli", de: "Details Ansehen" },
-
   // Detail page
   "Back to": { it: "Torna a", de: "Zurück zu" },
   "Send Enquiry": { it: "Invia Richiesta", de: "Anfrage Senden" },
@@ -54,7 +50,11 @@ const STRINGS = {
   "Weather / Cancellation Policy": { it: "Politica Meteo / Cancellazione", de: "Wetter- / Stornierungsrichtlinie" },
   "Explore Nearby": { it: "Esplora nei Dintorni", de: "In der Nähe Entdecken" },
   "See all": { it: "Vedi tutto", de: "Alle Anzeigen" },
-
+  // Filters (Location / Tags — added for the new FilterBar component)
+  "Location": { it: "Posizione", de: "Standort" },
+  "Tags": { it: "Tag", de: "Tags" },
+  "Clear filters": { it: "Cancella filtri", de: "Filter löschen" },
+  "e.g. Stone Town, Nungwi...": { it: "es. Stone Town, Nungwi...", de: "z.B. Stone Town, Nungwi..." },
   // Footer
   "About Us": { it: "Chi Siamo", de: "Über Uns" },
   "Data Source & Removal Notice": { it: "Fonte dei Dati e Rimozione", de: "Datenquelle & Entfernungshinweis" },
