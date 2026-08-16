@@ -1,6 +1,7 @@
 import { useState, useEffect } from "react";
 import { supabase } from "../lib/supabase";
 import GenericCard from "../components/GenericCard";
+import FilterBar from "../components/FilterBar";
 import { Compass } from "lucide-react";
 
 // Categories that count as an "activity" rather than a place to stay/eat.
@@ -12,6 +13,7 @@ export default function ThingsToDo() {
   const [listings, setListings] = useState([]);
   const [loading, setLoading] = useState(true);
   const [activeFilter, setActiveFilter] = useState("all");
+  const [extraFilters, setExtraFilters] = useState({ locationSearch: "", selectedTags: [] });
 
   useEffect(() => {
     document.title = "Things to Do in Zanzibar | Zanzibar Paradise Tours";
@@ -44,8 +46,24 @@ export default function ThingsToDo() {
     };
   }, []);
 
-  const filtered =
+  // Step 1: filter by category button (Tours, Attractions, etc.)
+  const byCategory =
     activeFilter === "all" ? listings : listings.filter((l) => l.category_key === activeFilter);
+
+  // Step 2: filter by location search text (matches anywhere in the location field)
+  const byLocation = extraFilters.locationSearch
+    ? byCategory.filter((l) =>
+        (l.location || "").toLowerCase().includes(extraFilters.locationSearch.toLowerCase())
+      )
+    : byCategory;
+
+  // Step 3: filter by selected tags (listing must have ALL selected tags)
+  const filtered =
+    extraFilters.selectedTags.length > 0
+      ? byLocation.filter((l) =>
+          extraFilters.selectedTags.every((tag) => (l.tags || []).includes(tag))
+        )
+      : byLocation;
 
   const filterLabels = {
     all: "All",
@@ -74,7 +92,7 @@ export default function ThingsToDo() {
         </p>
       </div>
 
-      <div className="flex flex-wrap gap-2 mb-8">
+      <div className="flex flex-wrap gap-2 mb-6">
         {availableFilters.map((key) => (
           <button
             key={key}
@@ -90,6 +108,8 @@ export default function ThingsToDo() {
           </button>
         ))}
       </div>
+
+      <FilterBar listings={listings} onFilterChange={setExtraFilters} />
 
       {loading ? (
         <p className="text-slate-500 text-center py-16">Loading...</p>
