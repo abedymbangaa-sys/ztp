@@ -7,9 +7,7 @@ import { Tag } from "lucide-react";
 // empty/broken-looking section.
 export default function DealsSection() {
   const { deals, loading } = useDeals(6);
-
   if (loading || deals.length === 0) return null;
-
   return (
     <section className="bg-amber-50 border-y border-amber-100">
       <div className="max-w-6xl mx-auto px-4 py-14">
@@ -18,12 +16,11 @@ export default function DealsSection() {
           <p className="text-amber-700 font-semibold text-sm uppercase tracking-wide">Limited Time</p>
         </div>
         <h2 className="text-2xl sm:text-3xl font-bold text-slate-900 mb-8">Special Deals</h2>
-
         <div className="flex gap-5 overflow-x-auto pb-2 -mx-4 px-4 sm:mx-0 sm:px-0 sm:grid sm:grid-cols-2 lg:grid-cols-3">
           {deals.map((item) => (
             <Link
               key={item.id}
-              to={`/ad/${item.id}`}
+              to={`/${item.category_key}/${item.id}`}
               className="relative flex-shrink-0 w-72 sm:w-auto bg-white rounded-2xl border border-slate-200 overflow-hidden hover:shadow-lg transition"
             >
               <div className="relative h-44">
