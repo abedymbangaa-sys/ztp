@@ -14,6 +14,7 @@ const TABS = [
   { key: "inquiries", label: "Inquiries" },
   { key: "partners", label: "Partners" },
   { key: "reviews", label: "Reviews" },
+  { key: "stories", label: "Traveler Stories" },
   { key: "categories", label: "Categories" },
   { key: "blog", label: "Blog" },
   { key: "itinerary", label: "Itinerary" },
@@ -27,6 +28,7 @@ export default function AdminDashboard() {
   const [partners, setPartners] = useState([]);
   const [categories, setCategories] = useState([]);
   const [reviews, setReviews] = useState([]);
+  const [stories, setStories] = useState([]);
   const [inquiries, setInquiries] = useState([]);
   const [claims, setClaims] = useState([]);
   const [ads, setAds] = useState([]);
@@ -133,6 +135,12 @@ export default function AdminDashboard() {
       .select("*, listings(title)")
       .order("created_at", { ascending: false });
     setReviews(reviewData || []);
+
+    const { data: storyData } = await supabase
+      .from("traveler_stories")
+      .select("*")
+      .order("created_at", { ascending: false });
+    setStories(storyData || []);
 
     const { data: inquiryData } = await supabase
       .from("inquiries")
@@ -392,6 +400,27 @@ export default function AdminDashboard() {
     loadAll();
   }
 
+  // Traveler Stories moderation: approve makes it public on the homepage
+  // gallery, reject just hides it (keeps the row), delete removes it and
+  // its photo entirely.
+  async function updateStoryStatus(id, status) {
+    await supabase.from("traveler_stories").update({ status }).eq("id", id);
+    loadAll();
+  }
+
+  async function deleteStory(id, photoUrl) {
+    if (!confirm("Delete this traveler story permanently? This cannot be undone.")) return;
+    await supabase.from("traveler_stories").delete().eq("id", id);
+    // Best-effort: also remove the photo file from storage.
+    try {
+      const path = photoUrl.split("/traveler-photos/")[1];
+      if (path) await supabase.storage.from("traveler-photos").remove([path]);
+    } catch {
+      // Non-fatal if this fails - the DB row is already gone.
+    }
+    loadAll();
+  }
+
   function slugify(text) {
     return text
       .toLowerCase()
@@ -514,6 +543,7 @@ export default function AdminDashboard() {
   const pendingListings = listings.filter((l) => l.status === "pending");
   const pendingPartners = partners.filter((p) => p.status === "pending");
   const pendingReviews = reviews.filter((r) => r.status === "pending");
+  const pendingStories = stories.filter((s) => s.status === "pending");
   const pendingAds = ads.filter((a) => a.status === "pending");
   const pendingClaims = claims.filter((c) => c.status === "pending" || c.status === "in_progress");
   const urgentRemovalClaims = claims.filter(
@@ -579,6 +609,11 @@ export default function AdminDashboard() {
             {t.key === "reviews" && pendingReviews.length > 0 && (
               <span className="ml-2 bg-amber-500 text-white text-xs px-2 py-0.5 rounded-full">
                 {pendingReviews.length}
+              </span>
+            )}
+            {t.key === "stories" && pendingStories.length > 0 && (
+              <span className="ml-2 bg-amber-500 text-white text-xs px-2 py-0.5 rounded-full">
+                {pendingStories.length}
               </span>
             )}
           </button>
@@ -1445,6 +1480,71 @@ export default function AdminDashboard() {
                     Reject
                   </button>
                 )}
+              </div>
+            </div>
+          ))}
+        </div>
+      )}
+
+      {tab === "stories" && (
+        <div className="space-y-3">
+          <p className="text-sm text-slate-500 mb-2">
+            Photos submitted by travelers. Approve to show them in the "Real Stories" gallery on the homepage,
+            or delete if the photo isn't a good fit.
+          </p>
+          {stories.length === 0 && <p className="text-slate-500">No traveler stories submitted yet.</p>}
+          {stories.map((s) => (
+            <div
+              key={s.id}
+              className="bg-white border border-slate-200 rounded-xl p-4 flex flex-col sm:flex-row sm:items-center gap-4"
+            >
+              <img
+                src={s.photo_url}
+                alt={s.caption || s.name}
+                className="w-full sm:w-28 h-40 sm:h-28 rounded-lg object-cover shrink-0"
+              />
+              <div className="flex-1">
+                <p className="font-semibold text-slate-900">{s.name}</p>
+                {s.caption && <p className="text-sm text-slate-600 mt-0.5">{s.caption}</p>}
+                <p className="text-xs text-slate-400 mt-1">
+                  {new Date(s.created_at).toLocaleDateString()}
+                </p>
+                <span
+                  className={
+                    "inline-block mt-2 text-xs font-semibold px-3 py-1 rounded-full " +
+                    (s.status === "approved"
+                      ? "bg-green-100 text-green-700"
+                      : s.status === "rejected"
+                      ? "bg-red-100 text-red-700"
+                      : "bg-amber-100 text-amber-700")
+                  }
+                >
+                  {s.status}
+                </span>
+              </div>
+              <div className="flex items-center gap-2 shrink-0 flex-wrap">
+                {s.status !== "approved" && (
+                  <button
+                    onClick={() => updateStoryStatus(s.id, "approved")}
+                    className="text-xs font-semibold bg-teal-700 text-white px-3 py-1.5 rounded-full hover:bg-teal-800"
+                  >
+                    Approve
+                  </button>
+                )}
+                {s.status !== "rejected" && (
+                  <button
+                    onClick={() => updateStoryStatus(s.id, "rejected")}
+                    className="text-xs font-semibold bg-slate-200 text-slate-700 px-3 py-1.5 rounded-full hover:bg-slate-300"
+                  >
+                    Reject
+                  </button>
+                )}
+                <button
+                  onClick={() => deleteStory(s.id, s.photo_url)}
+                  className="text-xs font-semibold bg-red-100 text-red-700 px-3 py-1.5 rounded-full hover:bg-red-200"
+                >
+                  Delete
+                </button>
               </div>
             </div>
           ))}
