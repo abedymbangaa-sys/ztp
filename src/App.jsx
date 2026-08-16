@@ -4,7 +4,7 @@ import { LanguageProvider } from "./lib/LanguageContext";
 import Navbar from "./components/Navbar";
 import Footer from "./components/Footer";
 import Home from "./pages/Home";
-
+import SiteReviewPrompt from "./components/SiteReviewPrompt";
 // Code-splitting: these pages are visited by a small minority of users
 // (business owners, admin) so they should NOT be part of the main bundle
 // that every tourist downloads just to browse listings. React.lazy()
@@ -28,7 +28,6 @@ const BeforeYouGo = lazy(() => import("./pages/BeforeYouGo"));
 const Privacy = lazy(() => import("./pages/Privacy"));
 const Terms = lazy(() => import("./pages/Terms"));
 const DataSource = lazy(() => import("./pages/DataSource"));
-
 function PageLoading() {
   return (
     <div className="flex items-center justify-center py-24">
@@ -36,7 +35,6 @@ function PageLoading() {
     </div>
   );
 }
-
 export default function App() {
   return (
     <BrowserRouter>
@@ -66,6 +64,7 @@ export default function App() {
           </Routes>
         </Suspense>
         <Footer />
+        <SiteReviewPrompt />
       </LanguageProvider>
     </BrowserRouter>
   );
