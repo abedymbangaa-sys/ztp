@@ -53,13 +53,12 @@ export default function SearchAutocomplete({ listings = [], placeholder = "Searc
           {t("Search")}
         </button>
       </form>
-
       {open && suggestions.length > 0 && (
         <div className="absolute top-full left-0 right-0 mt-2 bg-white rounded-2xl shadow-xl border border-slate-100 overflow-hidden z-20 text-left">
           {suggestions.map((item) => (
             <Link
               key={item.id}
-              to={`/ad/${item.id}`}
+              to={`/${item.category_key}/${item.id}`}
               onMouseDown={(e) => e.preventDefault()}
               className="flex items-center gap-3 px-4 py-3 hover:bg-slate-50 transition border-b border-slate-50 last:border-0"
             >
