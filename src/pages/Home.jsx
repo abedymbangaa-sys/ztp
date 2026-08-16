@@ -4,6 +4,7 @@ import { useListings, useCategories, useSettings } from "../data/hooks";
 import GenericCard from "../components/GenericCard";
 import { SectionIcon } from "../lib/icons";
 import StatsCounter from "../components/StatsCounter";
+import WebsiteReviews from "../components/WebsiteReviews";
 import DealsSection from "../components/DealsSection";
 import SearchAutocomplete from "../components/SearchAutocomplete";
 import { useT } from "../lib/i18n";
@@ -99,6 +100,8 @@ export default function Home() {
       </section>
 
       <StatsCounter />
+
+      <WebsiteReviews />
 
       <DealsSection />
 
