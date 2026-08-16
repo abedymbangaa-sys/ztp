@@ -3,7 +3,8 @@ import { X, Star } from "lucide-react";
 import { supabase } from "../lib/supabase";
 
 const SESSION_KEY = "zpt_site_review_prompted";
-const FALLBACK_MS = 45000; // safety net: shows even if no exit signal fires
+const FALLBACK_MS = 45000; // safety net: shows even if no other signal fires
+const SCROLL_DEPTH_TRIGGER = 0.7; // 70% down the page counts as "engaged" on mobile
 
 export default function SiteReviewPrompt() {
   const [visible, setVisible] = useState(false);
@@ -28,23 +29,26 @@ export default function SiteReviewPrompt() {
       if (e.clientY <= 0) trigger();
     }
 
-    // 2) Mobile/tablet: user presses the back button.
-    // We push one extra history entry so the first "back" press fires
-    // popstate here instead of immediately leaving the page.
-    window.history.pushState({ zptReviewGuard: true }, "");
-    function handlePopState() {
-      trigger();
+    // 2) Mobile/tablet (and desktop too): reaching most of the way down the
+    // page is a strong "engaged, about to be done" signal. True exit-intent
+    // isn't reliably detectable on mobile, so this is the practical stand-in.
+    function handleScroll() {
+      const scrollTop = window.scrollY;
+      const docHeight = document.documentElement.scrollHeight - window.innerHeight;
+      if (docHeight > 0 && scrollTop / docHeight >= SCROLL_DEPTH_TRIGGER) {
+        trigger();
+      }
     }
 
-    // 3) Fallback for anyone who leaves another way (closing the tab, etc.)
+    // 3) Fallback for anyone who leaves another way (closing the tab, short page, etc.)
     const fallbackTimer = setTimeout(trigger, FALLBACK_MS);
 
     document.addEventListener("mouseout", handleMouseOut);
-    window.addEventListener("popstate", handlePopState);
+    window.addEventListener("scroll", handleScroll, { passive: true });
 
     return () => {
       document.removeEventListener("mouseout", handleMouseOut);
-      window.removeEventListener("popstate", handlePopState);
+      window.removeEventListener("scroll", handleScroll);
       clearTimeout(fallbackTimer);
     };
   }, []);
@@ -93,11 +97,11 @@ export default function SiteReviewPrompt() {
 
       {submitted ? (
         <p className="text-sm font-semibold text-teal-700 py-3 text-center">
-          Asante kwa maoni yako! 🙏
+          Thanks for your feedback!
         </p>
       ) : !expanded ? (
         <>
-          <p className="font-bold text-slate-900 text-sm mb-1">Before you go...</p>
+          <p className="font-bold text-slate-900 text-sm mb-1">Enjoying the site so far?</p>
           <p className="text-xs text-slate-500 mb-3">Tap a star to leave a quick review of our site.</p>
           <div className="flex gap-1">
             {[1, 2, 3, 4, 5].map((n) => (
