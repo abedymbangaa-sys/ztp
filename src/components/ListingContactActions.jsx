@@ -37,7 +37,7 @@ export default function ListingContactActions({ item, compact = false }) {
   };
 
   const baseBtn =
-    "flex items-center justify-center gap-1.5 text-sm font-semibold px-4 py-3 rounded-full transition min-h-[44px]";
+    "flex items-center justify-center gap-1 text-xs font-semibold px-3 py-2.5 rounded-full transition min-h-[44px] leading-tight text-center";
   const primaryBtn = `${baseBtn} bg-green-600 hover:bg-green-700 text-white`;
   const secondaryBtn = `${baseBtn} border border-slate-300 text-slate-700 hover:border-teal-600 hover:text-teal-700 bg-white`;
   const expertBtn = `${baseBtn} bg-amber-500 hover:bg-amber-600 text-white`;
@@ -51,7 +51,7 @@ export default function ListingContactActions({ item, compact = false }) {
         </p>
       )}
 
-      <div className="grid grid-cols-2 gap-2.5">
+      <div className="grid grid-cols-2 gap-2">
         {whatsappUrl ? (
           <a
             href={whatsappUrl}
@@ -61,11 +61,11 @@ export default function ListingContactActions({ item, compact = false }) {
             className={primaryBtn}
             onClick={() => trackEvent("click_whatsapp_owner", eventData)}
           >
-            <MessageCircle className="w-4 h-4" /> WhatsApp Owner
+            <MessageCircle className="w-3.5 h-3.5 shrink-0" /> WhatsApp
           </a>
         ) : (
           <span className={disabledBtn} aria-label="Owner contact not available">
-            <MessageCircle className="w-4 h-4" /> Owner contact not available
+            <MessageCircle className="w-3.5 h-3.5 shrink-0" /> Not available
           </span>
         )}
 
@@ -76,11 +76,11 @@ export default function ListingContactActions({ item, compact = false }) {
             className={secondaryBtn}
             onClick={() => trackEvent("click_call_owner", eventData)}
           >
-            <Phone className="w-4 h-4" /> Call
+            <Phone className="w-3.5 h-3.5 shrink-0" /> Call
           </a>
         ) : (
           <span className={disabledBtn} aria-label="Phone not available">
-            <Phone className="w-4 h-4" /> Phone not available
+            <Phone className="w-3.5 h-3.5 shrink-0" /> Not available
           </span>
         )}
 
@@ -93,11 +93,11 @@ export default function ListingContactActions({ item, compact = false }) {
             className={secondaryBtn}
             onClick={() => trackEvent("click_get_directions", eventData)}
           >
-            <MapPin className="w-4 h-4" /> Get Directions
+            <MapPin className="w-3.5 h-3.5 shrink-0" /> Directions
           </a>
         ) : (
           <span className={disabledBtn} aria-label="Location not available">
-            <MapPin className="w-4 h-4" /> Location not available
+            <MapPin className="w-3.5 h-3.5 shrink-0" /> Not available
           </span>
         )}
 
@@ -109,7 +109,7 @@ export default function ListingContactActions({ item, compact = false }) {
           className={expertBtn}
           onClick={() => trackEvent("click_ask_zanzibar_expert", eventData)}
         >
-          <Compass className="w-4 h-4" /> Ask Zanzibar Expert
+          <Compass className="w-3.5 h-3.5 shrink-0" /> Ask Expert
         </a>
       </div>
     </div>
