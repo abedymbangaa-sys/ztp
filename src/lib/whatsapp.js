@@ -38,3 +38,17 @@ export function buildRichInquiryLink(businessNumber, itemTitle, itemLocation, de
   return `https://wa.me/${businessNumber}?text=${encodeURIComponent(lines.join("\n"))}`;
 }
 
+// "Ask Zanzibar Expert" - inatumika kutoka listing detail page (na
+// baadaye listing cards) kumpeleka visitor kwa Wachu Digital Growth
+// moja kwa moja, si kwa biashara husika. Inatumia SITE_CONTACT_NUMBER
+// hapo juu - namba moja tu, centralized, kama ilivyopo kwa CTA zingine
+// za site nzima.
+export function buildExpertLink(itemTitle, itemLocation, pageUrl) {
+  const lines = [
+    `Habari Zanzibar Expert, naomba msaada kuchagua hoteli, tour au experience Zanzibar.`,
+    ``,
+    `Listing: ${itemTitle}${itemLocation ? ` (${itemLocation})` : ""}`,
+  ];
+  if (pageUrl) lines.push(`Page: ${pageUrl}`);
+  return `https://wa.me/${SITE_CONTACT_NUMBER}?text=${encodeURIComponent(lines.join("\n"))}`;
+}
