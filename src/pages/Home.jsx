@@ -16,17 +16,25 @@ import AdvertiseSection from "../components/AdvertiseSection";
 import AdvertiseFormModal from "../components/AdvertiseFormModal";
 import PaymentInstructions from "../components/PaymentInstructions";
 
+const DEFAULT_HERO_IMAGE =
+  "https://images.unsplash.com/photo-1559827260-dc66d52bef19?w=2400&q=85&auto=format&fit=crop";
+
 export default function Home() {
   const location = useLocation();
   const t = useT();
   const { categories } = useCategories();
   const { listings: hotels } = useListings("hotels");
   const { listings: allApproved } = useListings();
-  const { settings } = useSettings();
+  const { settings, loading: settingsLoading } = useSettings();
   const adPrice = Number(settings.ad_price_usd) || 15;
-  const heroImageUrl =
-    settings.hero_image_url ||
-    "https://images.unsplash.com/photo-1559827260-dc66d52bef19?w=2400&q=85&auto=format&fit=crop";
+
+  // While settings are still loading, we don't know yet whether the admin
+  // has set a custom hero image — so we deliberately show NO image (just
+  // the gradient background already on the section) rather than flashing
+  // the generic Unsplash default first and then swapping to the real one
+  // a few seconds later. Once settings have loaded, we show the admin's
+  // image if set, or fall back to the default only then.
+  const heroImageUrl = settingsLoading ? null : settings.hero_image_url || DEFAULT_HERO_IMAGE;
   const topHotels = hotels.slice(0, 6);
 
   const [adFormOpen, setAdFormOpen] = useState(false);
@@ -45,14 +53,16 @@ export default function Home() {
     <div>
       {/* Hero */}
       <section className="relative text-white overflow-hidden min-h-[640px] flex items-center bg-gradient-to-br from-teal-900 via-teal-800 to-slate-900">
-        <img
-          src={heroImageUrl}
-          alt="Zanzibar coastline"
-          className="absolute inset-0 w-full h-full object-cover scale-105"
-          onError={(e) => {
-            e.target.style.display = "none";
-          }}
-        />
+        {heroImageUrl && (
+          <img
+            src={heroImageUrl}
+            alt="Zanzibar coastline"
+            className="absolute inset-0 w-full h-full object-cover scale-105 animate-[fadeIn_0.4s_ease-in]"
+            onError={(e) => {
+              e.target.style.display = "none";
+            }}
+          />
+        )}
         <div className="absolute inset-0 bg-gradient-to-b from-slate-950/75 via-teal-950/45 to-slate-950/85" />
         <div className="absolute inset-x-0 bottom-0 h-40 bg-gradient-to-t from-slate-950/90 to-transparent" />
 
