@@ -29,6 +29,10 @@ export default function AdminDashboard() {
   const [categories, setCategories] = useState([]);
   const [reviews, setReviews] = useState([]);
   const [stories, setStories] = useState([]);
+  const [editingStory, setEditingStory] = useState(null);
+  const [storyEditForm, setStoryEditForm] = useState(null);
+  const [storyEditMessage, setStoryEditMessage] = useState("");
+  const [storyReports, setStoryReports] = useState({});
   const [inquiries, setInquiries] = useState([]);
   const [claims, setClaims] = useState([]);
   const [ads, setAds] = useState([]);
@@ -277,8 +281,6 @@ export default function AdminDashboard() {
     loadAll();
   }
 
-  // Activates (or renews) a paid ad for 30 days from today. Use this once
-  // you've confirmed the mobile money payment came through.
   async function activateAd(id) {
     const thirtyDaysFromNow = new Date(Date.now() + 30 * 24 * 60 * 60 * 1000).toISOString();
     await supabase
@@ -288,9 +290,6 @@ export default function AdminDashboard() {
     loadAll();
   }
 
-  // Admin-added listing: goes straight into the directory as "approved" -
-  // no partner account or approval step needed, since the admin is the one
-  // adding it (e.g. after onboarding a hotel manually via Instagram/email).
   async function handleAddListing(e) {
     e.preventDefault();
     setNewListingSaving(true);
@@ -317,8 +316,6 @@ export default function AdminDashboard() {
     }));
   }
 
-  // Admin-added advertisement: published live immediately for 30 days,
-  // skipping the pending/payment-confirmation step used for self-submitted ads.
   async function handleAddAd(e) {
     e.preventDefault();
     setNewAdSaving(true);
@@ -400,25 +397,114 @@ export default function AdminDashboard() {
     loadAll();
   }
 
-  // Traveler Stories moderation: approve makes it public on the homepage
-  // gallery, reject just hides it (keeps the row), delete removes it and
-  // its photo entirely.
-  async function updateStoryStatus(id, status) {
-    await supabase.from("traveler_stories").update({ status }).eq("id", id);
+  // ============================================================
+  // TRAVELER STORIES MODERATION
+  // ============================================================
+
+  async function getCurrentAdminId() {
+    const { data } = await supabase.auth.getUser();
+    return data?.user?.id || null;
+  }
+
+  async function logStoryModeration(storyId, action, note = null) {
+    const adminId = await getCurrentAdminId();
+    await supabase.from("traveler_story_moderation_log").insert({
+      story_id: storyId,
+      admin_id: adminId,
+      action,
+      note,
+    });
+  }
+
+  async function approveStory(id) {
+    await supabase
+      .from("traveler_stories")
+      .update({ status: "approved", approved_at: new Date().toISOString(), rejection_reason: null })
+      .eq("id", id);
+    await logStoryModeration(id, "approved");
     loadAll();
   }
 
-  async function deleteStory(id, photoUrl) {
+  async function rejectStory(id) {
+    const reason = window.prompt("Rejection reason (kept for your records only):", "");
+    if (reason === null) return;
+    await supabase
+      .from("traveler_stories")
+      .update({ status: "rejected", rejection_reason: reason || null })
+      .eq("id", id);
+    await logStoryModeration(id, "rejected", reason || null);
+    loadAll();
+  }
+
+  async function archiveStory(id) {
+    await supabase.from("traveler_stories").update({ status: "archived" }).eq("id", id);
+    await logStoryModeration(id, "archived");
+    loadAll();
+  }
+
+  async function deleteStory(id, photoUrl, thumbnailUrl) {
     if (!confirm("Delete this traveler story permanently? This cannot be undone.")) return;
     await supabase.from("traveler_stories").delete().eq("id", id);
-    // Best-effort: also remove the photo file from storage.
     try {
-      const path = photoUrl.split("/traveler-photos/")[1];
-      if (path) await supabase.storage.from("traveler-photos").remove([path]);
+      const pathsToRemove = [];
+      const fullPath = photoUrl?.split("/traveler-photos/")[1];
+      const thumbPath = thumbnailUrl?.split("/traveler-photos/")[1];
+      if (fullPath) pathsToRemove.push(fullPath);
+      if (thumbPath && thumbPath !== fullPath) pathsToRemove.push(thumbPath);
+      if (pathsToRemove.length) await supabase.storage.from("traveler-photos").remove(pathsToRemove);
     } catch {
       // Non-fatal if this fails - the DB row is already gone.
     }
     loadAll();
+  }
+
+  function openEditStory(s) {
+    setEditingStory(s);
+    setStoryEditForm({
+      caption: s.caption || "",
+      location_name: s.location_name || "",
+      category: s.category || "",
+    });
+    setStoryEditMessage("");
+  }
+
+  function closeEditStory() {
+    setEditingStory(null);
+    setStoryEditForm(null);
+    setStoryEditMessage("");
+  }
+
+  async function saveEditStory(e) {
+    e.preventDefault();
+    if (!editingStory) return;
+    const { error } = await supabase
+      .from("traveler_stories")
+      .update(storyEditForm)
+      .eq("id", editingStory.id);
+    if (error) {
+      setStoryEditMessage("Error: " + error.message);
+      return;
+    }
+    await logStoryModeration(editingStory.id, "edited");
+    closeEditStory();
+    loadAll();
+  }
+
+  async function loadStoryReports(storyId) {
+    if (storyReports[storyId]) {
+      setStoryReports((prev) => {
+        const next = { ...prev };
+        delete next[storyId];
+        return next;
+      });
+      return;
+    }
+    const { data } = await supabase
+      .from("traveler_story_reports")
+      .select("*")
+      .eq("story_id", storyId)
+      .order("created_at", { ascending: false });
+    setStoryReports((prev) => ({ ...prev, [storyId]: data || [] }));
   }
 
   function slugify(text) {
@@ -444,9 +530,6 @@ export default function AdminDashboard() {
     };
     let { error } = await supabase.from("blog_posts").insert(payload);
     if (error && /language/i.test(error.message)) {
-      // The `language` column hasn't been added to Supabase yet (migration
-      // not run). Fall back to inserting without it so post creation still
-      // works — it will just default to English until the migration runs.
       const { language, ...withoutLanguage } = payload;
       const retry = await supabase.from("blog_posts").insert(withoutLanguage);
       error = retry.error;
@@ -1489,43 +1572,95 @@ export default function AdminDashboard() {
       {tab === "stories" && (
         <div className="space-y-3">
           <p className="text-sm text-slate-500 mb-2">
-            Photos submitted by travelers. Approve to show them in the "Real Stories" gallery on the homepage,
-            or delete if the photo isn't a good fit.
+            Photos submitted by travelers. Approve to show them in the "Real Stories" gallery on the homepage.
+            Reject hides it (reversible). Archive removes it without deleting. Delete removes it permanently.
           </p>
           {stories.length === 0 && <p className="text-slate-500">No traveler stories submitted yet.</p>}
           {stories.map((s) => (
             <div
               key={s.id}
-              className="bg-white border border-slate-200 rounded-xl p-4 flex flex-col sm:flex-row sm:items-center gap-4"
+              className="bg-white border border-slate-200 rounded-xl p-4 flex flex-col sm:flex-row sm:items-start gap-4"
             >
               <img
-                src={s.photo_url}
+                src={s.thumbnail_url || s.photo_url}
                 alt={s.caption || s.name}
                 className="w-full sm:w-28 h-40 sm:h-28 rounded-lg object-cover shrink-0"
               />
               <div className="flex-1">
                 <p className="font-semibold text-slate-900">{s.name}</p>
                 {s.caption && <p className="text-sm text-slate-600 mt-0.5">{s.caption}</p>}
-                <p className="text-xs text-slate-400 mt-1">
-                  {new Date(s.created_at).toLocaleDateString()}
-                </p>
-                <span
-                  className={
-                    "inline-block mt-2 text-xs font-semibold px-3 py-1 rounded-full " +
-                    (s.status === "approved"
-                      ? "bg-green-100 text-green-700"
-                      : s.status === "rejected"
-                      ? "bg-red-100 text-red-700"
-                      : "bg-amber-100 text-amber-700")
-                  }
-                >
-                  {s.status}
-                </span>
+
+                <div className="flex flex-wrap items-center gap-2 mt-1.5 text-xs text-slate-500">
+                  {s.location_name && <span>📍 {s.location_name}</span>}
+                  {s.category && (
+                    <span className="bg-slate-100 px-2 py-0.5 rounded-full font-semibold text-slate-600">
+                      {s.category}
+                    </span>
+                  )}
+                  <span>{new Date(s.created_at).toLocaleDateString()}</span>
+                </div>
+
+                <div className="flex flex-wrap items-center gap-2 mt-2">
+                  <span
+                    className={
+                      "text-xs font-semibold px-3 py-1 rounded-full " +
+                      (s.status === "approved"
+                        ? "bg-green-100 text-green-700"
+                        : s.status === "rejected"
+                        ? "bg-red-100 text-red-700"
+                        : s.status === "archived"
+                        ? "bg-slate-200 text-slate-600"
+                        : "bg-amber-100 text-amber-700")
+                    }
+                  >
+                    {s.status}
+                  </span>
+
+                  {!s.rights_confirmed && (
+                    <span className="text-xs font-semibold px-2.5 py-1 rounded-full bg-red-50 text-red-600">
+                      ⚠ No rights confirmation
+                    </span>
+                  )}
+
+                  {s.report_count > 0 && (
+                    <button
+                      onClick={() => loadStoryReports(s.id)}
+                      className="text-xs font-semibold px-2.5 py-1 rounded-full bg-red-100 text-red-700 hover:bg-red-200"
+                    >
+                      🚩 {s.report_count} report{s.report_count > 1 ? "s" : ""}
+                    </button>
+                  )}
+                </div>
+
+                {s.status === "rejected" && s.rejection_reason && (
+                  <p className="text-xs text-red-500 mt-1.5 italic">Reason: {s.rejection_reason}</p>
+                )}
+
+                {storyReports[s.id] && (
+                  <div className="mt-2 bg-red-50 border border-red-100 rounded-lg p-3 space-y-1.5">
+                    {storyReports[s.id].length === 0 ? (
+                      <p className="text-xs text-slate-500">No report details found.</p>
+                    ) : (
+                      storyReports[s.id].map((r) => (
+                        <div key={r.id} className="text-xs text-slate-600 flex items-center justify-between gap-2">
+                          <span>
+                            <span className="font-semibold">{r.reason}</span>
+                            {r.details ? ` — ${r.details}` : ""}
+                          </span>
+                          <span className="text-slate-400 whitespace-nowrap">
+                            {new Date(r.created_at).toLocaleDateString()}
+                          </span>
+                        </div>
+                      ))
+                    )}
+                  </div>
+                )}
               </div>
+
               <div className="flex items-center gap-2 shrink-0 flex-wrap">
                 {s.status !== "approved" && (
                   <button
-                    onClick={() => updateStoryStatus(s.id, "approved")}
+                    onClick={() => approveStory(s.id)}
                     className="text-xs font-semibold bg-teal-700 text-white px-3 py-1.5 rounded-full hover:bg-teal-800"
                   >
                     Approve
@@ -1533,14 +1668,28 @@ export default function AdminDashboard() {
                 )}
                 {s.status !== "rejected" && (
                   <button
-                    onClick={() => updateStoryStatus(s.id, "rejected")}
+                    onClick={() => rejectStory(s.id)}
                     className="text-xs font-semibold bg-slate-200 text-slate-700 px-3 py-1.5 rounded-full hover:bg-slate-300"
                   >
                     Reject
                   </button>
                 )}
+                {s.status !== "archived" && (
+                  <button
+                    onClick={() => archiveStory(s.id)}
+                    className="text-xs font-semibold bg-slate-100 text-slate-500 px-3 py-1.5 rounded-full hover:bg-slate-200"
+                  >
+                    Archive
+                  </button>
+                )}
                 <button
-                  onClick={() => deleteStory(s.id, s.photo_url)}
+                  onClick={() => openEditStory(s)}
+                  className="text-xs font-semibold bg-blue-100 text-blue-700 px-3 py-1.5 rounded-full hover:bg-blue-200"
+                >
+                  Edit
+                </button>
+                <button
+                  onClick={() => deleteStory(s.id, s.photo_url, s.thumbnail_url)}
                   className="text-xs font-semibold bg-red-100 text-red-700 px-3 py-1.5 rounded-full hover:bg-red-200"
                 >
                   Delete
@@ -1548,6 +1697,74 @@ export default function AdminDashboard() {
               </div>
             </div>
           ))}
+        </div>
+      )}
+
+      {editingStory && storyEditForm && (
+        <div className="fixed inset-0 bg-black/50 flex items-center justify-center p-4 z-50" onClick={closeEditStory}>
+          <div
+            className="bg-white rounded-2xl p-6 max-w-md w-full max-h-[90vh] overflow-y-auto"
+            onClick={(e) => e.stopPropagation()}
+          >
+            <div className="flex items-center justify-between mb-4">
+              <h2 className="font-bold text-lg">Edit Traveler Story</h2>
+              <button onClick={closeEditStory} className="text-slate-400 hover:text-slate-700 text-xl leading-none">
+                &times;
+              </button>
+            </div>
+            <form onSubmit={saveEditStory} className="space-y-3">
+              <div>
+                <label className="block text-sm font-semibold text-slate-700 mb-1">Caption</label>
+                <textarea
+                  rows={3}
+                  value={storyEditForm.caption}
+                  onChange={(e) => setStoryEditForm({ ...storyEditForm, caption: e.target.value })}
+                  className="w-full border border-slate-300 rounded-lg px-4 py-2.5"
+                />
+              </div>
+              <div>
+                <label className="block text-sm font-semibold text-slate-700 mb-1">Location</label>
+                <input
+                  value={storyEditForm.location_name}
+                  onChange={(e) => setStoryEditForm({ ...storyEditForm, location_name: e.target.value })}
+                  className="w-full border border-slate-300 rounded-lg px-4 py-2.5"
+                />
+              </div>
+              <div>
+                <label className="block text-sm font-semibold text-slate-700 mb-1">Category</label>
+                <select
+                  value={storyEditForm.category}
+                  onChange={(e) => setStoryEditForm({ ...storyEditForm, category: e.target.value })}
+                  className="w-full border border-slate-300 rounded-lg px-4 py-2.5"
+                >
+                  <option value="">—</option>
+                  <option value="beaches">Beaches</option>
+                  <option value="stone_town">Stone Town</option>
+                  <option value="food">Food</option>
+                  <option value="hotels">Hotels</option>
+                  <option value="tours">Tours</option>
+                  <option value="nature">Nature</option>
+                  <option value="culture">Culture</option>
+                </select>
+              </div>
+              {storyEditMessage && <p className="text-sm text-red-600">{storyEditMessage}</p>}
+              <div className="flex gap-2 pt-2">
+                <button
+                  type="submit"
+                  className="bg-teal-700 hover:bg-teal-800 transition text-white font-bold px-6 py-2.5 rounded-full"
+                >
+                  Save Changes
+                </button>
+                <button
+                  type="button"
+                  onClick={closeEditStory}
+                  className="bg-slate-100 hover:bg-slate-200 transition text-slate-700 font-semibold px-6 py-2.5 rounded-full"
+                >
+                  Cancel
+                </button>
+              </div>
+            </form>
+          </div>
         </div>
       )}
 
