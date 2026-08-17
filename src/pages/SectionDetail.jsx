@@ -1,4 +1,4 @@
-import { useState } from "react";
+          import { useState } from "react";
 import { useParams, Link } from "react-router-dom";
 import { useListing, useCategories } from "../data/hooks";
 import { buildRichInquiryLink, SITE_CONTACT_NUMBER } from "../lib/whatsapp";
@@ -11,6 +11,7 @@ import RelatedListings from "../components/RelatedListings";
 import PhotoGallery from "../components/PhotoGallery";
 import InquiryModal from "../components/InquiryModal";
 import ClaimListingModal from "../components/ClaimListingModal";
+import ListingContactActions from "../components/ListingContactActions";
 import { useT } from "../lib/i18n";
 import { useLanguage } from "../lib/LanguageContext";
 
@@ -85,7 +86,14 @@ export default function SectionDetail() {
     <div>
       <PhotoGallery coverImage={item.image_url} galleryImages={item.gallery_images} />
 
-      <div className="max-w-6xl mx-auto px-4 py-10">
+      {/* Sticky bottom action bar - mobile only. Quick access to the two
+          highest-intent actions without scrolling back up. Hidden on
+          desktop (lg:hidden) since the sidebar card already covers this. */}
+      <div className="lg:hidden fixed bottom-0 left-0 right-0 z-40 bg-white border-t border-slate-200 px-3 py-2.5 pb-[calc(0.625rem+env(safe-area-inset-bottom))] shadow-[0_-4px_12px_rgba(0,0,0,0.06)]">
+        <ListingContactActionsCompactBar item={item} />
+      </div>
+
+      <div className="max-w-6xl mx-auto px-4 py-10 pb-28 lg:pb-10">
         <Link to={`/${sectionKey}`} className="text-sm text-teal-700 font-semibold hover:underline">
           ← {t("Back to")} {config?.title || sectionKey}
         </Link>
@@ -108,6 +116,13 @@ export default function SectionDetail() {
               <MapPin className="w-4 h-4" /> {item.location}
             </p>
           )}
+        </div>
+
+        {/* Conversion action area - WhatsApp Owner / Call / Get Directions /
+            Ask Zanzibar Expert. Sits right under the title/location, near
+            the top of the page, as its own compact card. */}
+        <div className="mb-8 bg-slate-50 border border-slate-100 rounded-2xl p-5">
+          <ListingContactActions item={item} />
         </div>
 
         {/* Two-column layout: main story on the left, a compact info card
@@ -194,6 +209,63 @@ export default function SectionDetail() {
         listingId={item.id}
         listingTitle={item.title}
       />
+    </div>
+  );
+}
+
+// Compact version of the two highest-intent actions (WhatsApp Owner + Ask
+// Zanzibar Expert) for the mobile sticky bottom bar. Reuses the same
+// ListingContactActions component's links/tracking by rendering it in
+// "compact" mode would show all 4 buttons in a 2x2 grid, which is too
+// tall for a bottom bar - so this renders just the two primary CTAs
+// directly, sharing the same helpers/tracking events.
+import { MessageCircle as WA, Compass } from "lucide-react";
+import { buildWhatsAppLink, buildExpertLink } from "../lib/whatsapp";
+import { trackEvent } from "../lib/analytics";
+
+function ListingContactActionsCompactBar({ item }) {
+  const hasOwnNumber = Boolean(item.whatsapp_number);
+  const currentUrl = typeof window !== "undefined" ? window.location.href : "";
+  const whatsappUrl = hasOwnNumber
+    ? buildWhatsAppLink(item.title, item.location, item.whatsapp_number)
+    : null;
+  const expertUrl = buildExpertLink(item.title, item.location, currentUrl);
+
+  const eventData = {
+    listing_id: item.id,
+    listing_name: item.title,
+    listing_category: item.category_key,
+    listing_location: item.location,
+  };
+
+  return (
+    <div className="grid grid-cols-2 gap-2.5">
+      {whatsappUrl ? (
+        <a
+          href={whatsappUrl}
+          target="_blank"
+          rel="noopener noreferrer"
+          aria-label={`WhatsApp owner of ${item.title}`}
+          className="flex items-center justify-center gap-1.5 text-sm font-semibold px-4 py-3 rounded-full min-h-[44px] bg-green-600 hover:bg-green-700 text-white"
+          onClick={() => trackEvent("click_whatsapp_owner", eventData)}
+        >
+          <WA className="w-4 h-4" /> WhatsApp Owner
+        </a>
+      ) : (
+        <span className="flex items-center justify-center gap-1.5 text-sm font-semibold px-4 py-3 rounded-full min-h-[44px] border border-slate-200 text-slate-400 bg-slate-50">
+          Owner contact not available
+        </span>
+      )}
+      <a
+        href={expertUrl}
+        target="_blank"
+        rel="noopener noreferrer"
+        aria-label={`Ask Zanzibar Expert about ${item.title}`}
+        className="flex items-center justify-center gap-1.5 text-sm font-semibold px-4 py-3 rounded-full min-h-[44px] bg-amber-500 hover:bg-amber-600 text-white"
+        onClick={() => trackEvent("click_ask_zanzibar_expert", eventData)}
+      >
+        <Compass className="w-4 h-4" /> Ask Zanzibar Expert
+      </a>
     </div>
   );
 }
