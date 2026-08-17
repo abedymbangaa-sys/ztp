@@ -48,7 +48,7 @@ export default function WebsiteReviews() {
   const avg = (reviews.reduce((sum, r) => sum + r.rating, 0) / reviews.length).toFixed(1);
 
   return (
-    <section className="max-w-6xl mx-auto px-4 py-16">
+    <section id="traveler-reviews" className="max-w-6xl mx-auto px-4 py-16">
       <div className="flex flex-col sm:flex-row sm:items-end justify-between gap-4 mb-8">
         <div>
           <p className="text-teal-700 font-semibold text-sm uppercase tracking-wide">Traveler Reviews</p>
