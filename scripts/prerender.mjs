@@ -25,6 +25,7 @@
 import { createClient } from "@supabase/supabase-js";
 import fs from "node:fs";
 import path from "node:path";
+import { slugify } from "../src/lib/slug.js";
 
 const DIST_DIR = path.resolve("dist");
 const TEMPLATE_PATH = path.join(DIST_DIR, "index.html");
@@ -231,10 +232,26 @@ async function main() {
     if (error) throw new Error(error.message);
     for (const post of posts || []) {
       try {
+        const pageUrl = `${SITE_URL}/blog/${post.slug}`;
+        const description = post.excerpt || (post.content || "").slice(0, 155);
         writeStaticPage(template, `/blog/${post.slug}`, {
           title: `${post.title} | Zanzibar Paradise Tours Blog`,
-          description: (post.content || "").slice(0, 155),
+          description,
+          image: post.cover_image,
+          url: pageUrl,
           bodyHtml: `<h1>${escapeHtml(post.title)}</h1><div>${escapeHtml(post.content || "")}</div>`,
+          structuredData: {
+            "@context": "https://schema.org",
+            "@type": "Article",
+            headline: post.title,
+            description,
+            image: post.cover_image ? [absoluteUrl(post.cover_image)] : undefined,
+            datePublished: post.created_at,
+            dateModified: post.updated_at || post.created_at,
+            author: { "@type": "Organization", name: "Zanzibar Paradise Tours" },
+            publisher: { "@type": "Organization", name: "Zanzibar Paradise Tours" },
+            mainEntityOfPage: pageUrl,
+          },
         });
         generated++;
         sitemapRoutes.push(`/blog/${post.slug}`);
@@ -244,6 +261,57 @@ async function main() {
     }
   } catch (err) {
     console.warn("[prerender] Could not load blog posts, skipping blog prerender:", err.message);
+  }
+
+  // ---- Free itinerary guides (list page + per-guide online view) ----
+  try {
+    const { data: guides, error } = await supabase
+      .from("itinerary_guides")
+      .select("*")
+      .eq("status", "published");
+    if (error) throw new Error(error.message);
+
+    const listItems = (guides || [])
+      .map((g) => `<li><a href="/itinerary/${escapeHtml(slugify(g.title))}">${escapeHtml(g.title)}</a></li>`)
+      .join("");
+
+    writeStaticPage(template, "/itinerary", {
+      title: "Free 5-Day Zanzibar Itinerary PDF | Zanzibar Paradise Tours",
+      description:
+        "Download a free practical 5-day Zanzibar itinerary with beaches, Stone Town, spice farms, Jozani Forest and marine activities.",
+      bodyHtml: `<h1>Free Zanzibar Itinerary Guides</h1><ul>${listItems}</ul>`,
+    });
+    generated++;
+    sitemapRoutes.push("/itinerary");
+
+    for (const g of guides || []) {
+      try {
+        const slug = slugify(g.title);
+        const pageUrl = `${SITE_URL}/itinerary/${slug}`;
+        writeStaticPage(template, `/itinerary/${slug}`, {
+          title: `${g.title} | Free Online Itinerary | Zanzibar Paradise Tours`,
+          description: g.description || "A free, practical day-by-day Zanzibar itinerary.",
+          image: g.cover_image,
+          url: pageUrl,
+          bodyHtml: `<h1>${escapeHtml(g.title)}</h1>${g.days_summary ? `<p>${escapeHtml(g.days_summary)}</p>` : ""}<p>${escapeHtml(
+            g.description || ""
+          )}</p>`,
+          structuredData: {
+            "@context": "https://schema.org",
+            "@type": "TouristTrip",
+            name: g.title,
+            description: g.description || "",
+            url: pageUrl,
+          },
+        });
+        generated++;
+        sitemapRoutes.push(`/itinerary/${slug}`);
+      } catch (err) {
+        console.warn(`[prerender] Failed to write itinerary page for "${g.title}":`, err.message);
+      }
+    }
+  } catch (err) {
+    console.warn("[prerender] Could not load itinerary guides, skipping itinerary prerender:", err.message);
   }
 
   // ---- sitemap.xml ----
