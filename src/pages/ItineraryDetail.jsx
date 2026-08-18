@@ -164,7 +164,15 @@ export default function ItineraryDetail() {
     <div className="max-w-4xl mx-auto px-4 py-12">
       {guide.cover_image && (
         <div className="h-56 md:h-72 w-full overflow-hidden rounded-2xl mb-6">
-          <img src={guide.cover_image} alt={guide.title} className="w-full h-full object-cover" />
+          <img
+            src={guide.cover_image}
+            alt={guide.title}
+            onError={(event) => {
+              event.currentTarget.onerror = null;
+              event.currentTarget.src = "/images/itinerary/zanzibar-itinerary-fallback.jpg";
+            }}
+            className="w-full h-full object-cover"
+          />
         </div>
       )}
 
