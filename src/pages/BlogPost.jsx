@@ -105,7 +105,15 @@ export default function BlogPost() {
     <div>
       {post.cover_image && (
         <div className="h-64 md:h-96 w-full overflow-hidden">
-          <img src={post.cover_image} alt={post.title} className="w-full h-full object-cover" />
+          <img
+            src={post.cover_image}
+            alt={post.title}
+            onError={(event) => {
+              event.currentTarget.onerror = null;
+              event.currentTarget.src = "/images/itinerary/zanzibar-itinerary-fallback.jpg";
+            }}
+            className="w-full h-full object-cover"
+          />
         </div>
       )}
       <div className="max-w-3xl mx-auto px-4 py-10">
@@ -121,24 +129,31 @@ export default function BlogPost() {
         <div className="flex flex-wrap gap-3 my-8">
           <Link
             to="/itinerary"
-            onClick={track("plan_trip")}
+            onClick={track("download_itinerary_inline")}
             className="inline-flex items-center gap-2 bg-teal-700 hover:bg-teal-800 transition text-white font-semibold px-4 py-2 rounded-full text-sm"
           >
-            Plan Your Zanzibar Trip
-          </Link>
-          <Link
-            to="/itinerary"
-            onClick={track("download_itinerary_inline")}
-            className="inline-flex items-center gap-2 border-2 border-teal-700 text-teal-700 hover:bg-teal-50 transition font-semibold px-4 py-2 rounded-full text-sm"
-          >
-            Download Free 5-Day Itinerary
+            Download Free Itinerary
           </Link>
           <Link
             to="/things-to-do"
             onClick={track("things_to_do")}
-            className="inline-flex items-center gap-2 border-2 border-slate-200 text-slate-600 hover:border-teal-300 hover:text-teal-700 transition font-semibold px-4 py-2 rounded-full text-sm"
+            className="inline-flex items-center gap-2 border-2 border-teal-700 text-teal-700 hover:bg-teal-50 transition font-semibold px-4 py-2 rounded-full text-sm"
           >
             Explore Things to Do
+          </Link>
+          <Link
+            to="/hotels"
+            onClick={track("find_hotel")}
+            className="inline-flex items-center gap-2 border-2 border-slate-200 text-slate-600 hover:border-teal-300 hover:text-teal-700 transition font-semibold px-4 py-2 rounded-full text-sm"
+          >
+            Find a Hotel
+          </Link>
+          <Link
+            to="/tours"
+            onClick={track("explore_tours")}
+            className="inline-flex items-center gap-2 border-2 border-slate-200 text-slate-600 hover:border-teal-300 hover:text-teal-700 transition font-semibold px-4 py-2 rounded-full text-sm"
+          >
+            Browse Tours
           </Link>
         </div>
 
