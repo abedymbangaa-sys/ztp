@@ -1,36 +1,28 @@
 import { MessageCircle, Phone, MapPin, Compass } from "lucide-react";
-import { buildWhatsAppLink, buildExpertLink } from "../lib/whatsapp";
+import { buildExpertLink } from "../lib/whatsapp";
 import { buildDirectionsUrl } from "../lib/maps";
 import { normalizePhone } from "../lib/phone";
 import { trackEvent } from "../lib/analytics";
 
-// Action area yenye buttons 4: WhatsApp Owner, Call, Get Directions,
+// Action area yenye buttons 4: Send Enquiry, Call, Get Directions,
 // Ask Zanzibar Expert. Inatumika kwenye SectionDetail.jsx (juu ya title)
 // na pia kama sticky bottom bar kwenye mobile (compact prop).
 //
-// Haibashiri fields - inatumia item.whatsapp_number, item.title,
-// item.location, item.maps_link tu (ndizo fields halisi zilizopo
-// kwenye "listings" table kwa sasa, kama zinavyoonekana SectionDetail.jsx
-// na hooks.js).
-export default function ListingContactActions({ item, compact = false }) {
+// "Send Enquiry" inafungua InquiryModal (fomu ya jina/watalii/budget/dates)
+// ambayo tayari ipo SectionDetail.jsx - hii component haijengi wa.me link
+// yake yenyewe kwa hilo, inaita tu onSendEnquiry() iliyopewa na parent.
+// Hii inaepusha kuwa na WhatsApp button mbili tofauti kwenye page moja.
+export default function ListingContactActions({ item, onSendEnquiry, compact = false }) {
   if (!item) return null;
 
-  // Some listings have whatsapp_number stored as a placeholder string
-  // ("Null", "N/A", empty) instead of a real missing value - normalizePhone
-  // catches that and returns null, so we never build a wa.me/Null link.
-  const ownerNumber = normalizePhone(item.whatsapp_number);
-  const hasOwnNumber = Boolean(ownerNumber);
   const currentUrl = typeof window !== "undefined" ? window.location.href : "";
-
-  const whatsappUrl = hasOwnNumber
-    ? buildWhatsAppLink(item.title, item.location, ownerNumber)
-    : null;
 
   // Hatuna field tofauti ya "phone" kwenye listings kwa sasa - Call
   // inatumia namba hiyo hiyo ya WhatsApp (baada ya normalization).
   // Ukiongeza field ya phone baadaye, badilisha mstari huu kwenda
   // normalizePhone(item.phone).
-  const callHref = hasOwnNumber ? `tel:+${ownerNumber}` : null;
+  const ownerNumber = normalizePhone(item.whatsapp_number);
+  const callHref = ownerNumber ? `tel:+${ownerNumber}` : null;
 
   const directionsUrl = buildDirectionsUrl(item);
   const expertUrl = buildExpertLink(item.title, item.location, currentUrl);
@@ -58,22 +50,17 @@ export default function ListingContactActions({ item, compact = false }) {
       )}
 
       <div className="grid grid-cols-2 gap-2">
-        {whatsappUrl ? (
-          <a
-            href={whatsappUrl}
-            target="_blank"
-            rel="noopener noreferrer"
-            aria-label={`WhatsApp owner of ${item.title}`}
-            className={primaryBtn}
-            onClick={() => trackEvent("click_whatsapp_owner", eventData)}
-          >
-            <MessageCircle className="w-3.5 h-3.5 shrink-0" /> WhatsApp
-          </a>
-        ) : (
-          <span className={disabledBtn} aria-label="Owner contact not available">
-            <MessageCircle className="w-3.5 h-3.5 shrink-0" /> Not available
-          </span>
-        )}
+        <button
+          type="button"
+          onClick={() => {
+            trackEvent("click_send_enquiry", eventData);
+            onSendEnquiry?.();
+          }}
+          aria-label={`Send enquiry about ${item.title}`}
+          className={primaryBtn}
+        >
+          <MessageCircle className="w-3.5 h-3.5 shrink-0" /> Send Enquiry
+        </button>
 
         {callHref ? (
           <a
