@@ -21,6 +21,7 @@ const AdminDashboard = lazy(() => import("./pages/AdminDashboard"));
 const Blog = lazy(() => import("./pages/Blog"));
 const BlogPost = lazy(() => import("./pages/BlogPost"));
 const Itinerary = lazy(() => import("./pages/Itinerary"));
+const ItineraryDetail = lazy(() => import("./pages/ItineraryDetail"));
 const ThingsToDo = lazy(() => import("./pages/ThingsToDo"));
 const ForTanzanians = lazy(() => import("./pages/ForTanzanians"));
 const About = lazy(() => import("./pages/About"));
@@ -51,6 +52,7 @@ export default function App() {
             <Route path="/blog" element={<Blog />} />
             <Route path="/blog/:slug" element={<BlogPost />} />
             <Route path="/itinerary" element={<Itinerary />} />
+            <Route path="/itinerary/:slug" element={<ItineraryDetail />} />
             <Route path="/about" element={<About />} />
             <Route path="/before-you-go" element={<BeforeYouGo />} />
             <Route path="/privacy" element={<Privacy />} />
