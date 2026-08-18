@@ -1,6 +1,7 @@
 import { MessageCircle, Phone, MapPin, Compass } from "lucide-react";
 import { buildWhatsAppLink, buildExpertLink } from "../lib/whatsapp";
 import { buildDirectionsUrl } from "../lib/maps";
+import { normalizePhone } from "../lib/phone";
 import { trackEvent } from "../lib/analytics";
 
 // Action area yenye buttons 4: WhatsApp Owner, Call, Get Directions,
@@ -14,17 +15,22 @@ import { trackEvent } from "../lib/analytics";
 export default function ListingContactActions({ item, compact = false }) {
   if (!item) return null;
 
-  const hasOwnNumber = Boolean(item.whatsapp_number);
+  // Some listings have whatsapp_number stored as a placeholder string
+  // ("Null", "N/A", empty) instead of a real missing value - normalizePhone
+  // catches that and returns null, so we never build a wa.me/Null link.
+  const ownerNumber = normalizePhone(item.whatsapp_number);
+  const hasOwnNumber = Boolean(ownerNumber);
   const currentUrl = typeof window !== "undefined" ? window.location.href : "";
 
   const whatsappUrl = hasOwnNumber
-    ? buildWhatsAppLink(item.title, item.location, item.whatsapp_number)
+    ? buildWhatsAppLink(item.title, item.location, ownerNumber)
     : null;
 
   // Hatuna field tofauti ya "phone" kwenye listings kwa sasa - Call
-  // inatumia namba hiyo hiyo ya WhatsApp. Ukiongeza field ya phone
-  // baadaye, badilisha mstari huu kwenda item.phone.
-  const callHref = hasOwnNumber ? `tel:+${item.whatsapp_number}` : null;
+  // inatumia namba hiyo hiyo ya WhatsApp (baada ya normalization).
+  // Ukiongeza field ya phone baadaye, badilisha mstari huu kwenda
+  // normalizePhone(item.phone).
+  const callHref = hasOwnNumber ? `tel:+${ownerNumber}` : null;
 
   const directionsUrl = buildDirectionsUrl(item);
   const expertUrl = buildExpertLink(item.title, item.location, currentUrl);
