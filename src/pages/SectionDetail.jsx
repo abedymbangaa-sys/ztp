@@ -6,7 +6,7 @@ import { normalizePhone } from "../lib/phone";
 import { sendNotificationEmail } from "../lib/email";
 import { supabase } from "../lib/supabase";
 import { SectionIcon } from "../lib/icons";
-import { MapPin, MessageCircle, ExternalLink, ShieldCheck, BadgeCheck, CloudRain, RefreshCw, AlertTriangle } from "lucide-react";
+import { MapPin, ExternalLink, ShieldCheck, BadgeCheck, CloudRain, RefreshCw, AlertTriangle } from "lucide-react";
 import ReviewsSection from "../components/ReviewsSection";
 import RelatedListings from "../components/RelatedListings";
 import PhotoGallery from "../components/PhotoGallery";
@@ -16,7 +16,7 @@ import ListingContactActions from "../components/ListingContactActions";
 import { useT } from "../lib/i18n";
 import { useLanguage } from "../lib/LanguageContext";
 import { MessageCircle as WA, Compass } from "lucide-react";
-import { buildWhatsAppLink, buildExpertLink } from "../lib/whatsapp";
+import { buildExpertLink } from "../lib/whatsapp";
 import { trackEvent } from "../lib/analytics";
 
 export default function SectionDetail() {
@@ -117,7 +117,7 @@ export default function SectionDetail() {
           highest-intent actions without scrolling back up. Hidden on
           desktop (lg:hidden) since the sidebar card already covers this. */}
       <div className="lg:hidden fixed bottom-0 left-0 right-0 z-40 bg-white border-t border-slate-200 px-3 py-2.5 pb-[calc(0.625rem+env(safe-area-inset-bottom))] shadow-[0_-4px_12px_rgba(0,0,0,0.06)]">
-        <ListingContactActionsCompactBar item={item} />
+        <ListingContactActionsCompactBar item={item} onSendEnquiry={() => setInquiryOpen(true)} />
       </div>
 
       <div className="max-w-6xl mx-auto px-4 py-10 pb-28 lg:pb-10">
@@ -149,7 +149,7 @@ export default function SectionDetail() {
             Ask Zanzibar Expert. Sits right under the title/location, near
             the top of the page, as its own compact card. */}
         <div className="mb-8 bg-slate-50 border border-slate-100 rounded-2xl p-5">
-          <ListingContactActions item={item} />
+          <ListingContactActions item={item} onSendEnquiry={() => setInquiryOpen(true)} />
         </div>
 
         {/* Two-column layout: main story on the left, a compact info card
@@ -186,36 +186,31 @@ export default function SectionDetail() {
           </div>
 
           <div className="lg:col-span-1">
-            <div className="lg:sticky lg:top-24 bg-white border border-slate-100 rounded-2xl shadow-sm p-5 space-y-4">
-              <button
-                onClick={() => setInquiryOpen(true)}
-                className="w-full bg-green-600 hover:bg-green-700 transition text-white font-bold px-6 py-3 rounded-full"
-              >
-                <MessageCircle className="w-4 h-4 inline mr-1.5" /> {t("Send Enquiry")}
-              </button>
-
-              {item.weather_policy && (
-                <div className="bg-sky-50 border border-sky-100 rounded-xl p-4 flex gap-3">
-                  <CloudRain className="w-5 h-5 text-sky-600 shrink-0 mt-0.5" />
-                  <div>
-                    <p className="text-sm font-semibold text-slate-900 mb-0.5">{t("Weather / Cancellation Policy")}</p>
-                    <p className="text-sm text-slate-600">{item.weather_policy}</p>
+            {(item.weather_policy || item.maps_link) && (
+              <div className="lg:sticky lg:top-24 bg-white border border-slate-100 rounded-2xl shadow-sm p-5 space-y-4">
+                {item.weather_policy && (
+                  <div className="bg-sky-50 border border-sky-100 rounded-xl p-4 flex gap-3">
+                    <CloudRain className="w-5 h-5 text-sky-600 shrink-0 mt-0.5" />
+                    <div>
+                      <p className="text-sm font-semibold text-slate-900 mb-0.5">{t("Weather / Cancellation Policy")}</p>
+                      <p className="text-sm text-slate-600">{item.weather_policy}</p>
+                    </div>
                   </div>
-                </div>
-              )}
+                )}
 
-              {item.maps_link && (
-                <a
-                  href={item.maps_link}
-                  target="_blank"
-                  rel="noreferrer"
-                  className="flex items-center gap-1.5 text-teal-700 font-semibold hover:underline text-sm pt-1"
-                >
-                  <MapPin className="w-4 h-4" /> {t("View on Google Maps")}{" "}
-                  <ExternalLink className="w-3.5 h-3.5" />
-                </a>
-              )}
-            </div>
+                {item.maps_link && (
+                  <a
+                    href={item.maps_link}
+                    target="_blank"
+                    rel="noreferrer"
+                    className="flex items-center gap-1.5 text-teal-700 font-semibold hover:underline text-sm pt-1"
+                  >
+                    <MapPin className="w-4 h-4" /> {t("View on Google Maps")}{" "}
+                    <ExternalLink className="w-3.5 h-3.5" />
+                  </a>
+                )}
+              </div>
+            )}
           </div>
         </div>
 
@@ -245,13 +240,8 @@ export default function SectionDetail() {
 // buttons would be too tall for a bottom bar, so this renders just the
 // two primary CTAs directly, sharing the same helpers/tracking events as
 // ListingContactActions above.
-function ListingContactActionsCompactBar({ item }) {
-  const ownerNumber = normalizePhone(item.whatsapp_number);
-  const hasOwnNumber = Boolean(ownerNumber);
+function ListingContactActionsCompactBar({ item, onSendEnquiry }) {
   const currentUrl = typeof window !== "undefined" ? window.location.href : "";
-  const whatsappUrl = hasOwnNumber
-    ? buildWhatsAppLink(item.title, item.location, ownerNumber)
-    : null;
   const expertUrl = buildExpertLink(item.title, item.location, currentUrl);
 
   const eventData = {
@@ -263,22 +253,17 @@ function ListingContactActionsCompactBar({ item }) {
 
   return (
     <div className="grid grid-cols-2 gap-2">
-      {whatsappUrl ? (
-        <a
-          href={whatsappUrl}
-          target="_blank"
-          rel="noopener noreferrer"
-          aria-label={`WhatsApp owner of ${item.title}`}
-          className="flex items-center justify-center gap-1 text-xs font-semibold px-3 py-2.5 rounded-full min-h-[44px] bg-green-600 hover:bg-green-700 text-white"
-          onClick={() => trackEvent("click_whatsapp_owner", eventData)}
-        >
-          <WA className="w-3.5 h-3.5 shrink-0" /> WhatsApp
-        </a>
-      ) : (
-        <span className="flex items-center justify-center gap-1 text-xs font-semibold px-3 py-2.5 rounded-full min-h-[44px] border border-slate-200 text-slate-400 bg-slate-50">
-          Not available
-        </span>
-      )}
+      <button
+        type="button"
+        onClick={() => {
+          trackEvent("click_send_enquiry", eventData);
+          onSendEnquiry?.();
+        }}
+        aria-label={`Send enquiry about ${item.title}`}
+        className="flex items-center justify-center gap-1 text-xs font-semibold px-3 py-2.5 rounded-full min-h-[44px] bg-green-600 hover:bg-green-700 text-white"
+      >
+        <WA className="w-3.5 h-3.5 shrink-0" /> Send Enquiry
+      </button>
       <a
         href={expertUrl}
         target="_blank"
