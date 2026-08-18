@@ -19,9 +19,9 @@ export default function Privacy() {
           <li>Messages you send us via WhatsApp or our contact forms</li>
         </ul>
         <p>
-          We do not collect payment card details on this website. Any payments related to products such as
-          itinerary guides are handled through the payment method described at checkout, and any bookings
-          with hotels, tours, or other businesses are arranged directly between you and that business.
+          We do not collect payment card details on this website. Our itinerary guides are free to
+          download - no payment or account is required. Any bookings with hotels, tours, or other
+          businesses are arranged directly between you and that business.
         </p>
 
         <h2 className="text-xl font-bold text-slate-900 pt-4">2. How We Use Your Information</h2>
