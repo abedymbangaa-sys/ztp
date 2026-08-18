@@ -101,7 +101,15 @@ function ItineraryCard({ guide: g }) {
     <div className="bg-white border border-slate-200 rounded-2xl overflow-hidden shadow-sm flex flex-col">
       {g.cover_image && (
         <div className="h-44 overflow-hidden">
-          <img src={g.cover_image} alt={g.title} className="w-full h-full object-cover" />
+          <img
+            src={g.cover_image}
+            alt={g.title}
+            onError={(event) => {
+              event.currentTarget.onerror = null;
+              event.currentTarget.src = "/images/itinerary/zanzibar-itinerary-fallback.jpg";
+            }}
+            className="w-full h-full object-cover"
+          />
         </div>
       )}
       <div className="p-6 flex flex-col flex-1">
@@ -137,7 +145,7 @@ function ItineraryCard({ guide: g }) {
             </div>
           )}
 
-          <div className="flex gap-2">
+          <div className="flex flex-col sm:flex-row gap-2">
             <Link
               to={`/itinerary/${slug}`}
               aria-label={`View the ${g.title} itinerary online`}
@@ -153,10 +161,11 @@ function ItineraryCard({ guide: g }) {
               onClick={() =>
                 trackEvent("click_itinerary_cta", { itinerary_id: g.id, cta_name: "ask_expert" })
               }
-              className="shrink-0 inline-flex items-center justify-center gap-2 border-2 border-slate-200 text-slate-600 hover:border-teal-300 hover:text-teal-700 transition font-semibold px-3 py-2 rounded-full text-sm"
+              className="flex-1 inline-flex items-center justify-center gap-1.5 border-2 border-slate-200 text-slate-600 hover:border-teal-300 hover:text-teal-700 transition font-semibold px-3 py-2 rounded-full text-sm whitespace-nowrap"
               aria-label="Ask a Zanzibar Expert on WhatsApp"
             >
-              <MessageCircle className="w-4 h-4" />
+              <MessageCircle className="w-4 h-4 shrink-0" />
+              Ask a Zanzibar Expert
             </a>
           </div>
         </div>
