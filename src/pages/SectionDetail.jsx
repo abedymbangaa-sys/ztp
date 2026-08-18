@@ -1,4 +1,4 @@
-          import { useState } from "react";
+import { useState } from "react";
 import { useParams, Link } from "react-router-dom";
 import { useListing, useCategories } from "../data/hooks";
 import { buildRichInquiryLink, SITE_CONTACT_NUMBER } from "../lib/whatsapp";
@@ -14,6 +14,9 @@ import ClaimListingModal from "../components/ClaimListingModal";
 import ListingContactActions from "../components/ListingContactActions";
 import { useT } from "../lib/i18n";
 import { useLanguage } from "../lib/LanguageContext";
+import { MessageCircle as WA, Compass } from "lucide-react";
+import { buildWhatsAppLink, buildExpertLink } from "../lib/whatsapp";
+import { trackEvent } from "../lib/analytics";
 
 export default function SectionDetail() {
   const { sectionKey, id } = useParams();
@@ -214,15 +217,10 @@ export default function SectionDetail() {
 }
 
 // Compact version of the two highest-intent actions (WhatsApp Owner + Ask
-// Zanzibar Expert) for the mobile sticky bottom bar. Reuses the same
-// ListingContactActions component's links/tracking by rendering it in
-// "compact" mode would show all 4 buttons in a 2x2 grid, which is too
-// tall for a bottom bar - so this renders just the two primary CTAs
-// directly, sharing the same helpers/tracking events.
-import { MessageCircle as WA, Compass } from "lucide-react";
-import { buildWhatsAppLink, buildExpertLink } from "../lib/whatsapp";
-import { trackEvent } from "../lib/analytics";
-
+// Zanzibar Expert) for the mobile sticky bottom bar. A 2x2 grid of all 4
+// buttons would be too tall for a bottom bar, so this renders just the
+// two primary CTAs directly, sharing the same helpers/tracking events as
+// ListingContactActions above.
 function ListingContactActionsCompactBar({ item }) {
   const hasOwnNumber = Boolean(item.whatsapp_number);
   const currentUrl = typeof window !== "undefined" ? window.location.href : "";
@@ -239,21 +237,21 @@ function ListingContactActionsCompactBar({ item }) {
   };
 
   return (
-    <div className="grid grid-cols-2 gap-2.5">
+    <div className="grid grid-cols-2 gap-2">
       {whatsappUrl ? (
         <a
           href={whatsappUrl}
           target="_blank"
           rel="noopener noreferrer"
           aria-label={`WhatsApp owner of ${item.title}`}
-          className="flex items-center justify-center gap-1.5 text-sm font-semibold px-4 py-3 rounded-full min-h-[44px] bg-green-600 hover:bg-green-700 text-white"
+          className="flex items-center justify-center gap-1 text-xs font-semibold px-3 py-2.5 rounded-full min-h-[44px] bg-green-600 hover:bg-green-700 text-white"
           onClick={() => trackEvent("click_whatsapp_owner", eventData)}
         >
-          <WA className="w-4 h-4" /> WhatsApp Owner
+          <WA className="w-3.5 h-3.5 shrink-0" /> WhatsApp
         </a>
       ) : (
-        <span className="flex items-center justify-center gap-1.5 text-sm font-semibold px-4 py-3 rounded-full min-h-[44px] border border-slate-200 text-slate-400 bg-slate-50">
-          Owner contact not available
+        <span className="flex items-center justify-center gap-1 text-xs font-semibold px-3 py-2.5 rounded-full min-h-[44px] border border-slate-200 text-slate-400 bg-slate-50">
+          Not available
         </span>
       )}
       <a
@@ -261,10 +259,10 @@ function ListingContactActionsCompactBar({ item }) {
         target="_blank"
         rel="noopener noreferrer"
         aria-label={`Ask Zanzibar Expert about ${item.title}`}
-        className="flex items-center justify-center gap-1.5 text-sm font-semibold px-4 py-3 rounded-full min-h-[44px] bg-amber-500 hover:bg-amber-600 text-white"
+        className="flex items-center justify-center gap-1 text-xs font-semibold px-3 py-2.5 rounded-full min-h-[44px] bg-amber-500 hover:bg-amber-600 text-white"
         onClick={() => trackEvent("click_ask_zanzibar_expert", eventData)}
       >
-        <Compass className="w-4 h-4" /> Ask Zanzibar Expert
+        <Compass className="w-3.5 h-3.5 shrink-0" /> Ask Expert
       </a>
     </div>
   );
