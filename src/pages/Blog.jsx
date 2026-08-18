@@ -84,6 +84,10 @@ export default function Blog() {
                   <img
                     src={p.cover_image}
                     alt={p.title}
+                    onError={(event) => {
+                      event.currentTarget.onerror = null;
+                      event.currentTarget.src = "/images/itinerary/zanzibar-itinerary-fallback.jpg";
+                    }}
                     className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
                   />
                 </div>
