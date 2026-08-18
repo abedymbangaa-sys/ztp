@@ -156,31 +156,51 @@ export function useSettings() {
   return { settings, loading };
 }
 
-// Load a single listing by id
+// Load a single listing by id.
+//
+// Now also exposes `error` and `retry`, used by SectionDetail.jsx to show
+// a proper error/retry state instead of getting stuck showing "Loading"
+// (or silently falling through to "Not Found") when the request itself
+// fails (network issue, Supabase down, etc.) rather than the listing
+// genuinely not existing.
 export function useListing(id) {
   const [listing, setListing] = useState(null);
   const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(null);
+  const [refreshKey, setRefreshKey] = useState(0);
 
   useEffect(() => {
     let mounted = true;
     setLoading(true);
+    setError(null);
     supabase
       .from("listings")
       .select("*, partners(business_name, email)")
       .eq("id", id)
       .single()
-      .then(({ data }) => {
-        if (mounted) {
+      .then(({ data, error }) => {
+        if (!mounted) return;
+        // PGRST116 = "no rows returned" from .single() - that's a genuine
+        // "this listing doesn't exist", not a failure, so we treat it the
+        // same as before (listing stays null, no error state shown).
+        if (error && error.code !== "PGRST116") {
+          setError(error);
+          setListing(null);
+        } else {
           setListing(data || null);
-          setLoading(false);
         }
+        setLoading(false);
       });
     return () => {
       mounted = false;
     };
-  }, [id]);
+  }, [id, refreshKey]);
 
-  return { listing, loading };
+  function retry() {
+    setRefreshKey((k) => k + 1);
+  }
+
+  return { listing, loading, error, retry };
 }
 
 // Load a handful of other approved listings in the same category, for the
