@@ -4,6 +4,7 @@ import { useLanguage } from "../lib/LanguageContext";
 import { useT } from "../lib/i18n";
 import { TAG_OPTIONS } from "../lib/tags";
 import { buildWhatsAppLink } from "../lib/whatsapp";
+import { normalizePhone } from "../lib/phone";
 import { trackEvent } from "../lib/analytics";
 
 export default function GenericCard({ item, sectionKey }) {
@@ -12,8 +13,9 @@ export default function GenericCard({ item, sectionKey }) {
   const description = (language !== "en" && item[`description_${language}`]) || item.description;
   const itemTags = TAG_OPTIONS.filter((t) => (item.tags || []).includes(t.key));
 
-  const whatsappUrl = item.whatsapp_number
-    ? buildWhatsAppLink(item.title, item.location, item.whatsapp_number)
+  const ownerNumber = normalizePhone(item.whatsapp_number);
+  const whatsappUrl = ownerNumber
+    ? buildWhatsAppLink(item.title, item.location, ownerNumber)
     : null;
 
   return (
