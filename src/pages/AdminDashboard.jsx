@@ -1912,11 +1912,16 @@ export default function AdminDashboard() {
                 className="w-full border border-slate-300 rounded-lg px-4 py-2.5"
               />
               <input
-                placeholder="Full PDF Link (Google Drive, etc.)"
+                placeholder="Full PDF Link (Google Drive share link or direct URL)"
                 value={newGuide.pdf_url}
                 onChange={(e) => setNewGuide({ ...newGuide, pdf_url: e.target.value })}
                 className="w-full border border-slate-300 rounded-lg px-4 py-2.5"
               />
+              <p className="text-xs text-slate-400 -mt-2">
+                Tip: for Google Drive, use the "Share" link in the form
+                drive.google.com/file/d/FILE_ID/view — it will be converted to a direct download
+                automatically. Set the file's access to "Anyone with the link".
+              </p>
               <button
                 type="submit"
                 className="bg-teal-700 hover:bg-teal-800 transition text-white font-bold px-6 py-2.5 rounded-full"
