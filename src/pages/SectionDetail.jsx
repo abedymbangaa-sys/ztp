@@ -2,10 +2,11 @@ import { useState } from "react";
 import { useParams, Link } from "react-router-dom";
 import { useListing, useCategories } from "../data/hooks";
 import { buildRichInquiryLink, SITE_CONTACT_NUMBER } from "../lib/whatsapp";
+import { normalizePhone } from "../lib/phone";
 import { sendNotificationEmail } from "../lib/email";
 import { supabase } from "../lib/supabase";
 import { SectionIcon } from "../lib/icons";
-import { MapPin, MessageCircle, ExternalLink, ShieldCheck, BadgeCheck, CloudRain } from "lucide-react";
+import { MapPin, MessageCircle, ExternalLink, ShieldCheck, BadgeCheck, CloudRain, RefreshCw, AlertTriangle } from "lucide-react";
 import ReviewsSection from "../components/ReviewsSection";
 import RelatedListings from "../components/RelatedListings";
 import PhotoGallery from "../components/PhotoGallery";
@@ -21,7 +22,7 @@ import { trackEvent } from "../lib/analytics";
 export default function SectionDetail() {
   const { sectionKey, id } = useParams();
   const { categories } = useCategories();
-  const { listing: item, loading } = useListing(id);
+  const { listing: item, loading, error, retry } = useListing(id);
   const config = categories.find((c) => c.key === sectionKey);
   const [inquiryOpen, setInquiryOpen] = useState(false);
   const [claimOpen, setClaimOpen] = useState(false);
@@ -29,7 +30,25 @@ export default function SectionDetail() {
   const t = useT();
 
   if (loading) {
-    return <div className="max-w-3xl mx-auto px-4 py-24 text-center">Loading...</div>;
+    return <SectionDetailSkeleton />;
+  }
+
+  if (error) {
+    return (
+      <div className="max-w-3xl mx-auto px-4 py-24 text-center">
+        <AlertTriangle className="w-10 h-10 text-amber-500 mx-auto mb-4" />
+        <h1 className="text-2xl font-bold mb-2">{t("Something went wrong")}</h1>
+        <p className="text-slate-500 mb-6">
+          {t("We couldn't load this listing. Please check your connection and try again.")}
+        </p>
+        <button
+          onClick={retry}
+          className="inline-flex items-center gap-1.5 bg-teal-700 hover:bg-teal-800 transition text-white font-semibold px-5 py-2.5 rounded-full"
+        >
+          <RefreshCw className="w-4 h-4" /> {t("Try Again")}
+        </button>
+      </div>
+    );
   }
 
   if (!item) {
@@ -43,7 +62,12 @@ export default function SectionDetail() {
     );
   }
 
-  const hasOwnNumber = Boolean(item.whatsapp_number);
+  // Normalized once here and reused everywhere on the page (sticky bar,
+  // action buttons, and the rich-inquiry WhatsApp fallback below) so a
+  // placeholder value like "Null" or "N/A" in whatsapp_number can never
+  // produce a broken wa.me/Null link or a bogus rich-inquiry target.
+  const ownerNumber = normalizePhone(item.whatsapp_number);
+  const hasOwnNumber = Boolean(ownerNumber);
 
   async function handleInquirySubmit(details) {
     try {
@@ -79,7 +103,7 @@ export default function SectionDetail() {
       }
     }
 
-    const targetNumber = hasOwnNumber ? item.whatsapp_number : SITE_CONTACT_NUMBER;
+    const targetNumber = hasOwnNumber ? ownerNumber : SITE_CONTACT_NUMBER;
     const link = buildRichInquiryLink(targetNumber, item.title, item.location, details, !hasOwnNumber);
     if (link) window.open(link, "_blank");
     setInquiryOpen(false);
@@ -222,10 +246,11 @@ export default function SectionDetail() {
 // two primary CTAs directly, sharing the same helpers/tracking events as
 // ListingContactActions above.
 function ListingContactActionsCompactBar({ item }) {
-  const hasOwnNumber = Boolean(item.whatsapp_number);
+  const ownerNumber = normalizePhone(item.whatsapp_number);
+  const hasOwnNumber = Boolean(ownerNumber);
   const currentUrl = typeof window !== "undefined" ? window.location.href : "";
   const whatsappUrl = hasOwnNumber
-    ? buildWhatsAppLink(item.title, item.location, item.whatsapp_number)
+    ? buildWhatsAppLink(item.title, item.location, ownerNumber)
     : null;
   const expertUrl = buildExpertLink(item.title, item.location, currentUrl);
 
@@ -264,6 +289,44 @@ function ListingContactActionsCompactBar({ item }) {
       >
         <Compass className="w-3.5 h-3.5 shrink-0" /> Ask Expert
       </a>
+    </div>
+  );
+}
+
+// Skeleton shown while the listing is loading, matching the real page's
+// layout (gallery, title/location, 4-button action area, description) so
+// there's no layout shift and no bare "Loading..." text flash.
+function SectionDetailSkeleton() {
+  return (
+    <div className="animate-pulse">
+      <div className="h-[320px] sm:h-[420px] bg-slate-200" />
+      <div className="max-w-6xl mx-auto px-4 py-10">
+        <div className="h-4 w-32 bg-slate-200 rounded mb-6" />
+        <div className="h-5 w-20 bg-slate-200 rounded-full mb-3" />
+        <div className="h-9 w-2/3 bg-slate-200 rounded mb-3" />
+        <div className="h-4 w-40 bg-slate-200 rounded mb-8" />
+
+        <div className="mb-8 bg-slate-50 border border-slate-100 rounded-2xl p-5">
+          <div className="h-4 w-3/4 bg-slate-200 rounded mb-4" />
+          <div className="grid grid-cols-2 gap-2">
+            <div className="h-11 bg-slate-200 rounded-full" />
+            <div className="h-11 bg-slate-200 rounded-full" />
+            <div className="h-11 bg-slate-200 rounded-full" />
+            <div className="h-11 bg-slate-200 rounded-full" />
+          </div>
+        </div>
+
+        <div className="grid grid-cols-1 lg:grid-cols-3 gap-10">
+          <div className="lg:col-span-2 space-y-2">
+            <div className="h-4 bg-slate-200 rounded w-full" />
+            <div className="h-4 bg-slate-200 rounded w-full" />
+            <div className="h-4 bg-slate-200 rounded w-5/6" />
+          </div>
+          <div className="lg:col-span-1">
+            <div className="h-40 bg-slate-100 border border-slate-100 rounded-2xl" />
+          </div>
+        </div>
+      </div>
     </div>
   );
 }
