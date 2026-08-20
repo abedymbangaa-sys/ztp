@@ -12,6 +12,7 @@ import RelatedListings from "../components/RelatedListings";
 import PhotoGallery from "../components/PhotoGallery";
 import InquiryModal from "../components/InquiryModal";
 import ClaimListingModal from "../components/ClaimListingModal";
+import VerificationPanel from "../components/VerificationPanel";
 import ListingContactActions from "../components/ListingContactActions";
 import { useT } from "../lib/i18n";
 import { useLanguage } from "../lib/LanguageContext";
@@ -26,6 +27,7 @@ export default function SectionDetail() {
   const config = categories.find((c) => c.key === sectionKey);
   const [inquiryOpen, setInquiryOpen] = useState(false);
   const [claimOpen, setClaimOpen] = useState(false);
+  const [claimDefaultType, setClaimDefaultType] = useState("claim");
   const { language } = useLanguage();
   const t = useT();
 
@@ -175,7 +177,10 @@ export default function SectionDetail() {
 
             <div className="mt-8 pt-4 border-t border-slate-100">
               <button
-                onClick={() => setClaimOpen(true)}
+                onClick={() => {
+                  setClaimDefaultType("claim");
+                  setClaimOpen(true);
+                }}
                 className="text-xs text-slate-400 hover:text-teal-700 hover:underline flex items-center gap-1"
               >
                 <ShieldCheck className="w-3.5 h-3.5" /> {t("Own this business? Claim, edit or request removal")}
@@ -185,9 +190,17 @@ export default function SectionDetail() {
             <ReviewsSection listingId={item.id} />
           </div>
 
-          <div className="lg:col-span-1">
+          <div className="lg:col-span-1 lg:sticky lg:top-24 space-y-4">
+            <VerificationPanel
+              item={item}
+              onReportIssue={() => {
+                setClaimDefaultType("edit_request");
+                setClaimOpen(true);
+              }}
+            />
+
             {(item.weather_policy || item.maps_link) && (
-              <div className="lg:sticky lg:top-24 bg-white border border-slate-100 rounded-2xl shadow-sm p-5 space-y-4">
+              <div className="bg-white border border-slate-100 rounded-2xl shadow-sm p-5 space-y-4">
                 {item.weather_policy && (
                   <div className="bg-sky-50 border border-sky-100 rounded-xl p-4 flex gap-3">
                     <CloudRain className="w-5 h-5 text-sky-600 shrink-0 mt-0.5" />
@@ -230,6 +243,7 @@ export default function SectionDetail() {
         onClose={() => setClaimOpen(false)}
         listingId={item.id}
         listingTitle={item.title}
+        defaultType={claimDefaultType}
       />
     </div>
   );
