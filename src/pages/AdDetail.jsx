@@ -32,7 +32,7 @@ export default function AdDetail() {
 
   return (
     <div>
-      <PhotoGallery coverImage={ad.image_url} galleryImages={ad.gallery_images} />
+      <PhotoGallery coverImage={ad.image_url} galleryImages={ad.gallery_images} listingName={ad.business_name} />
 
       <div className="max-w-6xl mx-auto px-4 py-10">
         <Link to="/" className="text-sm text-teal-700 font-semibold hover:underline">
