@@ -88,6 +88,7 @@ export default function SectionDetail() {
         travelers_count: details.travelers,
         budget: details.budget,
         travel_dates: details.dates,
+        current_area: details.area,
         notes: details.notes,
         used_fallback_number: !hasOwnNumber,
         created_at: new Date().toISOString(),
@@ -105,7 +106,7 @@ export default function SectionDetail() {
           toEmail: item.partners.email,
           toName: item.partners.business_name || item.title,
           subject: `New Inquiry for "${item.title}"`,
-          message: `Hello ${item.partners.business_name || ""}, you have a new inquiry on Zanzibar Paradise Tours for "${item.title}".\n\nFrom: ${details.name || "N/A"}\nTravelers: ${details.travelers || "N/A"}\nBudget: ${details.budget || "N/A"}\nDates: ${details.dates || "N/A"}\nNotes: ${details.notes || "N/A"}\n\nReply directly on WhatsApp to follow up.`,
+          message: `Hello ${item.partners.business_name || ""}, you have a new inquiry on Zanzibar Paradise Tours for "${item.title}".\n\nFrom: ${details.name || "N/A"}\nTravelers: ${details.travelers || "N/A"}\nBudget: ${details.budget || "N/A"}\nDates: ${details.dates || "N/A"}\nCurrent area: ${details.area || "N/A"}\nNotes: ${details.notes || "N/A"}\n\nReply directly on WhatsApp to follow up.`,
         });
       } catch (err) {
         console.error("Could not send owner notification email", err);
