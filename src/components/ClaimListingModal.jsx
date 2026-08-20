@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { X, ShieldCheck } from "lucide-react";
 import { supabase } from "../lib/supabase";
 
@@ -20,12 +20,16 @@ const REQUEST_TYPES = [
   },
 ];
 
-export default function ClaimListingModal({ open, onClose, listingId, listingTitle }) {
-  const [requestType, setRequestType] = useState("claim");
+export default function ClaimListingModal({ open, onClose, listingId, listingTitle, defaultType = "claim" }) {
+  const [requestType, setRequestType] = useState(defaultType);
   const [form, setForm] = useState({ business_name: "", contact_name: "", phone: "", email: "", message: "" });
   const [submitting, setSubmitting] = useState(false);
   const [done, setDone] = useState(false);
   const [error, setError] = useState("");
+
+  useEffect(() => {
+    if (open) setRequestType(defaultType);
+  }, [open, defaultType]);
 
   if (!open) return null;
 
@@ -34,7 +38,7 @@ export default function ClaimListingModal({ open, onClose, listingId, listingTit
   }
 
   function reset() {
-    setRequestType("claim");
+    setRequestType(defaultType);
     setForm({ business_name: "", contact_name: "", phone: "", email: "", message: "" });
     setDone(false);
     setError("");
