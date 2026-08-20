@@ -1,5 +1,5 @@
 import { Link } from "react-router-dom";
-import { MapPin, BadgeCheck, MessageCircle } from "lucide-react";
+import { MapPin, BadgeCheck, MessageCircle, Clock, Star, Tag } from "lucide-react";
 import { useLanguage } from "../lib/LanguageContext";
 import { useT } from "../lib/i18n";
 import { TAG_OPTIONS } from "../lib/tags";
@@ -48,6 +48,29 @@ export default function GenericCard({ item, sectionKey }) {
             </div>
           )}
           <h3 className="font-bold text-lg text-slate-900 mb-2">{item.title}</h3>
+          {(item.price_range || item.duration || item.review_count > 0) && (
+            <div className="flex flex-wrap items-center gap-x-3 gap-y-1 text-xs text-slate-600 mb-2">
+              {item.price_range && (
+                <span className="inline-flex items-center gap-1 font-semibold text-teal-700">
+                  <Tag className="w-3.5 h-3.5" />
+                  {item.price_range}
+                </span>
+              )}
+              {item.duration && (
+                <span className="inline-flex items-center gap-1">
+                  <Clock className="w-3.5 h-3.5" />
+                  {item.duration}
+                </span>
+              )}
+              {item.review_count > 0 && (
+                <span className="inline-flex items-center gap-1">
+                  <Star className="w-3.5 h-3.5 text-amber-400 fill-amber-400" />
+                  <span className="font-semibold text-slate-800">{item.review_avg}</span>
+                  <span>({item.review_count})</span>
+                </span>
+              )}
+            </div>
+          )}
           {itemTags.length > 0 && (
             <div className="flex flex-wrap gap-1.5 mb-2">
               {itemTags.map((tag) => (
