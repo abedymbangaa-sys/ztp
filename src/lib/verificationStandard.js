@@ -60,3 +60,9 @@ export function formatVerifiedDate(dateString) {
     year: "numeric",
   });
 }
+
+// Neutral text shown under a check that hasn't been confirmed yet -
+// deliberately generic (not "this may not be true"), so it reads as
+// "we haven't looked at this" rather than a negative claim about the
+// business itself.
+export const NOT_YET_CHECKED_LABEL = "Not yet checked by our team.";
