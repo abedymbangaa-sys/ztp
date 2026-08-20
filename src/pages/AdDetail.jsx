@@ -2,6 +2,7 @@ import { Link, useParams } from "react-router-dom";
 import { useAdvertisement } from "../data/hooks";
 import { MapPin, MessageCircle, ExternalLink, Megaphone } from "lucide-react";
 import PhotoGallery from "../components/PhotoGallery";
+import ShareButtons from "../components/ShareButtons";
 
 // Detail page for a single paid advertisement, reached via the "View
 // Details" button on the Sponsored/Featured cards. Mirrors the look of a
@@ -39,12 +40,15 @@ export default function AdDetail() {
           ← Back to Home
         </Link>
 
-        <div className="mt-4 mb-6">
-          <span className="inline-flex items-center gap-1.5 bg-amber-100 text-amber-800 text-xs font-semibold px-3 py-1 rounded-full mb-2">
-            <Megaphone className="w-3.5 h-3.5" />
-            {ad.category}
-          </span>
-          <h1 className="text-3xl md:text-4xl font-bold text-slate-900">{ad.business_name}</h1>
+        <div className="mt-4 mb-6 flex items-start justify-between gap-4">
+          <div>
+            <span className="inline-flex items-center gap-1.5 bg-amber-100 text-amber-800 text-xs font-semibold px-3 py-1 rounded-full mb-2">
+              <Megaphone className="w-3.5 h-3.5" />
+              {ad.category}
+            </span>
+            <h1 className="text-3xl md:text-4xl font-bold text-slate-900">{ad.business_name}</h1>
+          </div>
+          <ShareButtons title={ad.business_name} className="shrink-0 mt-1" />
         </div>
 
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-10">
