@@ -93,8 +93,36 @@ export default function ThingsToDo() {
 
         if (result.error) throw result.error;
 
+        const rows = result.data || [];
+
+        // Attach rating/review-count summary per card, same approach as
+        // useListings, so Things to Do cards show the same trust signals
+        // (e.g. "4.8 (12)") as the Hotels/Tours listing pages.
+        if (rows.length > 0) {
+          try {
+            const ids = rows.map((r) => r.id);
+            const reviewResult = await Promise.race([
+              supabase.from("reviews").select("listing_id, rating").eq("status", "approved").in("listing_id", ids),
+              timeoutPromise,
+            ]);
+            const statsByListing = {};
+            (reviewResult.data || []).forEach((r) => {
+              const s = (statsByListing[r.listing_id] ||= { total: 0, count: 0 });
+              s.total += r.rating;
+              s.count += 1;
+            });
+            rows.forEach((row) => {
+              const s = statsByListing[row.id];
+              row.review_avg = s ? Number((s.total / s.count).toFixed(1)) : null;
+              row.review_count = s ? s.count : 0;
+            });
+          } catch (statsErr) {
+            if (import.meta.env.DEV) console.error("ThingsToDo: failed to load review stats", statsErr);
+          }
+        }
+
         if (mounted) {
-          setListings(result.data || []);
+          setListings(rows);
           setIsLoading(false);
         }
       } catch (err) {
