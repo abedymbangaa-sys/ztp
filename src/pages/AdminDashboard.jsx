@@ -235,6 +235,12 @@ export default function AdminDashboard() {
       maps_link: l.maps_link || "",
       tags: l.tags || [],
       weather_policy: l.weather_policy || "",
+      price_range: l.price_range || "",
+      duration: l.duration || "",
+      start_time: l.start_time || "",
+      group_size: l.group_size || "",
+      key_inclusions: l.key_inclusions || "",
+      pickup_available: l.pickup_available === true ? "yes" : l.pickup_available === false ? "no" : "",
       is_deal: l.is_deal || false,
       deal_label: l.deal_label || "",
     });
@@ -252,7 +258,14 @@ export default function AdminDashboard() {
     if (!editingListing) return;
     setEditSaving(true);
     setEditMessage("");
-    const payload = { ...editForm, gallery_images: (editForm.gallery_images || []).slice(0, 10) };
+    const payload = {
+      ...editForm,
+      gallery_images: (editForm.gallery_images || []).slice(0, 10),
+      // "" (not answered) is stored as NULL - distinct from an explicit
+      // "no" - so the public page can show "Ask the business" instead of
+      // implying pickup was confirmed unavailable.
+      pickup_available: editForm.pickup_available === "yes" ? true : editForm.pickup_available === "no" ? false : null,
+    };
     const { error } = await supabase.from("listings").update(payload).eq("id", editingListing.id);
     setEditSaving(false);
     if (error) {
@@ -1016,6 +1029,72 @@ export default function AdminDashboard() {
                   placeholder="e.g. If it rains, we reschedule for free or refund in full within 24 hours."
                   className="w-full border border-slate-300 rounded-lg px-4 py-2.5"
                 />
+              </div>
+
+              {/* "At a glance" fields - all optional. Leave blank if you
+                  don't know; the public page shows "Ask the business"
+                  rather than a made-up value for anything left empty. */}
+              <div className="border border-slate-200 rounded-lg p-4 space-y-3">
+                <p className="text-sm font-semibold text-slate-700">At a glance (optional)</p>
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                  <div>
+                    <label className="block text-xs font-semibold text-slate-600 mb-1">Price range</label>
+                    <input
+                      value={editForm.price_range || ""}
+                      onChange={(e) => setEditForm({ ...editForm, price_range: e.target.value })}
+                      placeholder="e.g. $80 - $150/night"
+                      className="w-full border border-slate-300 rounded-lg px-3 py-2 text-sm"
+                    />
+                  </div>
+                  <div>
+                    <label className="block text-xs font-semibold text-slate-600 mb-1">Duration</label>
+                    <input
+                      value={editForm.duration || ""}
+                      onChange={(e) => setEditForm({ ...editForm, duration: e.target.value })}
+                      placeholder="e.g. Full day (8 hours)"
+                      className="w-full border border-slate-300 rounded-lg px-3 py-2 text-sm"
+                    />
+                  </div>
+                  <div>
+                    <label className="block text-xs font-semibold text-slate-600 mb-1">Starting time</label>
+                    <input
+                      value={editForm.start_time || ""}
+                      onChange={(e) => setEditForm({ ...editForm, start_time: e.target.value })}
+                      placeholder="e.g. Check-in from 2:00 PM"
+                      className="w-full border border-slate-300 rounded-lg px-3 py-2 text-sm"
+                    />
+                  </div>
+                  <div>
+                    <label className="block text-xs font-semibold text-slate-600 mb-1">Group size</label>
+                    <input
+                      value={editForm.group_size || ""}
+                      onChange={(e) => setEditForm({ ...editForm, group_size: e.target.value })}
+                      placeholder="e.g. Up to 8 people"
+                      className="w-full border border-slate-300 rounded-lg px-3 py-2 text-sm"
+                    />
+                  </div>
+                  <div>
+                    <label className="block text-xs font-semibold text-slate-600 mb-1">Pickup available?</label>
+                    <select
+                      value={editForm.pickup_available || ""}
+                      onChange={(e) => setEditForm({ ...editForm, pickup_available: e.target.value })}
+                      className="w-full border border-slate-300 rounded-lg px-3 py-2 text-sm"
+                    >
+                      <option value="">Not sure / not answered</option>
+                      <option value="yes">Yes</option>
+                      <option value="no">No</option>
+                    </select>
+                  </div>
+                  <div>
+                    <label className="block text-xs font-semibold text-slate-600 mb-1">Key inclusions</label>
+                    <input
+                      value={editForm.key_inclusions || ""}
+                      onChange={(e) => setEditForm({ ...editForm, key_inclusions: e.target.value })}
+                      placeholder="e.g. Breakfast, snorkeling gear, guide"
+                      className="w-full border border-slate-300 rounded-lg px-3 py-2 text-sm"
+                    />
+                  </div>
+                </div>
               </div>
 
               <div className="border border-amber-200 bg-amber-50 rounded-lg p-4">
