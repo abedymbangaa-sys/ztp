@@ -3,6 +3,7 @@ import { BrowserRouter, Routes, Route } from "react-router-dom";
 import { LanguageProvider } from "./lib/LanguageContext";
 import Navbar from "./components/Navbar";
 import Footer from "./components/Footer";
+import ScrollToTop from "./components/ScrollToTop";
 import Home from "./pages/Home";
 import SiteReviewPrompt from "./components/SiteReviewPrompt";
 // Code-splitting: these pages are visited by a small minority of users
@@ -40,6 +41,7 @@ export default function App() {
   return (
     <BrowserRouter>
       <LanguageProvider>
+        <ScrollToTop />
         <Navbar />
         <Suspense fallback={<PageLoading />}>
           <Routes>
