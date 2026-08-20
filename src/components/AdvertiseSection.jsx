@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Link } from "react-router-dom";
 import { MapPin, Megaphone, ChevronLeft, ChevronRight } from "lucide-react";
 import { useAdvertisements } from "../data/hooks";
@@ -11,10 +11,22 @@ function AdCard({ ad }) {
   const photos = [ad.image_url, ...(ad.gallery_images || [])].filter(Boolean);
   const [current, setCurrent] = useState(0);
   const hasMultiple = photos.length > 1;
+  const [paused, setPaused] = useState(false);
+
+  // Auto-advance every 3s, like a mini slideshow. Pauses while the user is
+  // actively interacting with the arrows/dots so it doesn't fight them.
+  useEffect(() => {
+    if (!hasMultiple || paused) return;
+    const timer = setInterval(() => {
+      setCurrent((c) => (c + 1) % photos.length);
+    }, 3000);
+    return () => clearInterval(timer);
+  }, [hasMultiple, paused, photos.length]);
 
   function go(e, dir) {
     e.preventDefault();
     e.stopPropagation();
+    setPaused(true);
     setCurrent((c) => (c + dir + photos.length) % photos.length);
   }
 
@@ -55,6 +67,7 @@ function AdCard({ ad }) {
                   onClick={(e) => {
                     e.preventDefault();
                     e.stopPropagation();
+                    setPaused(true);
                     setCurrent(i);
                   }}
                   className={`w-1.5 h-1.5 rounded-full transition ${
