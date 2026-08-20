@@ -304,3 +304,39 @@ export function useRelatedListings(categoryKey, excludeId, limit = 4) {
 
   return { related, loading };
 }
+
+// Lightweight rating/count summary for a single listing, used by the
+// "At a glance" card. Reads the same `reviews` table ReviewsSection
+// already queries, but only the `rating` column and only approved
+// reviews, so this stays a cheap, separate read rather than plumbing
+// state out of ReviewsSection itself.
+export function useListingRatingSummary(listingId) {
+  const [summary, setSummary] = useState({ average: null, count: 0, loading: true });
+
+  useEffect(() => {
+    let mounted = true;
+    if (!listingId) {
+      setSummary({ average: null, count: 0, loading: false });
+      return;
+    }
+    supabase
+      .from("reviews")
+      .select("rating")
+      .eq("listing_id", listingId)
+      .eq("status", "approved")
+      .then(({ data, error }) => {
+        if (!mounted) return;
+        if (error || !data || data.length === 0) {
+          setSummary({ average: null, count: 0, loading: false });
+          return;
+        }
+        const avg = data.reduce((sum, r) => sum + r.rating, 0) / data.length;
+        setSummary({ average: Number(avg.toFixed(1)), count: data.length, loading: false });
+      });
+    return () => {
+      mounted = false;
+    };
+  }, [listingId]);
+
+  return summary;
+}
