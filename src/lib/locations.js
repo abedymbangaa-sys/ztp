@@ -23,3 +23,18 @@ export function locationMatches(listingLocation, areaKey) {
   if (!opt) return true;
   return (listingLocation || "").toLowerCase().includes(opt.match);
 }
+
+// Display-only cleanup for the free-text `location` field on a listing.
+// Fixes common source-data formatting slips (e.g. "Paje,Zanzibar" ->
+// "Paje, Zanzibar") without ever touching the underlying database value -
+// this is purely how the text is *rendered*, so it's safe to apply
+// everywhere the location is shown (detail page, cards, inquiries stay
+// on the raw value).
+export function formatLocation(location) {
+  if (!location) return "";
+  return location
+    .split(",")
+    .map((part) => part.trim())
+    .filter(Boolean)
+    .join(", ");
+}
