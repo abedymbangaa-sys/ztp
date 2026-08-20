@@ -8,6 +8,8 @@ import WebsiteReviews from "../components/WebsiteReviews";
 import TravelerStories from "../components/TravelerStories";
 import DealsSection from "../components/DealsSection";
 import SearchAutocomplete from "../components/SearchAutocomplete";
+import TripBuilderModal from "../components/TripBuilderModal";
+import { ShieldCheck, MapPin, MessageCircle, BadgeCheck, Compass } from "lucide-react";
 import { useT } from "../lib/i18n";
 // Leaflet + react-leaflet is a heavy library (~150kB). Lazy-loading it
 // means visitors who never scroll down to the map never download it.
@@ -39,6 +41,20 @@ export default function Home() {
 
   const [adFormOpen, setAdFormOpen] = useState(false);
   const [pendingAd, setPendingAd] = useState(null); // ad row awaiting payment confirmation
+  const [tripBuilderOpen, setTripBuilderOpen] = useState(false);
+
+  // Trust strip shows a real "Verified on [date]" - the most recent
+  // last_verified_at across all approved listings - never a fabricated or
+  // hardcoded date. If nothing has a verification date yet, the strip
+  // simply omits that item rather than showing something untrue.
+  const mostRecentVerifiedDate = allApproved.reduce((latest, item) => {
+    if (!item.last_verified_at) return latest;
+    const d = new Date(item.last_verified_at);
+    return !latest || d > latest ? d : latest;
+  }, null);
+  const verifiedDateLabel = mostRecentVerifiedDate
+    ? mostRecentVerifiedDate.toLocaleDateString("en-GB", { day: "numeric", month: "short", year: "numeric" })
+    : null;
 
   useEffect(() => {
     if (location.hash === "#advertise") {
@@ -86,17 +102,17 @@ export default function Home() {
           />
 
           <div className="flex flex-col sm:flex-row justify-center gap-3 sm:gap-4 px-4 sm:px-0">
+            <button
+              onClick={() => setTripBuilderOpen(true)}
+              className="bg-amber-500 hover:bg-amber-400 transition text-slate-900 font-bold px-7 py-3.5 rounded-full shadow-lg inline-flex items-center justify-center gap-2"
+            >
+              <Compass className="w-5 h-5" /> Build My Zanzibar Trip
+            </button>
             <Link
               to="/things-to-do"
-              className="bg-amber-500 hover:bg-amber-400 transition text-slate-900 font-bold px-7 py-3.5 rounded-full shadow-lg"
-            >
-              {t("Things to Do")}
-            </Link>
-            <Link
-              to="/hotels"
               className="bg-white text-teal-900 font-bold px-7 py-3.5 rounded-full hover:bg-amber-50 transition shadow-lg"
             >
-              {t("View Hotels")}
+              {t("Explore Experiences")}
             </Link>
             <a
               href="https://wa.me/255635442732"
@@ -107,8 +123,32 @@ export default function Home() {
               Ask Now
             </a>
           </div>
+
+          {/* Trust strip - every claim here is either a fixed, true fact
+              (local team, direct contact, no fees) or computed live from
+              the database (verified date), never a static "trust us"
+              placeholder. Wraps to 2 lines on small screens instead of
+              overflowing. */}
+          <div className="mt-8 flex flex-wrap items-center justify-center gap-x-6 gap-y-2 text-xs sm:text-sm text-slate-200/90">
+            {verifiedDateLabel && (
+              <span className="inline-flex items-center gap-1.5">
+                <BadgeCheck className="w-4 h-4 text-amber-300" /> Verified on {verifiedDateLabel}
+              </span>
+            )}
+            <span className="inline-flex items-center gap-1.5">
+              <MapPin className="w-4 h-4 text-amber-300" /> Local team
+            </span>
+            <span className="inline-flex items-center gap-1.5">
+              <MessageCircle className="w-4 h-4 text-amber-300" /> Direct contact
+            </span>
+            <span className="inline-flex items-center gap-1.5">
+              <ShieldCheck className="w-4 h-4 text-amber-300" /> No hidden booking fees
+            </span>
+          </div>
         </div>
       </section>
+
+      <TripBuilderModal open={tripBuilderOpen} onClose={() => setTripBuilderOpen(false)} />
 
       <StatsCounter />
 
