@@ -15,6 +15,7 @@ export default function InquiryModal({ open, onClose, itemTitle, itemLocation, o
     travelers: "",
     budget: "",
     dates: "",
+    area: "",
     notes: "",
   });
   const [sending, setSending] = useState(false);
@@ -122,6 +123,21 @@ export default function InquiryModal({ open, onClose, itemTitle, itemLocation, o
                 placeholder="e.g. 12-18 August, or 'flexible'"
                 className="w-full border border-slate-300 rounded-lg px-4 py-2.5"
               />
+            </div>
+
+            <div>
+              <label className="block text-sm font-semibold text-slate-700 mb-1">
+                Current Area / Hotel (optional)
+              </label>
+              <input
+                value={form.area}
+                onChange={(e) => setForm({ ...form, area: e.target.value })}
+                placeholder="e.g. Nungwi, or the name of your hotel"
+                className="w-full border border-slate-300 rounded-lg px-4 py-2.5"
+              />
+              <p className="text-xs text-slate-400 mt-1">
+                Helps the business know how far pickup or delivery would be.
+              </p>
             </div>
 
             <div>
