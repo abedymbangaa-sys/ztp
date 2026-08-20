@@ -15,6 +15,8 @@ const emptyForm = {
   maps_link: "",
   tags: [],
   weather_policy: "",
+  price_range: "",
+  duration: "",
 };
 
 export default function PartnerDashboard() {
@@ -23,6 +25,7 @@ export default function PartnerDashboard() {
   const [categories, setCategories] = useState([]);
   const [listings, setListings] = useState([]);
   const [form, setForm] = useState(emptyForm);
+  const [editingId, setEditingId] = useState(null);
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
   const [message, setMessage] = useState("");
@@ -69,6 +72,22 @@ export default function PartnerDashboard() {
     setSaving(true);
     setMessage("");
 
+    if (editingId) {
+      // Editing an existing listing: save the changes directly. No need to
+      // reset status to "pending" - price/duration corrections shouldn't
+      // send an already-approved listing back through moderation.
+      const { error } = await supabase.from("listings").update(form).eq("id", editingId);
+      setSaving(false);
+      if (error) {
+        setMessage("Error: " + error.message);
+        return;
+      }
+      setMessage("Listing updated.");
+      cancelEdit();
+      loadData();
+      return;
+    }
+
     const { error } = await supabase.from("listings").insert({
       ...form,
       partner_id: partner.id,
@@ -83,6 +102,32 @@ export default function PartnerDashboard() {
     setMessage("Listing submitted - awaiting admin approval.");
     setForm(emptyForm);
     loadData();
+  }
+
+  function startEdit(listing) {
+    setEditingId(listing.id);
+    setForm({
+      category_key: listing.category_key || "hotels",
+      title: listing.title || "",
+      location: listing.location || "",
+      description: listing.description || "",
+      image_url: listing.image_url || "",
+      gallery_images: listing.gallery_images || [],
+      whatsapp_number: listing.whatsapp_number || "",
+      maps_link: listing.maps_link || "",
+      tags: listing.tags || [],
+      weather_policy: listing.weather_policy || "",
+      price_range: listing.price_range || "",
+      duration: listing.duration || "",
+    });
+    setMessage("");
+    // Scroll the form into view since it's below the listings list.
+    document.getElementById("partner-listing-form")?.scrollIntoView({ behavior: "smooth" });
+  }
+
+  function cancelEdit() {
+    setEditingId(null);
+    setForm(emptyForm);
   }
 
   async function handleLogout() {
@@ -134,6 +179,11 @@ export default function PartnerDashboard() {
                 <div>
                   <p className="font-semibold text-slate-900">{l.title}</p>
                   <p className="text-xs text-slate-500">{l.category_key} · {l.location}</p>
+                  {!l.price_range && !l.duration && (
+                    <p className="text-xs text-amber-600 font-medium mt-0.5">
+                      Add price &amp; duration so travelers can see it →
+                    </p>
+                  )}
                 </div>
                 <span
                   className={
@@ -147,15 +197,22 @@ export default function PartnerDashboard() {
                 >
                   {l.status === "approved" ? "Approved" : l.status === "rejected" ? "Rejected" : "Pending"}
                 </span>
+                <button
+                  type="button"
+                  onClick={() => startEdit(l)}
+                  className="text-xs font-semibold text-teal-700 border border-teal-600 hover:bg-teal-50 px-3 py-1 rounded-full transition"
+                >
+                  Edit
+                </button>
               </div>
             ))}
           </div>
         )}
       </div>
 
-      {/* Add new listing */}
-      <div className="bg-white border border-slate-200 rounded-2xl p-6">
-        <h2 className="font-bold text-lg mb-4">Add New Listing</h2>
+      {/* Add / edit listing */}
+      <div id="partner-listing-form" className="bg-white border border-slate-200 rounded-2xl p-6">
+        <h2 className="font-bold text-lg mb-4">{editingId ? "Edit Listing" : "Add New Listing"}</h2>
         <form onSubmit={handleSubmit} className="space-y-4">
           <div>
             <label className="block text-sm font-semibold text-slate-700 mb-1">Type</label>
@@ -200,6 +257,33 @@ export default function PartnerDashboard() {
               className="w-full border border-slate-300 rounded-lg px-4 py-2.5"
             />
           </div>
+          <div className="grid grid-cols-2 gap-4">
+            <div>
+              <label className="block text-sm font-semibold text-slate-700 mb-1">
+                Price Range <span className="text-slate-400 font-normal">(optional)</span>
+              </label>
+              <input
+                value={form.price_range}
+                onChange={(e) => setForm({ ...form, price_range: e.target.value })}
+                placeholder="e.g. $40-60 pp"
+                className="w-full border border-slate-300 rounded-lg px-4 py-2.5"
+              />
+            </div>
+            <div>
+              <label className="block text-sm font-semibold text-slate-700 mb-1">
+                Duration <span className="text-slate-400 font-normal">(optional)</span>
+              </label>
+              <input
+                value={form.duration}
+                onChange={(e) => setForm({ ...form, duration: e.target.value })}
+                placeholder="e.g. 6 hours"
+                className="w-full border border-slate-300 rounded-lg px-4 py-2.5"
+              />
+            </div>
+          </div>
+          <p className="text-xs text-slate-500 -mt-2">
+            Travelers strongly prefer listings that show a clear price and duration upfront - it builds trust and gets more WhatsApp messages.
+          </p>
           <div>
             <SinglePhotoUploader
               label="Main Photo"
@@ -265,13 +349,24 @@ export default function PartnerDashboard() {
 
           {message && <p className="text-sm text-teal-700 font-medium">{message}</p>}
 
-          <button
-            type="submit"
-            disabled={saving}
-            className="bg-teal-700 hover:bg-teal-800 transition text-white font-bold px-6 py-3 rounded-full disabled:opacity-50"
-          >
-            {saving ? "Submitting..." : "Submit Listing"}
-          </button>
+          <div className="flex items-center gap-3">
+            <button
+              type="submit"
+              disabled={saving}
+              className="bg-teal-700 hover:bg-teal-800 transition text-white font-bold px-6 py-3 rounded-full disabled:opacity-50"
+            >
+              {saving ? "Saving..." : editingId ? "Save Changes" : "Submit Listing"}
+            </button>
+            {editingId && (
+              <button
+                type="button"
+                onClick={cancelEdit}
+                className="text-sm font-semibold text-slate-500 hover:text-slate-800"
+              >
+                Cancel
+              </button>
+            )}
+          </div>
         </form>
       </div>
     </div>
