@@ -1,59 +1,99 @@
 import { useState, useEffect } from "react";
 import { supabase } from "../lib/supabase";
 
-// Load active categories from Supabase (live - admin can add new ones anytime)
+// Shared timeout so a hung Supabase request (dead connection, cold serverless
+// function, flaky mobile network) can't leave a page stuck on "loading"
+// forever. Any request that takes longer than this is treated as failed.
+const FETCH_TIMEOUT_MS = 15000;
+
+function withTimeout(promise) {
+  const timeoutPromise = new Promise((_, reject) =>
+    setTimeout(() => reject(new Error("timeout")), FETCH_TIMEOUT_MS)
+  );
+  return Promise.race([promise, timeoutPromise]);
+}
+
+// Load active categories from Supabase (live - admin can add new ones anytime).
+// Exposes `error` and `retry` so pages relying on categories (page title,
+// icon, tag label) don't silently render blank forever if the request fails.
 export function useCategories() {
   const [categories, setCategories] = useState([]);
   const [loading, setLoading] = useState(true);
-
-  useEffect(() => {
-    let mounted = true;
-    supabase
-      .from("categories")
-      .select("*")
-      .eq("is_active", true)
-      .order("created_at", { ascending: true })
-      .then(({ data }) => {
-        if (mounted) {
-          setCategories(data || []);
-          setLoading(false);
-        }
-      });
-    return () => {
-      mounted = false;
-    };
-  }, []);
-
-  return { categories, loading };
-}
-
-// Load approved listings, optionally filtered by category.
-// Featured (paid/sponsored) listings are pinned to the top.
-export function useListings(categoryKey) {
-  const [listings, setListings] = useState([]);
-  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(null);
+  const [refreshKey, setRefreshKey] = useState(0);
 
   useEffect(() => {
     let mounted = true;
     setLoading(true);
+    setError(null);
+
+    withTimeout(
+      supabase.from("categories").select("*").eq("is_active", true).order("created_at", { ascending: true })
+    )
+      .then(({ data, error }) => {
+        if (!mounted) return;
+        if (error) throw error;
+        setCategories(data || []);
+        setLoading(false);
+      })
+      .catch((err) => {
+        if (import.meta.env.DEV) console.error("useCategories: failed to load", err);
+        if (!mounted) return;
+        setError("Unable to load categories right now.");
+        setCategories([]);
+        setLoading(false);
+      });
+
+    return () => {
+      mounted = false;
+    };
+  }, [refreshKey]);
+
+  return { categories, loading, error, retry: () => setRefreshKey((k) => k + 1) };
+}
+
+// Load approved listings, optionally filtered by category.
+// Featured (paid/sponsored) listings are pinned to the top.
+// Has a hard timeout + error state so a hung request (dead connection, cold
+// serverless function, flaky mobile network) can't leave the page stuck on
+// "Loading..." forever - it resolves to an error with a retry button instead.
+export function useListings(categoryKey) {
+  const [listings, setListings] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(null);
+  const [refreshKey, setRefreshKey] = useState(0);
+
+  useEffect(() => {
+    let mounted = true;
+    setLoading(true);
+    setError(null);
+
     let query = supabase.from("listings").select("*").eq("status", "approved");
     if (categoryKey) {
       query = query.eq("category_key", categoryKey);
     }
-    query
-      .order("created_at", { ascending: false })
-      .then(({ data }) => {
-        if (mounted) {
-          setListings(data || []);
-          setLoading(false);
-        }
+
+    withTimeout(query.order("created_at", { ascending: false }))
+      .then(({ data, error }) => {
+        if (!mounted) return;
+        if (error) throw error;
+        setListings(data || []);
+        setLoading(false);
+      })
+      .catch((err) => {
+        if (import.meta.env.DEV) console.error("useListings: failed to load", err);
+        if (!mounted) return;
+        setError("Unable to load listings right now.");
+        setListings([]);
+        setLoading(false);
       });
+
     return () => {
       mounted = false;
     };
-  }, [categoryKey]);
+  }, [categoryKey, refreshKey]);
 
-  return { listings, loading };
+  return { listings, loading, error, retry: () => setRefreshKey((k) => k + 1) };
 }
 
 // Load approved listings currently marked as a "deal" (is_deal = true),
