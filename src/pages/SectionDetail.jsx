@@ -12,6 +12,7 @@ import { MapPin, ExternalLink, ShieldCheck, BadgeCheck, CloudRain, RefreshCw, Al
 import ReviewsSection from "../components/ReviewsSection";
 import RelatedListings from "../components/RelatedListings";
 import PhotoGallery from "../components/PhotoGallery";
+import AtAGlance from "../components/AtAGlance";
 import InquiryModal from "../components/InquiryModal";
 import ClaimListingModal from "../components/ClaimListingModal";
 import VerificationPanel from "../components/VerificationPanel";
@@ -169,6 +170,8 @@ export default function SectionDetail() {
             </div>
           )}
         </div>
+
+        <AtAGlance item={item} />
 
         {/* Conversion action area - WhatsApp Owner / Call / Get Directions /
             Ask Zanzibar Expert. Sits right under the title/location, near
