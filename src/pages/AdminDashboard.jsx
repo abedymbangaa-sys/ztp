@@ -240,6 +240,7 @@ export default function AdminDashboard() {
       start_time: l.start_time || "",
       group_size: l.group_size || "",
       key_inclusions: l.key_inclusions || "",
+      key_exclusions: l.key_exclusions || "",
       pickup_available: l.pickup_available === true ? "yes" : l.pickup_available === false ? "no" : "",
       is_deal: l.is_deal || false,
       deal_label: l.deal_label || "",
@@ -1091,6 +1092,15 @@ export default function AdminDashboard() {
                       value={editForm.key_inclusions || ""}
                       onChange={(e) => setEditForm({ ...editForm, key_inclusions: e.target.value })}
                       placeholder="e.g. Breakfast, snorkeling gear, guide"
+                      className="w-full border border-slate-300 rounded-lg px-3 py-2 text-sm"
+                    />
+                  </div>
+                  <div>
+                    <label className="block text-xs font-semibold text-slate-600 mb-1">Not included</label>
+                    <input
+                      value={editForm.key_exclusions || ""}
+                      onChange={(e) => setEditForm({ ...editForm, key_exclusions: e.target.value })}
+                      placeholder="e.g. Marine park fee, lunch, tips"
                       className="w-full border border-slate-300 rounded-lg px-3 py-2 text-sm"
                     />
                   </div>
