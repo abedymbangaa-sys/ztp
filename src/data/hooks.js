@@ -74,10 +74,38 @@ export function useListings(categoryKey) {
     }
 
     withTimeout(query.order("created_at", { ascending: false }))
-      .then(({ data, error }) => {
+      .then(async ({ data, error }) => {
         if (!mounted) return;
         if (error) throw error;
-        setListings(data || []);
+        const rows = data || [];
+
+        // Attach a lightweight rating/review-count summary to each card so
+        // listing grids can show trust signals (e.g. "4.8 (12)") without a
+        // separate request per card. Best-effort: if this secondary query
+        // fails, listings still render fine, just without the badge.
+        if (rows.length > 0) {
+          try {
+            const ids = rows.map((r) => r.id);
+            const { data: reviewRows } = await withTimeout(
+              supabase.from("reviews").select("listing_id, rating").eq("status", "approved").in("listing_id", ids)
+            );
+            const statsByListing = {};
+            (reviewRows || []).forEach((r) => {
+              const s = (statsByListing[r.listing_id] ||= { total: 0, count: 0 });
+              s.total += r.rating;
+              s.count += 1;
+            });
+            rows.forEach((row) => {
+              const s = statsByListing[row.id];
+              row.review_avg = s ? Number((s.total / s.count).toFixed(1)) : null;
+              row.review_count = s ? s.count : 0;
+            });
+          } catch (statsErr) {
+            if (import.meta.env.DEV) console.error("useListings: failed to load review stats", statsErr);
+          }
+        }
+
+        setListings(rows);
         setLoading(false);
       })
       .catch((err) => {
