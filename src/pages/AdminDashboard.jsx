@@ -5,6 +5,8 @@ import { SectionIcon } from "../lib/icons";
 import { sendNotificationEmail } from "../lib/email";
 import { SinglePhotoUploader, MultiPhotoUploader } from "../components/ImageUploader";
 import { TAG_OPTIONS } from "../lib/tags";
+import VerificationManager from "../components/admin/VerificationManager";
+import { isCoreVerified } from "../lib/verificationStandard";
 
 const TABS = [
   { key: "homepage", label: "Homepage" },
@@ -35,6 +37,7 @@ export default function AdminDashboard() {
   const [storyReports, setStoryReports] = useState({});
   const [inquiries, setInquiries] = useState([]);
   const [claims, setClaims] = useState([]);
+  const [verifyingListing, setVerifyingListing] = useState(null);
   const [ads, setAds] = useState([]);
   const [adPriceInput, setAdPriceInput] = useState("");
   const [adPriceSaving, setAdPriceSaving] = useState(false);
@@ -198,11 +201,6 @@ export default function AdminDashboard() {
           : `Hello, your listing "${listing.title}" has not been approved at this time. Contact us for more details.`,
       });
     }
-    loadAll();
-  }
-
-  async function toggleVerified(id, currentValue) {
-    await supabase.from("listings").update({ is_verified: !currentValue }).eq("id", id);
     loadAll();
   }
 
@@ -879,16 +877,16 @@ export default function AdminDashboard() {
                   {l.status}
                 </span>
                 <button
-                  onClick={() => toggleVerified(l.id, l.is_verified)}
+                  onClick={() => setVerifyingListing(l)}
                   className={
                     "text-xs font-semibold px-3 py-1 rounded-full border " +
-                    (l.is_verified
+                    (isCoreVerified(l)
                       ? "bg-teal-700 text-white border-teal-700"
                       : "bg-white text-slate-500 border-slate-300 hover:border-teal-400")
                   }
-                  title={l.is_verified ? "Click to remove Verified badge" : "Click to mark as Verified"}
+                  title="Set identity/location/photos/safety/eco checks"
                 >
-                  {l.is_verified ? "✓ Verified" : "Mark Verified"}
+                  {isCoreVerified(l) ? "✓ Verified" : "Verification"}
                 </button>
                 {l.is_deal && (
                   <button
@@ -2068,6 +2066,13 @@ export default function AdminDashboard() {
           </div>
         </div>
       )}
+
+      <VerificationManager
+        open={Boolean(verifyingListing)}
+        listing={verifyingListing}
+        onClose={() => setVerifyingListing(null)}
+        onSaved={loadAll}
+      />
     </div>
   );
 }
