@@ -13,7 +13,6 @@ import PhotoGallery from "../components/PhotoGallery";
 import InquiryModal from "../components/InquiryModal";
 import ClaimListingModal from "../components/ClaimListingModal";
 import ListingContactActions from "../components/ListingContactActions";
-import ShareButtons from "../components/ShareButtons";
 import { useT } from "../lib/i18n";
 import { useLanguage } from "../lib/LanguageContext";
 import { MessageCircle as WA, Compass } from "lucide-react";
@@ -126,27 +125,24 @@ export default function SectionDetail() {
           ← {t("Back to")} {config?.title || sectionKey}
         </Link>
 
-        <div className="mt-4 mb-6 flex items-start justify-between gap-4">
-          <div>
-            <span className="inline-flex items-center gap-1.5 bg-teal-100 text-teal-800 text-xs font-semibold px-3 py-1 rounded-full mb-2">
-              <SectionIcon sectionKey={sectionKey} className="w-3.5 h-3.5" />
-              {config?.tag || ""}
-            </span>
-            <h1 className="text-3xl md:text-4xl font-bold text-slate-900 flex items-center gap-2 flex-wrap">
-              {item.title}
-              {item.is_verified && (
-                <span className="inline-flex items-center gap-1 bg-teal-100 text-teal-800 text-xs font-semibold px-2.5 py-1 rounded-full align-middle">
-                  <BadgeCheck className="w-3.5 h-3.5" /> Verified
-                </span>
-              )}
-            </h1>
-            {item.location && (
-              <p className="text-slate-500 mt-1 flex items-center gap-1">
-                <MapPin className="w-4 h-4" /> {item.location}
-              </p>
+        <div className="mt-4 mb-6">
+          <span className="inline-flex items-center gap-1.5 bg-teal-100 text-teal-800 text-xs font-semibold px-3 py-1 rounded-full mb-2">
+            <SectionIcon sectionKey={sectionKey} className="w-3.5 h-3.5" />
+            {config?.tag || ""}
+          </span>
+          <h1 className="text-3xl md:text-4xl font-bold text-slate-900 flex items-center gap-2 flex-wrap">
+            {item.title}
+            {item.is_verified && (
+              <span className="inline-flex items-center gap-1 bg-teal-100 text-teal-800 text-xs font-semibold px-2.5 py-1 rounded-full align-middle">
+                <BadgeCheck className="w-3.5 h-3.5" /> Verified
+              </span>
             )}
-          </div>
-          <ShareButtons title={item.title} className="shrink-0 mt-1" />
+          </h1>
+          {item.location && (
+            <p className="text-slate-500 mt-1 flex items-center gap-1">
+              <MapPin className="w-4 h-4" /> {item.location}
+            </p>
+          )}
         </div>
 
         {/* Conversion action area - WhatsApp Owner / Call / Get Directions /
