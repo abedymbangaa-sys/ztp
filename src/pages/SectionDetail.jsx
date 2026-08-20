@@ -6,6 +6,8 @@ import { normalizePhone } from "../lib/phone";
 import { sendNotificationEmail } from "../lib/email";
 import { supabase } from "../lib/supabase";
 import { SectionIcon } from "../lib/icons";
+import { formatLocation } from "../lib/locations";
+import { buildDirectionsUrl } from "../lib/maps";
 import { MapPin, ExternalLink, ShieldCheck, BadgeCheck, CloudRain, RefreshCw, AlertTriangle } from "lucide-react";
 import ReviewsSection from "../components/ReviewsSection";
 import RelatedListings from "../components/RelatedListings";
@@ -70,6 +72,11 @@ export default function SectionDetail() {
   // produce a broken wa.me/Null link or a bogus rich-inquiry target.
   const ownerNumber = normalizePhone(item.whatsapp_number);
   const hasOwnNumber = Boolean(ownerNumber);
+  // Same URL the "Get Directions" button in ListingContactActions uses
+  // (maps_link if the admin set one, otherwise a Maps search built from
+  // the location text) - reused here for the small "View on map" link
+  // right next to the location line.
+  const directionsUrl = buildDirectionsUrl(item);
 
   async function handleInquirySubmit(details) {
     try {
@@ -113,7 +120,7 @@ export default function SectionDetail() {
 
   return (
     <div>
-      <PhotoGallery coverImage={item.image_url} galleryImages={item.gallery_images} />
+      <PhotoGallery coverImage={item.image_url} galleryImages={item.gallery_images} listingName={item.title} />
 
       {/* Sticky bottom action bar - mobile only. Quick access to the two
           highest-intent actions without scrolling back up. Hidden on
@@ -132,8 +139,11 @@ export default function SectionDetail() {
             <SectionIcon sectionKey={sectionKey} className="w-3.5 h-3.5" />
             {config?.tag || ""}
           </span>
-          <h1 className="text-3xl md:text-4xl font-bold text-slate-900 flex items-center gap-2 flex-wrap">
-            {item.title}
+          {/* Name wraps under itself on narrow screens instead of the
+              Verified badge fighting it for space on one line - each gets
+              its own row below ~380px wide (e.g. "Jabali Bungalows Lodge"). */}
+          <h1 className="text-2xl sm:text-3xl md:text-4xl font-bold text-slate-900 leading-snug sm:leading-tight break-words flex flex-wrap items-center gap-x-2 gap-y-1.5">
+            <span>{item.title}</span>
             {item.is_verified && (
               <span className="inline-flex items-center gap-1 bg-teal-100 text-teal-800 text-xs font-semibold px-2.5 py-1 rounded-full align-middle">
                 <BadgeCheck className="w-3.5 h-3.5" /> Verified
@@ -141,9 +151,21 @@ export default function SectionDetail() {
             )}
           </h1>
           {item.location && (
-            <p className="text-slate-500 mt-1 flex items-center gap-1">
-              <MapPin className="w-4 h-4" /> {item.location}
-            </p>
+            <div className="mt-1.5 flex items-center gap-2 flex-wrap">
+              <p className="text-slate-500 flex items-center gap-1">
+                <MapPin className="w-4 h-4 shrink-0" /> {formatLocation(item.location)}
+              </p>
+              {directionsUrl && (
+                <a
+                  href={directionsUrl}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="text-teal-700 text-sm font-semibold hover:underline"
+                >
+                  {t("View on map")}
+                </a>
+              )}
+            </div>
           )}
         </div>
 
