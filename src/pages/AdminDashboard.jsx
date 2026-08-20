@@ -206,6 +206,11 @@ export default function AdminDashboard() {
     loadAll();
   }
 
+  async function toggleDeal(id, currentValue) {
+    await supabase.from("listings").update({ is_deal: !currentValue }).eq("id", id);
+    loadAll();
+  }
+
   async function deleteListing(id, title) {
     if (!confirm(`Delete listing "${title}" permanently? This cannot be undone.`)) return;
     await supabase.from("listings").delete().eq("id", id);
@@ -232,6 +237,8 @@ export default function AdminDashboard() {
       maps_link: l.maps_link || "",
       tags: l.tags || [],
       weather_policy: l.weather_policy || "",
+      is_deal: l.is_deal || false,
+      deal_label: l.deal_label || "",
     });
     setEditMessage("");
   }
@@ -883,6 +890,15 @@ export default function AdminDashboard() {
                 >
                   {l.is_verified ? "✓ Verified" : "Mark Verified"}
                 </button>
+                {l.is_deal && (
+                  <button
+                    onClick={() => toggleDeal(l.id, l.is_deal)}
+                    className="text-xs font-semibold px-3 py-1 rounded-full border bg-amber-500 text-white border-amber-500 hover:bg-amber-600"
+                    title="Click to remove from Special Deals"
+                  >
+                    ✕ Remove Deal
+                  </button>
+                )}
                 <button
                   onClick={() => openEditListing(l)}
                   className="text-xs font-semibold bg-blue-100 text-blue-700 px-3 py-1.5 rounded-full hover:bg-blue-200"
@@ -1002,6 +1018,36 @@ export default function AdminDashboard() {
                   placeholder="e.g. If it rains, we reschedule for free or refund in full within 24 hours."
                   className="w-full border border-slate-300 rounded-lg px-4 py-2.5"
                 />
+              </div>
+
+              <div className="border border-amber-200 bg-amber-50 rounded-lg p-4">
+                <label className="flex items-center gap-2 cursor-pointer select-none">
+                  <input
+                    type="checkbox"
+                    checked={!!editForm.is_deal}
+                    onChange={(e) => setEditForm({ ...editForm, is_deal: e.target.checked })}
+                    className="w-4 h-4 accent-amber-600"
+                  />
+                  <span className="text-sm font-semibold text-slate-700">
+                    Show in "Special Deals" section on homepage
+                  </span>
+                </label>
+                {editForm.is_deal && (
+                  <div className="mt-3">
+                    <label className="block text-sm font-semibold text-slate-700 mb-1">
+                      Deal Label <span className="text-slate-400 font-normal">(e.g. "20% Off This Month")</span>
+                    </label>
+                    <input
+                      value={editForm.deal_label || ""}
+                      onChange={(e) => setEditForm({ ...editForm, deal_label: e.target.value })}
+                      placeholder="20% Off This Month"
+                      className="w-full border border-slate-300 rounded-lg px-4 py-2.5"
+                    />
+                  </div>
+                )}
+                <p className="text-xs text-slate-500 mt-2">
+                  Untick this box to remove the listing from Special Deals at any time.
+                </p>
               </div>
 
               <div>
