@@ -7,6 +7,7 @@ import { SectionIcon } from "../lib/icons";
 import { TAG_OPTIONS } from "../lib/tags";
 import { LOCATION_OPTIONS, locationMatches } from "../lib/locations";
 import { Map, List, RefreshCw } from "lucide-react";
+import TideWidget from "../components/TideWidget";
 
 // Skeleton card matching GenericCard's layout, so the grid doesn't jump
 // around once real content arrives and there's no bare "Loading..." flash.
@@ -125,6 +126,8 @@ export default function SectionListing() {
           </button>
         </div>
       </div>
+
+      {sectionKey === "beaches" && <TideWidget />}
 
       <div className="flex flex-wrap gap-2 mb-8">
         {TAG_OPTIONS.map((t) => (
