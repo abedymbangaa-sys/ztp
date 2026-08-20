@@ -40,6 +40,19 @@ export function buildRichInquiryLink(businessNumber, itemTitle, itemLocation, de
   return `https://wa.me/${businessNumber}?text=${encodeURIComponent(lines.join("\n"))}`;
 }
 
+// "Build My Zanzibar Trip" teaser - a lightweight 3-question flow on the
+// homepage (dates, budget, interests) that turns into a single prefilled
+// WhatsApp message to the Zanzibar Expert line. This is intentionally NOT
+// a full itinerary-generation engine - it just removes the back-and-forth
+// of a blank chat, matching the message format Wachu Digital Growth uses
+// for its "Ask Expert" concierge line.
+export function buildTripBuilderLink({ dates, area, travelers, budget, interests }) {
+  const lines = [
+    `Habari, nipo Zanzibar${dates ? ` ${dates}` : ""}${area ? `, niko ${area}` : ""}, watu ${travelers || "?"}, budget ${budget || "?"}${interests ? `, napenda ${interests}` : ""}.`,
+    `Naomba itinerary na options zilizothibitishwa.`,
+  ];
+  return `https://wa.me/${SITE_CONTACT_NUMBER}?text=${encodeURIComponent(lines.join("\n"))}`;
+}
 // "Ask Zanzibar Expert" - inatumika kutoka listing detail page (na
 // baadaye listing cards) kumpeleka visitor kwa Wachu Digital Growth
 // moja kwa moja, si kwa biashara husika. Inatumia SITE_CONTACT_NUMBER
