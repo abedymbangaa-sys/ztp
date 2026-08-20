@@ -1,4 +1,4 @@
-import { DollarSign, Clock, MapPin, Car, Users, PackageCheck, ShieldCheck, Star, BadgeCheck } from "lucide-react";
+import { DollarSign, Clock, MapPin, Car, Users, PackageCheck, XCircle, ShieldCheck, Star, BadgeCheck } from "lucide-react";
 import { formatLocation } from "../lib/locations";
 import { formatVerifiedDate } from "../lib/verificationStandard";
 import { useListingRatingSummary } from "../data/hooks";
@@ -45,6 +45,9 @@ export default function AtAGlance({ item }) {
   }
   if (item.key_inclusions) {
     rows.push({ icon: PackageCheck, label: t("Inclusions"), value: item.key_inclusions });
+  }
+  if (item.key_exclusions) {
+    rows.push({ icon: XCircle, label: t("Not included"), value: item.key_exclusions });
   }
   if (item.weather_policy) {
     rows.push({ icon: ShieldCheck, label: t("Cancellation policy"), value: item.weather_policy });
