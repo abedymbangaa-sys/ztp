@@ -17,6 +17,8 @@ const emptyForm = {
   weather_policy: "",
   price_range: "",
   duration: "",
+  key_inclusions: "",
+  key_exclusions: "",
 };
 
 export default function PartnerDashboard() {
@@ -119,6 +121,8 @@ export default function PartnerDashboard() {
       weather_policy: listing.weather_policy || "",
       price_range: listing.price_range || "",
       duration: listing.duration || "",
+      key_inclusions: listing.key_inclusions || "",
+      key_exclusions: listing.key_exclusions || "",
     });
     setMessage("");
     // Scroll the form into view since it's below the listings list.
@@ -284,6 +288,28 @@ export default function PartnerDashboard() {
           <p className="text-xs text-slate-500 -mt-2">
             Travelers strongly prefer listings that show a clear price and duration upfront - it builds trust and gets more WhatsApp messages.
           </p>
+          <div>
+            <label className="block text-sm font-semibold text-slate-700 mb-1">
+              What's included <span className="text-slate-400 font-normal">(optional)</span>
+            </label>
+            <input
+              value={form.key_inclusions}
+              onChange={(e) => setForm({ ...form, key_inclusions: e.target.value })}
+              placeholder="e.g. Breakfast, snorkeling gear, guide"
+              className="w-full border border-slate-300 rounded-lg px-4 py-2.5"
+            />
+          </div>
+          <div>
+            <label className="block text-sm font-semibold text-slate-700 mb-1">
+              What's not included <span className="text-slate-400 font-normal">(optional)</span>
+            </label>
+            <input
+              value={form.key_exclusions}
+              onChange={(e) => setForm({ ...form, key_exclusions: e.target.value })}
+              placeholder="e.g. Marine park fee, lunch, tips"
+              className="w-full border border-slate-300 rounded-lg px-4 py-2.5"
+            />
+          </div>
           <div>
             <SinglePhotoUploader
               label="Main Photo"
