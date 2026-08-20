@@ -6,7 +6,46 @@ import ListingsMap from "../components/ListingsMap";
 import { SectionIcon } from "../lib/icons";
 import { TAG_OPTIONS } from "../lib/tags";
 import { LOCATION_OPTIONS, locationMatches } from "../lib/locations";
-import { Map, List } from "lucide-react";
+import { Map, List, RefreshCw } from "lucide-react";
+
+// Skeleton card matching GenericCard's layout, so the grid doesn't jump
+// around once real content arrives and there's no bare "Loading..." flash.
+function ListingCardSkeleton() {
+  return (
+    <div className="bg-white border border-slate-200 rounded-2xl overflow-hidden animate-pulse">
+      <div className="w-full h-44 bg-slate-200" />
+      <div className="p-4 space-y-2">
+        <div className="h-4 bg-slate-200 rounded w-3/4" />
+        <div className="h-3 bg-slate-200 rounded w-1/2" />
+        <div className="h-3 bg-slate-200 rounded w-full" />
+      </div>
+    </div>
+  );
+}
+
+function ListingCardSkeletonGrid({ count = 6 }) {
+  return (
+    <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-6">
+      {Array.from({ length: count }).map((_, i) => (
+        <ListingCardSkeleton key={i} />
+      ))}
+    </div>
+  );
+}
+
+function ListingErrorState({ message, onRetry }) {
+  return (
+    <div className="text-center py-16">
+      <p className="text-slate-500 mb-4">{message}</p>
+      <button
+        onClick={onRetry}
+        className="inline-flex items-center gap-1.5 bg-teal-700 hover:bg-teal-800 transition text-white font-semibold px-6 py-2.5 rounded-full"
+      >
+        <RefreshCw className="w-4 h-4" /> Try again
+      </button>
+    </div>
+  );
+}
 
 export default function SectionListing() {
   const { sectionKey } = useParams();
@@ -16,7 +55,7 @@ export default function SectionListing() {
   const [activeLocation, setActiveLocation] = useState("");
   const [view, setView] = useState("list"); // "list" | "map"
   const { categories } = useCategories();
-  const { listings, loading } = useListings(sectionKey);
+  const { listings, loading, error, retry } = useListings(sectionKey);
   const config = categories.find((c) => c.key === sectionKey);
 
   function toggleTag(key) {
@@ -107,7 +146,9 @@ export default function SectionListing() {
       </div>
 
       {loading ? (
-        <p className="text-slate-500 text-center py-16">Loading...</p>
+        <ListingCardSkeletonGrid count={6} />
+      ) : error ? (
+        <ListingErrorState message={error} onRetry={retry} />
       ) : filtered.length === 0 ? (
         <p className="text-slate-500 text-center py-16">Nothing found.</p>
       ) : view === "map" ? (
