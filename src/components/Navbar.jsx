@@ -17,6 +17,7 @@ const MAIN_LINKS = [
 // doesn't get cramped or overflow the screen on desktop widths
 const MORE_LINKS = [
   { to: "/before-you-go", label: "Before You Go" },
+  { to: "/guides", label: "Travel Guides" },
   { to: "/beaches", label: "Beaches" },
   { to: "/restaurants", label: "Restaurants" },
   { to: "/attractions", label: "Attractions" },
