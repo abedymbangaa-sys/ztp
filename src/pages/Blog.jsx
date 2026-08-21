@@ -15,6 +15,7 @@ export default function Blog() {
       .from("blog_posts")
       .select("*")
       .eq("status", "published")
+      .neq("post_type", "guide")
       .order("created_at", { ascending: false })
       .then(({ data, error }) => {
         if (error) {
