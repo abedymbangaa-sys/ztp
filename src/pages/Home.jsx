@@ -26,7 +26,7 @@ export default function Home() {
   const location = useLocation();
   const t = useT();
   const { categories } = useCategories();
-  const { listings: hotels } = useListings("hotels");
+  const { listings: hotels, loading: hotelsLoading } = useListings("hotels");
   const { listings: allApproved } = useListings();
   const { settings, loading: settingsLoading } = useSettings();
   const adPrice = Number(settings.ad_price_usd) || 15;
@@ -199,9 +199,19 @@ export default function Home() {
           </Link>
         </div>
         <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-6">
-          {topHotels.map((h) => (
-            <GenericCard key={h.id} item={h} sectionKey="hotels" />
-          ))}
+          {hotelsLoading && topHotels.length === 0
+            ? // Skeleton cards while the first load is in flight, so this
+              // section never sits empty/blank before data arrives.
+              Array.from({ length: 3 }).map((_, i) => (
+                <div key={i} className="bg-white border border-slate-200 rounded-2xl overflow-hidden animate-pulse">
+                  <div className="w-full h-44 bg-slate-200" />
+                  <div className="p-4 space-y-2">
+                    <div className="h-4 bg-slate-200 rounded w-3/4" />
+                    <div className="h-3 bg-slate-200 rounded w-1/2" />
+                  </div>
+                </div>
+              ))
+            : topHotels.map((h) => <GenericCard key={h.id} item={h} sectionKey="hotels" />)}
         </div>
       </section>
 
