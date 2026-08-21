@@ -48,8 +48,8 @@ export function buildRichInquiryLink(businessNumber, itemTitle, itemLocation, de
 // for its "Ask Expert" concierge line.
 export function buildTripBuilderLink({ dates, area, travelers, budget, interests }) {
   const lines = [
-    `Habari, nipo Zanzibar${dates ? ` ${dates}` : ""}${area ? `, niko ${area}` : ""}, watu ${travelers || "?"}, budget ${budget || "?"}${interests ? `, napenda ${interests}` : ""}.`,
-    `Naomba itinerary na options zilizothibitishwa.`,
+    `Hi, I'm planning a Zanzibar trip${dates ? ` (${dates})` : ""}${area ? `, staying in ${area}` : ""}. Travelers: ${travelers || "-"}. Budget: ${budget || "-"}.${interests ? ` Interested in: ${interests}.` : ""}`,
+    `Could you send me a day-by-day itinerary with confirmed options?`,
   ];
   return `https://wa.me/${SITE_CONTACT_NUMBER}?text=${encodeURIComponent(lines.join("\n"))}`;
 }
