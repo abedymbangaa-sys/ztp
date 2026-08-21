@@ -228,6 +228,7 @@ export default function AdminDashboard() {
     setEditForm({
       title: l.title || "",
       location: l.location || "",
+      area: l.area || "",
       description: l.description || "",
       image_url: l.image_url || "",
       gallery_images: l.gallery_images || [],
@@ -266,6 +267,9 @@ export default function AdminDashboard() {
       // "no" - so the public page can show "Ask the business" instead of
       // implying pickup was confirmed unavailable.
       pickup_available: editForm.pickup_available === "yes" ? true : editForm.pickup_available === "no" ? false : null,
+      // area has a DB check constraint allowing NULL or one of the fixed
+      // area keys - "" would violate it, so normalize here.
+      area: editForm.area || null,
     };
     const { error } = await supabase.from("listings").update(payload).eq("id", editingListing.id);
     setEditSaving(false);
@@ -974,6 +978,24 @@ export default function AdminDashboard() {
                   onChange={(e) => setEditForm({ ...editForm, location: e.target.value })}
                   className="w-full border border-slate-300 rounded-lg px-4 py-2.5"
                 />
+              </div>
+              <div>
+                <label className="block text-sm font-semibold text-slate-700 mb-1">
+                  Area <span className="text-slate-400 font-normal">(for /area/... landing pages)</span>
+                </label>
+                <select
+                  value={editForm.area || ""}
+                  onChange={(e) => setEditForm({ ...editForm, area: e.target.value || null })}
+                  className="w-full border border-slate-300 rounded-lg px-4 py-2.5 bg-white"
+                >
+                  <option value="">Not set</option>
+                  <option value="stone-town">Stone Town</option>
+                  <option value="north">North Coast</option>
+                  <option value="east">East Coast</option>
+                  <option value="south">South Coast</option>
+                  <option value="central">Central Zanzibar</option>
+                  <option value="pemba">Pemba Island</option>
+                </select>
               </div>
               <div>
                 <label className="block text-sm font-semibold text-slate-700 mb-1">Description</label>
