@@ -1,5 +1,6 @@
 import { useState } from "react";
 import { ChevronLeft, ChevronRight, X, Images } from "lucide-react";
+import ImageWithFallback from "./ImageWithFallback";
 
 // Editorial "mosaic" header: one large photo plus a small grid of supporting
 // shots, with a "See all photos" overlay that opens the full lightbox.
@@ -31,7 +32,7 @@ export default function PhotoGallery({ coverImage, galleryImages = [], listingNa
   if (allImages.length === 1) {
     return (
       <div className="h-[44vh] min-h-[220px] max-h-72 sm:max-h-none sm:h-72 md:h-[26rem] w-full overflow-hidden bg-slate-100">
-        <img
+        <ImageWithFallback
           src={allImages[0]}
           alt={altFor(0)}
           loading="eager"
@@ -52,7 +53,8 @@ export default function PhotoGallery({ coverImage, galleryImages = [], listingNa
           h-64 so it never eats too much of the screen on short devices,
           while still staying tall enough to be an attractive banner. */}
       <div className="md:hidden relative h-[44vh] min-h-[220px] max-h-72 w-full overflow-hidden bg-slate-100 group">
-        <img
+        <ImageWithFallback
+          key={allImages[current]}
           src={allImages[current]}
           alt={altFor(current)}
           loading="eager"
@@ -85,7 +87,7 @@ export default function PhotoGallery({ coverImage, galleryImages = [], listingNa
       {/* --- Desktop: mosaic grid --- */}
       <div className="hidden md:grid grid-cols-4 grid-rows-2 gap-1.5 h-[26rem] max-w-6xl mx-auto px-4 mt-4">
         <button onClick={() => openAt(0)} aria-label={`View photo 1 of ${allImages.length}${listingName ? `, ${listingName}` : ""}`} className="col-span-2 row-span-2 overflow-hidden rounded-l-2xl">
-          <img
+          <ImageWithFallback
             src={allImages[0]}
             alt={altFor(0)}
             loading="eager"
@@ -103,7 +105,7 @@ export default function PhotoGallery({ coverImage, galleryImages = [], listingNa
               aria-label={isLast ? `View all ${allImages.length} photos` : `View photo ${i + 2} of ${allImages.length}${listingName ? `, ${listingName}` : ""}`}
               className={`relative overflow-hidden ${cornerClass}`}
             >
-              <img src={img} alt={altFor(i + 1)} loading="lazy" className="w-full h-full object-cover hover:scale-105 transition duration-500" />
+              <ImageWithFallback src={img} alt={altFor(i + 1)} loading="lazy" className="w-full h-full object-cover hover:scale-105 transition duration-500" />
               {isLast && (
                 <span className="absolute inset-0 bg-black/50 flex items-center justify-center text-white font-semibold text-sm">
                   +{remainingCount} more
@@ -148,7 +150,8 @@ export default function PhotoGallery({ coverImage, galleryImages = [], listingNa
           >
             <ChevronLeft className="w-8 h-8" aria-hidden="true" />
           </button>
-          <img
+          <ImageWithFallback
+            key={allImages[current]}
             src={allImages[current]}
             alt={altFor(current)}
             className="max-h-[85vh] max-w-[90vw] object-contain"
