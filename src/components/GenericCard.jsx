@@ -6,6 +6,8 @@ import { TAG_OPTIONS } from "../lib/tags";
 import { buildWhatsAppLink } from "../lib/whatsapp";
 import { normalizePhone } from "../lib/phone";
 import { trackEvent } from "../lib/analytics";
+import { formatLocation } from "../lib/locations";
+import ImageWithFallback from "./ImageWithFallback";
 
 export default function GenericCard({ item, sectionKey }) {
   const { language } = useLanguage();
@@ -27,7 +29,7 @@ export default function GenericCard({ item, sectionKey }) {
     <div className="group bg-white rounded-2xl overflow-hidden shadow-sm hover:shadow-xl transition-shadow border border-slate-100">
       <Link to={`/${sectionKey}/${item.id}`} className="block">
         <div className="relative h-48 overflow-hidden">
-          <img
+          <ImageWithFallback
             src={item.image_url}
             alt={item.title}
             className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
@@ -44,7 +46,7 @@ export default function GenericCard({ item, sectionKey }) {
           {item.location && (
             <div className="flex items-center gap-1 text-xs text-slate-500 mb-1">
               <MapPin className="w-3.5 h-3.5" />
-              <span>{item.location}</span>
+              <span>{formatLocation(item.location)}</span>
             </div>
           )}
           <h3 className="font-bold text-lg text-slate-900 mb-2">{item.title}</h3>
