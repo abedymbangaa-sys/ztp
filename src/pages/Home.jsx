@@ -9,6 +9,7 @@ import TravelerStories from "../components/TravelerStories";
 import DealsSection from "../components/DealsSection";
 import SearchAutocomplete from "../components/SearchAutocomplete";
 import TripBuilderModal from "../components/TripBuilderModal";
+import { AREAS } from "../data/areas";
 import { ShieldCheck, MapPin, MessageCircle, BadgeCheck, Compass } from "lucide-react";
 import { useT } from "../lib/i18n";
 // Leaflet + react-leaflet is a heavy library (~150kB). Lazy-loading it
@@ -149,6 +150,33 @@ export default function Home() {
       </section>
 
       <TripBuilderModal open={tripBuilderOpen} onClose={() => setTripBuilderOpen(false)} />
+
+      {/* Explore by area - internal links for visitors comparing where to
+          stay, and a crawl path search engines can follow to each area's
+          indexable landing page. */}
+      <section className="max-w-6xl mx-auto px-4 py-16">
+        <div className="mb-8">
+          <h2 className="text-2xl sm:text-3xl font-bold text-slate-900">Explore Zanzibar by Area</h2>
+          <p className="text-slate-500 mt-1">Not sure where to stay? Start with a region.</p>
+        </div>
+        <div className="grid grid-cols-2 sm:grid-cols-3 gap-4">
+          {AREAS.map((a) => (
+            <Link
+              key={a.key}
+              to={`/area/${a.key}`}
+              className="relative rounded-2xl overflow-hidden h-32 sm:h-40 group"
+            >
+              <img
+                src={a.heroImage}
+                alt={a.name}
+                className="absolute inset-0 w-full h-full object-cover group-hover:scale-105 transition duration-300"
+              />
+              <div className="absolute inset-0 bg-gradient-to-t from-black/70 via-black/10 to-transparent" />
+              <span className="absolute bottom-3 left-3 text-white font-bold">{a.name}</span>
+            </Link>
+          ))}
+        </div>
+      </section>
 
       <StatsCounter />
 
