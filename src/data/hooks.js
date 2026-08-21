@@ -4,7 +4,7 @@ import { supabase } from "../lib/supabase";
 // Shared timeout so a hung Supabase request (dead connection, cold serverless
 // function, flaky mobile network) can't leave a page stuck on "loading"
 // forever. Any request that takes longer than this is treated as failed.
-const FETCH_TIMEOUT_MS = 15000;
+const FETCH_TIMEOUT_MS = 9000;
 
 function withTimeout(promise) {
   const timeoutPromise = new Promise((_, reject) =>
@@ -241,11 +241,13 @@ export function useListing(id) {
     let mounted = true;
     setLoading(true);
     setError(null);
-    supabase
-      .from("listings")
-      .select("*, partners(business_name, email)")
-      .eq("id", id)
-      .single()
+    withTimeout(
+      supabase
+        .from("listings")
+        .select("*, partners(business_name, email)")
+        .eq("id", id)
+        .single()
+    )
       .then(({ data, error }) => {
         if (!mounted) return;
         // PGRST116 = "no rows returned" from .single() - that's a genuine
@@ -257,6 +259,16 @@ export function useListing(id) {
         } else {
           setListing(data || null);
         }
+        setLoading(false);
+      })
+      .catch((err) => {
+        // Timeout (or any other rejection outside the normal Supabase
+        // {data,error} shape) lands here - surfaced as the same error
+        // state so the retry button always appears within ~9s instead of
+        // the skeleton spinning forever on a hung connection.
+        if (!mounted) return;
+        setError(err);
+        setListing(null);
         setLoading(false);
       });
     return () => {
