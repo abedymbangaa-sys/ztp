@@ -45,7 +45,7 @@ export default function AdminDashboard() {
   const [heroImageSaving, setHeroImageSaving] = useState(false);
   const [heroImageMessage, setHeroImageMessage] = useState("");
   const [blogPosts, setBlogPosts] = useState([]);
-  const [newPost, setNewPost] = useState({ title: "", excerpt: "", content: "", cover_image: "", language: "en" });
+  const [newPost, setNewPost] = useState({ title: "", excerpt: "", content: "", cover_image: "", language: "en", post_type: "blog" });
   const [postMessage, setPostMessage] = useState("");
   const [guides, setGuides] = useState([]);
   const [newGuide, setNewGuide] = useState({
@@ -549,6 +549,7 @@ export default function AdminDashboard() {
       content: newPost.content,
       cover_image: newPost.cover_image,
       language: newPost.language,
+      post_type: newPost.post_type,
       status: "draft",
     };
     let { error } = await supabase.from("blog_posts").insert(payload);
@@ -1951,6 +1952,25 @@ export default function AdminDashboard() {
                     onChange={() => setNewPost({ ...newPost, language: "sw" })}
                   />
                   Kiswahili (kwa Watanzania)
+                </label>
+              </div>
+              <div className="flex items-center gap-3">
+                <span className="text-sm text-slate-500">Aina ya makala:</span>
+                <label className="flex items-center gap-1.5 text-sm">
+                  <input
+                    type="radio"
+                    checked={newPost.post_type === "blog"}
+                    onChange={() => setNewPost({ ...newPost, post_type: "blog" })}
+                  />
+                  Blog (habari/vidokezo)
+                </label>
+                <label className="flex items-center gap-1.5 text-sm">
+                  <input
+                    type="radio"
+                    checked={newPost.post_type === "guide"}
+                    onChange={() => setNewPost({ ...newPost, post_type: "guide" })}
+                  />
+                  Practical Guide (/guides)
                 </label>
               </div>
               <input
