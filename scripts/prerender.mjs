@@ -216,6 +216,60 @@ async function main() {
     }
   }
 
+  // ---- Practical Guides (airport, ferry, tides, best time, money, etiquette) ----
+  try {
+    const { data: guidePosts, error } = await supabase
+      .from("blog_posts")
+      .select("*")
+      .eq("status", "published")
+      .eq("post_type", "guide");
+    if (error) throw new Error(error.message);
+
+    const listItems = (guidePosts || [])
+      .map((g) => `<li><a href="/guides/${escapeHtml(g.slug)}">${escapeHtml(g.title)}</a></li>`)
+      .join("");
+    writeStaticPage(template, "/guides", {
+      title: "Zanzibar Travel Guides — Airport, Ferry, Money & More | Zanzibar Paradise Tours",
+      description:
+        "Practical Zanzibar travel guides: airport transfers, the Dar es Salaam ferry, tide times, best time to visit, money & costs, and local etiquette.",
+      bodyHtml: `<h1>Zanzibar Travel Guides</h1><ul>${listItems}</ul>`,
+    });
+    generated++;
+    sitemapRoutes.push("/guides");
+
+    for (const g of guidePosts || []) {
+      try {
+        const pageUrl = `${SITE_URL}/guides/${g.slug}`;
+        const description = g.excerpt || (g.content || "").slice(0, 155);
+        writeStaticPage(template, `/guides/${g.slug}`, {
+          title: `${g.title} | Zanzibar Paradise Tours`,
+          description,
+          image: g.cover_image,
+          url: pageUrl,
+          bodyHtml: `<h1>${escapeHtml(g.title)}</h1><div>${escapeHtml(g.content || "")}</div>`,
+          structuredData: {
+            "@context": "https://schema.org",
+            "@type": "Article",
+            headline: g.title,
+            description,
+            image: g.cover_image ? [absoluteUrl(g.cover_image)] : undefined,
+            datePublished: g.created_at,
+            dateModified: g.updated_at || g.created_at,
+            author: { "@type": "Organization", name: "Zanzibar Paradise Tours" },
+            publisher: { "@type": "Organization", name: "Zanzibar Paradise Tours" },
+            mainEntityOfPage: pageUrl,
+          },
+        });
+        generated++;
+        sitemapRoutes.push(`/guides/${g.slug}`);
+      } catch (err) {
+        console.warn(`[prerender] Failed to write guide page /guides/${g.slug}:`, err.message);
+      }
+    }
+  } catch (err) {
+    console.warn("[prerender] Could not load guide posts, skipping guides prerender:", err.message);
+  }
+
   // ---- Things to Do hub page ----
   try {
     const activityListings = listings.filter((l) => ACTIVITY_CATEGORIES.includes(l.category_key));
@@ -261,6 +315,7 @@ async function main() {
     const { data: posts, error } = await supabase.from("blog_posts").select("*").eq("status", "published");
     if (error) throw new Error(error.message);
     for (const post of posts || []) {
+      if (post.post_type === "guide") continue; // guides get their own /guides/:slug page above
       try {
         const pageUrl = `${SITE_URL}/blog/${post.slug}`;
         const description = post.excerpt || (post.content || "").slice(0, 155);
