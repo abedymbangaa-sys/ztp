@@ -30,6 +30,7 @@ const BeforeYouGo = lazy(() => import("./pages/BeforeYouGo"));
 const Privacy = lazy(() => import("./pages/Privacy"));
 const Terms = lazy(() => import("./pages/Terms"));
 const DataSource = lazy(() => import("./pages/DataSource"));
+const Area = lazy(() => import("./pages/Area"));
 function PageLoading() {
   return (
     <div className="flex items-center justify-center py-24">
@@ -63,6 +64,11 @@ export default function App() {
             <Route path="/things-to-do" element={<ThingsToDo />} />
             <Route path="/kwa-watanzania" element={<ForTanzanians />} />
             <Route path="/ad/:id" element={<AdDetail />} />
+            {/* Must come before the generic /:sectionKey and /:sectionKey/:id
+                routes below, otherwise "/area/stone-town" would be matched
+                as sectionKey="area", id="stone-town" and render the wrong
+                page (SectionDetail instead of the area landing page). */}
+            <Route path="/area/:areaKey" element={<Area />} />
             <Route path="/:sectionKey" element={<SectionListing />} />
             <Route path="/:sectionKey/:id" element={<SectionDetail />} />
           </Routes>
