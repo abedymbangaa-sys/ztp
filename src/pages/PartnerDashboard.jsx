@@ -19,6 +19,7 @@ const emptyForm = {
   duration: "",
   key_inclusions: "",
   key_exclusions: "",
+  area: "",
 };
 
 export default function PartnerDashboard() {
@@ -78,7 +79,10 @@ export default function PartnerDashboard() {
       // Editing an existing listing: save the changes directly. No need to
       // reset status to "pending" - price/duration corrections shouldn't
       // send an already-approved listing back through moderation.
-      const { error } = await supabase.from("listings").update(form).eq("id", editingId);
+      const { error } = await supabase
+        .from("listings")
+        .update({ ...form, area: form.area || null })
+        .eq("id", editingId);
       setSaving(false);
       if (error) {
         setMessage("Error: " + error.message);
@@ -92,6 +96,7 @@ export default function PartnerDashboard() {
 
     const { error } = await supabase.from("listings").insert({
       ...form,
+      area: form.area || null,
       partner_id: partner.id,
       status: "pending",
     });
@@ -123,6 +128,7 @@ export default function PartnerDashboard() {
       duration: listing.duration || "",
       key_inclusions: listing.key_inclusions || "",
       key_exclusions: listing.key_exclusions || "",
+      area: listing.area || "",
     });
     setMessage("");
     // Scroll the form into view since it's below the listings list.
@@ -250,6 +256,22 @@ export default function PartnerDashboard() {
               placeholder="e.g. Nungwi, North Zanzibar"
               className="w-full border border-slate-300 rounded-lg px-4 py-2.5"
             />
+          </div>
+          <div>
+            <label className="block text-sm font-semibold text-slate-700 mb-1">Area</label>
+            <select
+              value={form.area}
+              onChange={(e) => setForm({ ...form, area: e.target.value })}
+              className="w-full border border-slate-300 rounded-lg px-4 py-2.5 bg-white"
+            >
+              <option value="">Select area</option>
+              <option value="stone-town">Stone Town</option>
+              <option value="north">North Coast</option>
+              <option value="east">East Coast</option>
+              <option value="south">South Coast</option>
+              <option value="central">Central Zanzibar</option>
+              <option value="pemba">Pemba Island</option>
+            </select>
           </div>
           <div>
             <label className="block text-sm font-semibold text-slate-700 mb-1">Description</label>
