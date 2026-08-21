@@ -31,6 +31,8 @@ const Privacy = lazy(() => import("./pages/Privacy"));
 const Terms = lazy(() => import("./pages/Terms"));
 const DataSource = lazy(() => import("./pages/DataSource"));
 const Area = lazy(() => import("./pages/Area"));
+const Guides = lazy(() => import("./pages/Guides"));
+const GuideDetail = lazy(() => import("./pages/GuideDetail"));
 function PageLoading() {
   return (
     <div className="flex items-center justify-center py-24">
@@ -69,6 +71,8 @@ export default function App() {
                 as sectionKey="area", id="stone-town" and render the wrong
                 page (SectionDetail instead of the area landing page). */}
             <Route path="/area/:areaKey" element={<Area />} />
+            <Route path="/guides" element={<Guides />} />
+            <Route path="/guides/:slug" element={<GuideDetail />} />
             <Route path="/:sectionKey" element={<SectionListing />} />
             <Route path="/:sectionKey/:id" element={<SectionDetail />} />
           </Routes>
