@@ -12,6 +12,7 @@ const TABS = [
   { key: "homepage", label: "Homepage" },
   { key: "listings", label: "Listings" },
   { key: "claims", label: "Claims" },
+  { key: "leads", label: "Leads" },
   { key: "advertisements", label: "Advertisements" },
   { key: "inquiries", label: "Inquiries" },
   { key: "partners", label: "Partners" },
@@ -37,6 +38,7 @@ export default function AdminDashboard() {
   const [storyReports, setStoryReports] = useState({});
   const [inquiries, setInquiries] = useState([]);
   const [claims, setClaims] = useState([]);
+  const [leadEvents, setLeadEvents] = useState([]);
   const [verifyingListing, setVerifyingListing] = useState(null);
   const [ads, setAds] = useState([]);
   const [adPriceInput, setAdPriceInput] = useState("");
@@ -161,6 +163,19 @@ export default function AdminDashboard() {
       .select("*")
       .order("created_at", { ascending: false });
     setClaims(claimData || []);
+
+    // Last 90 days is plenty for a "which listings are converting"
+    // overview without pulling an ever-growing table on every dashboard
+    // load. Aggregated client-side below rather than via SQL, keeping this
+    // consistent with the rest of the dashboard's plain supabase-js calls.
+    const ninetyDaysAgo = new Date(Date.now() - 90 * 24 * 60 * 60 * 1000).toISOString();
+    const { data: leadData } = await supabase
+      .from("lead_events")
+      .select("*")
+      .gte("created_at", ninetyDaysAgo)
+      .order("created_at", { ascending: false })
+      .limit(5000);
+    setLeadEvents(leadData || []);
 
     const { data: adData } = await supabase
       .from("advertisements")
@@ -656,6 +671,40 @@ export default function AdminDashboard() {
   const urgentRemovalClaims = claims.filter(
     (c) => c.request_type === "removal_request" && c.status === "pending"
   );
+
+  // Aggregate lead_events client-side into "which listings are converting"
+  // - top listings by total lead clicks, plus a simple event-type
+  // breakdown. Computed on every render off the last-90-days data already
+  // in state; the table stays small enough (a few thousand rows) that
+  // this is instant, no need for a separate SQL aggregate query.
+  const now = Date.now();
+  const DAY_MS = 24 * 60 * 60 * 1000;
+  const leadsLast7Days = leadEvents.filter((e) => now - new Date(e.created_at).getTime() <= 7 * DAY_MS);
+  const leadsLast30Days = leadEvents.filter((e) => now - new Date(e.created_at).getTime() <= 30 * DAY_MS);
+
+  const leadsByListing = {};
+  leadEvents.forEach((e) => {
+    if (!e.listing_id) return;
+    const key = e.listing_id;
+    if (!leadsByListing[key]) {
+      leadsByListing[key] = { listing_id: key, title: e.listing_title || "Untitled listing", category: e.listing_category, count: 0 };
+    }
+    leadsByListing[key].count += 1;
+  });
+  const topListingsByLeads = Object.values(leadsByListing)
+    .sort((a, b) => b.count - a.count)
+    .slice(0, 10);
+
+  const leadsByType = {};
+  leadEvents.forEach((e) => {
+    leadsByType[e.event_type] = (leadsByType[e.event_type] || 0) + 1;
+  });
+  const LEAD_TYPE_LABELS = {
+    click_send_enquiry: "Send Enquiry",
+    click_call_owner: "Call",
+    click_get_directions: "Directions",
+    click_ask_zanzibar_expert: "Ask Zanzibar Expert",
+  };
 
   return (
     <div className="max-w-5xl mx-auto px-4 py-12">
@@ -1633,6 +1682,66 @@ export default function AdminDashboard() {
         </div>
       )}
 
+      {tab === "leads" && (
+        <div className="space-y-6">
+          <div className="grid grid-cols-3 gap-3">
+            <div className="bg-white border border-slate-200 rounded-xl p-4 text-center">
+              <p className="text-2xl font-bold text-slate-900">{leadsLast7Days.length}</p>
+              <p className="text-xs text-slate-500">Leads (7 days)</p>
+            </div>
+            <div className="bg-white border border-slate-200 rounded-xl p-4 text-center">
+              <p className="text-2xl font-bold text-slate-900">{leadsLast30Days.length}</p>
+              <p className="text-xs text-slate-500">Leads (30 days)</p>
+            </div>
+            <div className="bg-white border border-slate-200 rounded-xl p-4 text-center">
+              <p className="text-2xl font-bold text-slate-900">{leadEvents.length}</p>
+              <p className="text-xs text-slate-500">Leads (90 days)</p>
+            </div>
+          </div>
+
+          <div>
+            <h3 className="font-semibold text-slate-800 mb-2 text-sm">By action type (last 90 days)</h3>
+            <div className="flex flex-wrap gap-2">
+              {Object.keys(leadsByType).length === 0 && (
+                <p className="text-slate-400 text-sm">No leads recorded yet.</p>
+              )}
+              {Object.entries(leadsByType)
+                .sort((a, b) => b[1] - a[1])
+                .map(([type, count]) => (
+                  <span key={type} className="text-xs font-semibold bg-teal-50 text-teal-800 px-3 py-1.5 rounded-full">
+                    {LEAD_TYPE_LABELS[type] || type}: {count}
+                  </span>
+                ))}
+            </div>
+          </div>
+
+          <div>
+            <h3 className="font-semibold text-slate-800 mb-2 text-sm">Top listings by leads (last 90 days)</h3>
+            {topListingsByLeads.length === 0 ? (
+              <p className="text-slate-500 text-sm">
+                No leads recorded yet - this fills up as visitors tap "Send Enquiry", "Call", "Directions" or
+                "Ask Zanzibar Expert" on a listing page.
+              </p>
+            ) : (
+              <div className="bg-white border border-slate-200 rounded-xl divide-y divide-slate-100">
+                {topListingsByLeads.map((l, i) => (
+                  <div key={l.listing_id} className="flex items-center justify-between px-4 py-3">
+                    <div className="flex items-center gap-3">
+                      <span className="text-xs font-semibold text-slate-400 w-5">{i + 1}</span>
+                      <div>
+                        <p className="font-medium text-slate-900 text-sm">{l.title}</p>
+                        <p className="text-xs text-slate-400">{l.category}</p>
+                      </div>
+                    </div>
+                    <span className="text-sm font-bold text-teal-700">{l.count}</span>
+                  </div>
+                ))}
+              </div>
+            )}
+          </div>
+        </div>
+      )}
+
       {tab === "partners" && (
         <div className="space-y-3">
           {partners.length === 0 && <p className="text-slate-500">No partners yet.</p>}
@@ -2194,16 +2303,4 @@ export default function AdminDashboard() {
                 </button>
               </div>
             ))}
-          </div>
-        </div>
-      )}
-
-      <VerificationManager
-        open={Boolean(verifyingListing)}
-        listing={verifyingListing}
-        onClose={() => setVerifyingListing(null)}
-        onSaved={loadAll}
-      />
-    </div>
-  );
-}
+          </div
