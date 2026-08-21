@@ -26,6 +26,7 @@ import { createClient } from "@supabase/supabase-js";
 import fs from "node:fs";
 import path from "node:path";
 import { slugify } from "../src/lib/slug.js";
+import { AREAS } from "../src/data/areas.js";
 
 const DIST_DIR = path.resolve("dist");
 const TEMPLATE_PATH = path.join(DIST_DIR, "index.html");
@@ -183,6 +184,35 @@ async function main() {
         console.warn(`[prerender] Failed to write listing page /${cat.key}/${l.id}:`, err.message);
       }
       sitemapRoutes.push(`/${cat.key}/${l.id}`);
+    }
+  }
+
+  // ---- Area landing pages (Stone Town, North, East, South, Central, Pemba) ----
+  for (const area of AREAS) {
+    try {
+      const areaListings = listings.filter((l) => l.area === area.key);
+      const listItems = areaListings
+        .map((l) => `<li><a href="/${escapeHtml(l.category_key)}/${escapeHtml(l.id)}">${escapeHtml(l.title)}</a></li>`)
+        .join("");
+      const pageUrl = `${SITE_URL}/area/${area.key}`;
+      writeStaticPage(template, `/area/${area.key}`, {
+        title: `${area.name} Zanzibar — Hotels, Tours & Things to Do | Zanzibar Paradise Tours`,
+        description: area.description.slice(0, 155),
+        image: area.heroImage,
+        url: pageUrl,
+        bodyHtml: `<h1>${escapeHtml(area.name)}</h1><p>${escapeHtml(area.description)}</p><ul>${listItems}</ul>`,
+        structuredData: {
+          "@context": "https://schema.org",
+          "@type": "TouristDestination",
+          name: `${area.name}, Zanzibar`,
+          description: area.description,
+          url: pageUrl,
+        },
+      });
+      generated++;
+      sitemapRoutes.push(`/area/${area.key}`);
+    } catch (err) {
+      console.warn(`[prerender] Failed to write area page /area/${area.key}:`, err.message);
     }
   }
 
