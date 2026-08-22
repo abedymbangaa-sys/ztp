@@ -153,7 +153,30 @@ export default function SectionListing() {
       ) : error ? (
         <ListingErrorState message={error} onRetry={retry} />
       ) : filtered.length === 0 ? (
-        <p className="text-slate-500 text-center py-16">Nothing found.</p>
+        <div className="text-center py-16">
+          {listings.length === 0 ? (
+            // Category genuinely has no approved listings yet - a
+            // different situation from "your search/filters matched
+            // nothing", so it gets its own honest message rather than
+            // reusing "Nothing found" for both.
+            <p className="text-slate-500">No {config?.title || sectionKey} listed yet - check back soon.</p>
+          ) : (
+            <>
+              <p className="text-slate-500 mb-3">Nothing matches your search or filters.</p>
+              <button
+                type="button"
+                onClick={() => {
+                  setQuery("");
+                  setActiveTags([]);
+                  setActiveLocation("");
+                }}
+                className="text-teal-700 font-semibold text-sm hover:underline"
+              >
+                Clear search and filters
+              </button>
+            </>
+          )}
+        </div>
       ) : view === "map" ? (
         <ListingsMap listings={filtered} sectionKey={sectionKey} />
       ) : (
