@@ -18,6 +18,7 @@ const MAIN_LINKS = [
 const MORE_LINKS = [
   { to: "/before-you-go", label: "Before You Go" },
   { to: "/guides", label: "Travel Guides" },
+  { to: "/collections", label: "Collections" },
   { to: "/beaches", label: "Beaches" },
   { to: "/restaurants", label: "Restaurants" },
   { to: "/attractions", label: "Attractions" },
