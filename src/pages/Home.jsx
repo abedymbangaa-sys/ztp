@@ -8,9 +8,8 @@ import WebsiteReviews from "../components/WebsiteReviews";
 import TravelerStories from "../components/TravelerStories";
 import DealsSection from "../components/DealsSection";
 import SearchAutocomplete from "../components/SearchAutocomplete";
-import { AREAS } from "../data/areas";
-import { ShieldCheck, MapPin, MessageCircle, BadgeCheck, Compass } from "lucide-react";
 import { useT } from "../lib/i18n";
+import { RefreshCw } from "lucide-react";
 // Leaflet + react-leaflet is a heavy library (~150kB). Lazy-loading it
 // means visitors who never scroll down to the map never download it.
 const ZanzibarMap = lazy(() => import("../components/ZanzibarMap"));
@@ -21,11 +20,61 @@ import PaymentInstructions from "../components/PaymentInstructions";
 const DEFAULT_HERO_IMAGE =
   "https://images.unsplash.com/photo-1559827260-dc66d52bef19?w=2400&q=85&auto=format&fit=crop";
 
+// Shared "something went wrong" block used by any homepage section that
+// depends on a network fetch, so a slow/failed connection always tells
+// the visitor what's going on instead of leaving a silent gap where
+// content should be - and gives them a one-tap way to try again.
+function SectionErrorState({ message, onRetry }) {
+  return (
+    <div className="text-center py-10 bg-slate-50 rounded-2xl border border-slate-200">
+      <p className="text-slate-500 mb-4 text-sm">{message}</p>
+      <button
+        onClick={onRetry}
+        className="inline-flex items-center gap-1.5 bg-teal-700 hover:bg-teal-800 transition text-white font-semibold px-5 py-2 rounded-full text-sm"
+      >
+        <RefreshCw className="w-3.5 h-3.5" /> Try again
+      </button>
+    </div>
+  );
+}
+
+function CardSkeletonGrid({ count = 6 }) {
+  return (
+    <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-6">
+      {Array.from({ length: count }).map((_, i) => (
+        <div key={i} className="bg-white border border-slate-200 rounded-2xl overflow-hidden animate-pulse">
+          <div className="w-full h-44 bg-slate-200" />
+          <div className="p-4 space-y-2">
+            <div className="h-4 bg-slate-200 rounded w-3/4" />
+            <div className="h-3 bg-slate-200 rounded w-1/2" />
+          </div>
+        </div>
+      ))}
+    </div>
+  );
+}
+
+function CategorySkeletonGrid({ count = 6 }) {
+  return (
+    <div className="grid sm:grid-cols-2 md:grid-cols-3 gap-4">
+      {Array.from({ length: count }).map((_, i) => (
+        <div key={i} className="flex items-center gap-4 bg-white border border-slate-200 rounded-2xl p-5 animate-pulse">
+          <div className="w-12 h-12 rounded-xl bg-slate-200 shrink-0" />
+          <div className="flex-1 space-y-2">
+            <div className="h-4 bg-slate-200 rounded w-2/3" />
+            <div className="h-3 bg-slate-200 rounded w-1/3" />
+          </div>
+        </div>
+      ))}
+    </div>
+  );
+}
+
 export default function Home() {
   const location = useLocation();
   const t = useT();
-  const { categories } = useCategories();
-  const { listings: hotels, loading: hotelsLoading } = useListings("hotels");
+  const { categories, loading: categoriesLoading, error: categoriesError, retry: retryCategories } = useCategories();
+  const { listings: hotels, loading: hotelsLoading, error: hotelsError, retry: retryHotels } = useListings("hotels");
   const { listings: allApproved } = useListings();
   const { settings, loading: settingsLoading } = useSettings();
   const adPrice = Number(settings.ad_price_usd) || 15;
@@ -41,19 +90,6 @@ export default function Home() {
 
   const [adFormOpen, setAdFormOpen] = useState(false);
   const [pendingAd, setPendingAd] = useState(null); // ad row awaiting payment confirmation
-
-  // Trust strip shows a real "Verified on [date]" - the most recent
-  // last_verified_at across all approved listings - never a fabricated or
-  // hardcoded date. If nothing has a verification date yet, the strip
-  // simply omits that item rather than showing something untrue.
-  const mostRecentVerifiedDate = allApproved.reduce((latest, item) => {
-    if (!item.last_verified_at) return latest;
-    const d = new Date(item.last_verified_at);
-    return !latest || d > latest ? d : latest;
-  }, null);
-  const verifiedDateLabel = mostRecentVerifiedDate
-    ? mostRecentVerifiedDate.toLocaleDateString("en-GB", { day: "numeric", month: "short", year: "numeric" })
-    : null;
 
   useEffect(() => {
     if (location.hash === "#advertise") {
@@ -102,16 +138,16 @@ export default function Home() {
 
           <div className="flex flex-col sm:flex-row justify-center gap-3 sm:gap-4 px-4 sm:px-0">
             <Link
-              to="/trip-builder"
-              className="bg-amber-500 hover:bg-amber-400 transition text-slate-900 font-bold px-7 py-3.5 rounded-full shadow-lg inline-flex items-center justify-center gap-2"
+              to="/things-to-do"
+              className="bg-amber-500 hover:bg-amber-400 transition text-slate-900 font-bold px-7 py-3.5 rounded-full shadow-lg"
             >
-              <Compass className="w-5 h-5" /> Build My Zanzibar Trip
+              {t("Things to Do")}
             </Link>
             <Link
-              to="/things-to-do"
+              to="/hotels"
               className="bg-white text-teal-900 font-bold px-7 py-3.5 rounded-full hover:bg-amber-50 transition shadow-lg"
             >
-              {t("Explore Experiences")}
+              {t("View Hotels")}
             </Link>
             <a
               href="https://wa.me/255635442732"
@@ -122,55 +158,6 @@ export default function Home() {
               Ask Now
             </a>
           </div>
-
-          {/* Trust strip - every claim here is either a fixed, true fact
-              (local team, direct contact, no fees) or computed live from
-              the database (verified date), never a static "trust us"
-              placeholder. Wraps to 2 lines on small screens instead of
-              overflowing. */}
-          <div className="mt-8 flex flex-wrap items-center justify-center gap-x-6 gap-y-2 text-xs sm:text-sm text-slate-200/90">
-            {verifiedDateLabel && (
-              <span className="inline-flex items-center gap-1.5">
-                <BadgeCheck className="w-4 h-4 text-amber-300" /> Verified on {verifiedDateLabel}
-              </span>
-            )}
-            <span className="inline-flex items-center gap-1.5">
-              <MapPin className="w-4 h-4 text-amber-300" /> Local team
-            </span>
-            <span className="inline-flex items-center gap-1.5">
-              <MessageCircle className="w-4 h-4 text-amber-300" /> Direct contact
-            </span>
-            <span className="inline-flex items-center gap-1.5">
-              <ShieldCheck className="w-4 h-4 text-amber-300" /> No hidden booking fees
-            </span>
-          </div>
-        </div>
-      </section>
-
-      {/* Explore by area - internal links for visitors comparing where to
-          stay, and a crawl path search engines can follow to each area's
-          indexable landing page. */}
-      <section className="max-w-6xl mx-auto px-4 py-16">
-        <div className="mb-8">
-          <h2 className="text-2xl sm:text-3xl font-bold text-slate-900">Explore Zanzibar by Area</h2>
-          <p className="text-slate-500 mt-1">Not sure where to stay? Start with a region.</p>
-        </div>
-        <div className="grid grid-cols-2 sm:grid-cols-3 gap-4">
-          {AREAS.map((a) => (
-            <Link
-              key={a.key}
-              to={`/area/${a.key}`}
-              className="relative rounded-2xl overflow-hidden h-32 sm:h-40 group"
-            >
-              <img
-                src={a.heroImage}
-                alt={a.name}
-                className="absolute inset-0 w-full h-full object-cover group-hover:scale-105 transition duration-300"
-              />
-              <div className="absolute inset-0 bg-gradient-to-t from-black/70 via-black/10 to-transparent" />
-              <span className="absolute bottom-3 left-3 text-white font-bold">{a.name}</span>
-            </Link>
-          ))}
         </div>
       </section>
 
@@ -194,21 +181,19 @@ export default function Home() {
             View All →
           </Link>
         </div>
-        <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-6">
-          {hotelsLoading && topHotels.length === 0
-            ? // Skeleton cards while the first load is in flight, so this
-              // section never sits empty/blank before data arrives.
-              Array.from({ length: 3 }).map((_, i) => (
-                <div key={i} className="bg-white border border-slate-200 rounded-2xl overflow-hidden animate-pulse">
-                  <div className="w-full h-44 bg-slate-200" />
-                  <div className="p-4 space-y-2">
-                    <div className="h-4 bg-slate-200 rounded w-3/4" />
-                    <div className="h-3 bg-slate-200 rounded w-1/2" />
-                  </div>
-                </div>
-              ))
-            : topHotels.map((h) => <GenericCard key={h.id} item={h} sectionKey="hotels" />)}
-        </div>
+        {hotelsLoading ? (
+          <CardSkeletonGrid count={6} />
+        ) : hotelsError ? (
+          <SectionErrorState message={hotelsError} onRetry={retryHotels} />
+        ) : topHotels.length === 0 ? (
+          <p className="text-slate-500 text-center py-10">No hotels listed yet — check back soon.</p>
+        ) : (
+          <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-6">
+            {topHotels.map((h) => (
+              <GenericCard key={h.id} item={h} sectionKey="hotels" />
+            ))}
+          </div>
+        )}
       </section>
 
       {/* Explore all categories */}
@@ -217,23 +202,31 @@ export default function Home() {
           <p className="text-teal-700 font-semibold text-sm uppercase tracking-wide">Explore More</p>
           <h2 className="text-2xl sm:text-3xl font-bold text-slate-900">Everything About Zanzibar</h2>
         </div>
-        <div className="grid sm:grid-cols-2 md:grid-cols-3 gap-4">
-          {categories.map((c) => (
-            <Link
-              key={c.key}
-              to={`/${c.key}`}
-              className="flex items-center gap-4 bg-white border border-slate-200 rounded-2xl p-5 hover:shadow-lg hover:border-teal-300 transition"
-            >
-              <span className="flex items-center justify-center w-12 h-12 rounded-xl bg-teal-50 text-teal-700">
-                <SectionIcon sectionKey={c.key} className="w-6 h-6" />
-              </span>
-              <div>
-                <p className="font-bold text-slate-900">{c.title}</p>
-                <p className="text-xs text-slate-500">{c.tag}</p>
-              </div>
-            </Link>
-          ))}
-        </div>
+        {categoriesLoading ? (
+          <CategorySkeletonGrid count={6} />
+        ) : categoriesError ? (
+          <SectionErrorState message={categoriesError} onRetry={retryCategories} />
+        ) : categories.length === 0 ? (
+          <p className="text-slate-500 text-center py-10">Categories will appear here soon.</p>
+        ) : (
+          <div className="grid sm:grid-cols-2 md:grid-cols-3 gap-4">
+            {categories.map((c) => (
+              <Link
+                key={c.key}
+                to={`/${c.key}`}
+                className="flex items-center gap-4 bg-white border border-slate-200 rounded-2xl p-5 hover:shadow-lg hover:border-teal-300 transition"
+              >
+                <span className="flex items-center justify-center w-12 h-12 rounded-xl bg-teal-50 text-teal-700">
+                  <SectionIcon sectionKey={c.key} className="w-6 h-6" />
+                </span>
+                <div>
+                  <p className="font-bold text-slate-900">{c.title}</p>
+                  <p className="text-xs text-slate-500">{c.tag}</p>
+                </div>
+              </Link>
+            ))}
+          </div>
+        )}
       </section>
 
       {/* Interactive map */}
