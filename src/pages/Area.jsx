@@ -4,7 +4,8 @@ import { supabase } from "../lib/supabase";
 import { useSEO } from "../lib/useSEO";
 import { getAreaConfig, AREAS } from "../data/areas";
 import GenericCard from "../components/GenericCard";
-import { MapPin, RefreshCw } from "lucide-react";
+import ListingsMap from "../components/ListingsMap";
+import { MapPin, RefreshCw, Users, CalendarClock } from "lucide-react";
 
 const FETCH_TIMEOUT_MS = 15000;
 
@@ -101,7 +102,42 @@ export default function Area() {
       </section>
 
       <div className="max-w-5xl mx-auto px-4 py-10">
-        <p className="text-slate-700 max-w-3xl leading-relaxed mb-10">{config.description}</p>
+        <p className="text-slate-700 max-w-3xl leading-relaxed mb-6">{config.description}</p>
+
+        {/* Who it's for + a simple day plan - answers "does this area fit
+            me?" and "what would I actually do here?" without the visitor
+            having to piece it together from the listings themselves. */}
+        {(config.whoItSuits || config.dayPlan) && (
+          <div className="grid sm:grid-cols-2 gap-6 mb-10">
+            {config.whoItSuits && (
+              <div className="bg-teal-50 border border-teal-100 rounded-2xl p-5">
+                <h2 className="flex items-center gap-2 font-bold text-slate-900 mb-2">
+                  <Users className="w-5 h-5 text-teal-700" /> Who {config.name} suits
+                </h2>
+                <p className="text-slate-700 text-sm leading-relaxed">{config.whoItSuits}</p>
+              </div>
+            )}
+            {config.dayPlan && (
+              <div className="bg-white border border-slate-200 rounded-2xl p-5">
+                <h2 className="flex items-center gap-2 font-bold text-slate-900 mb-2">
+                  <CalendarClock className="w-5 h-5 text-teal-700" /> A typical day here
+                </h2>
+                <ul className="text-slate-700 text-sm leading-relaxed space-y-1.5 list-disc list-inside">
+                  {config.dayPlan.map((step, i) => (
+                    <li key={i}>{step}</li>
+                  ))}
+                </ul>
+              </div>
+            )}
+          </div>
+        )}
+
+        {!loading && !error && listings.length > 0 && (
+          <div className="mb-10">
+            <h2 className="text-lg font-bold text-slate-900 mb-4">{config.name} on the map</h2>
+            <ListingsMap listings={listings} sectionKey={listings[0]?.category_key || "hotels"} />
+          </div>
+        )}
 
         {loading ? (
           <CardSkeletonGrid count={6} />
