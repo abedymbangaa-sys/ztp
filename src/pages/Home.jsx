@@ -8,7 +8,6 @@ import WebsiteReviews from "../components/WebsiteReviews";
 import TravelerStories from "../components/TravelerStories";
 import DealsSection from "../components/DealsSection";
 import SearchAutocomplete from "../components/SearchAutocomplete";
-import TripBuilderModal from "../components/TripBuilderModal";
 import { AREAS } from "../data/areas";
 import { ShieldCheck, MapPin, MessageCircle, BadgeCheck, Compass } from "lucide-react";
 import { useT } from "../lib/i18n";
@@ -42,7 +41,6 @@ export default function Home() {
 
   const [adFormOpen, setAdFormOpen] = useState(false);
   const [pendingAd, setPendingAd] = useState(null); // ad row awaiting payment confirmation
-  const [tripBuilderOpen, setTripBuilderOpen] = useState(false);
 
   // Trust strip shows a real "Verified on [date]" - the most recent
   // last_verified_at across all approved listings - never a fabricated or
@@ -103,12 +101,12 @@ export default function Home() {
           />
 
           <div className="flex flex-col sm:flex-row justify-center gap-3 sm:gap-4 px-4 sm:px-0">
-            <button
-              onClick={() => setTripBuilderOpen(true)}
+            <Link
+              to="/trip-builder"
               className="bg-amber-500 hover:bg-amber-400 transition text-slate-900 font-bold px-7 py-3.5 rounded-full shadow-lg inline-flex items-center justify-center gap-2"
             >
               <Compass className="w-5 h-5" /> Build My Zanzibar Trip
-            </button>
+            </Link>
             <Link
               to="/things-to-do"
               className="bg-white text-teal-900 font-bold px-7 py-3.5 rounded-full hover:bg-amber-50 transition shadow-lg"
@@ -148,8 +146,6 @@ export default function Home() {
           </div>
         </div>
       </section>
-
-      <TripBuilderModal open={tripBuilderOpen} onClose={() => setTripBuilderOpen(false)} />
 
       {/* Explore by area - internal links for visitors comparing where to
           stay, and a crawl path search engines can follow to each area's
