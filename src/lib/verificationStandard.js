@@ -66,3 +66,36 @@ export function formatVerifiedDate(dateString) {
 // "we haven't looked at this" rather than a negative claim about the
 // business itself.
 export const NOT_YET_CHECKED_LABEL = "Not yet checked by our team.";
+
+// ── Trust badges (report's 5-level model) ──────────────────────────────
+// A compact, always-visible strip distinct from the detailed checklist
+// above. Each badge maps to data that already exists on the listing row -
+// no new columns needed, just surfacing what's already there simply.
+const RECENTLY_UPDATED_DAYS = 90;
+
+export function getTrustBadges(item) {
+  if (!item) return [];
+  const badges = [];
+
+  // "Editorially listed" - our team gathered and entered this listing,
+  // as opposed to a business having submitted it themselves.
+  if (item.source !== "partner_submitted") {
+    badges.push({ key: "editorial", label: "Editorially listed" });
+  }
+  if (item.identity_checked) {
+    badges.push({ key: "contact", label: "Contact checked" });
+  }
+  if (item.location_checked) {
+    badges.push({ key: "location", label: "Location checked" });
+  }
+  if (item.is_claimed) {
+    badges.push({ key: "claimed", label: "Business claimed" });
+  }
+  if (item.last_verified_at) {
+    const days = (Date.now() - new Date(item.last_verified_at).getTime()) / 86400000;
+    if (days <= RECENTLY_UPDATED_DAYS) {
+      badges.push({ key: "recent", label: "Recently updated" });
+    }
+  }
+  return badges;
+}
