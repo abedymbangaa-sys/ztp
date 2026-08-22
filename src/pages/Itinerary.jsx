@@ -41,11 +41,12 @@ export default function Itinerary() {
         <p className="text-teal-700 font-semibold text-sm uppercase tracking-wide">Plan Your Trip</p>
         <h1 className="text-2xl sm:text-3xl font-bold text-slate-900 flex items-center gap-3">
           <BookOpenText className="w-7 h-7 text-teal-700" />
-          Free Zanzibar Itinerary Guides
+          Zanzibar Itinerary Guides
         </h1>
         <p className="text-slate-600 mt-2 max-w-2xl">
-          Practical day-by-day Zanzibar guides, free to download - no account, no payment,
-          no email required.
+          {status === "ready" && guides.length === 0
+            ? "We're putting together practical day-by-day Zanzibar guides, free to download - no account, no payment, no email required. Check back soon."
+            : "Practical day-by-day Zanzibar guides, free to download - no account, no payment, no email required."}
         </p>
       </div>
 
@@ -70,7 +71,23 @@ export default function Itinerary() {
       )}
 
       {status === "ready" && guides.length === 0 && (
-        <p className="text-slate-500">Guides are still being prepared - available soon.</p>
+        <div className="bg-teal-50 border border-teal-100 rounded-2xl p-8 text-center">
+          <BookOpenText className="w-8 h-8 text-teal-600 mx-auto mb-3" />
+          <h2 className="font-bold text-slate-900 text-lg mb-1">Coming Soon</h2>
+          <p className="text-slate-600 mb-5 max-w-md mx-auto">
+            Our first free itinerary guides are being written and will appear here shortly. In the
+            meantime, a Zanzibar Expert can put together a personalized day-by-day plan for you on WhatsApp.
+          </p>
+          <a
+            href={buildExpertLink("a Zanzibar itinerary", "Zanzibar", window.location.href)}
+            target="_blank"
+            rel="noreferrer"
+            className="inline-flex items-center gap-1.5 bg-teal-700 hover:bg-teal-800 transition text-white font-semibold px-5 py-2.5 rounded-full text-sm"
+          >
+            <MessageCircle className="w-4 h-4" />
+            Ask a Zanzibar Expert
+          </a>
+        </div>
       )}
 
       {status === "ready" && guides.length > 0 && (
