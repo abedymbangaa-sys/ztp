@@ -1,6 +1,7 @@
 import { Suspense, lazy } from "react";
 import { BrowserRouter, Routes, Route } from "react-router-dom";
 import { LanguageProvider } from "./lib/LanguageContext";
+import { SavedListProvider } from "./lib/SavedListContext";
 import Navbar from "./components/Navbar";
 import Footer from "./components/Footer";
 import ScrollToTop from "./components/ScrollToTop";
@@ -37,6 +38,7 @@ const TripBuilder = lazy(() => import("./pages/TripBuilder"));
 const Collections = lazy(() => import("./pages/Collections"));
 const CollectionDetail = lazy(() => import("./pages/CollectionDetail"));
 const NearMe = lazy(() => import("./pages/NearMe"));
+const MyZanzibar = lazy(() => import("./pages/MyZanzibar"));
 function PageLoading() {
   return (
     <div className="flex items-center justify-center py-24">
@@ -48,6 +50,7 @@ export default function App() {
   return (
     <BrowserRouter>
       <LanguageProvider>
+        <SavedListProvider>
         <ScrollToTop />
         <Navbar />
         <Suspense fallback={<PageLoading />}>
@@ -80,6 +83,7 @@ export default function App() {
             <Route path="/collections" element={<Collections />} />
             <Route path="/collections/:collectionKey" element={<CollectionDetail />} />
             <Route path="/near-me" element={<NearMe />} />
+            <Route path="/my-zanzibar" element={<MyZanzibar />} />
             <Route path="/guides" element={<Guides />} />
             <Route path="/guides/:slug" element={<GuideDetail />} />
             <Route path="/trip-builder" element={<TripBuilder />} />
@@ -89,6 +93,7 @@ export default function App() {
         </Suspense>
         <Footer />
         <SiteReviewPrompt />
+        </SavedListProvider>
       </LanguageProvider>
     </BrowserRouter>
   );
