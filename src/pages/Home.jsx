@@ -18,6 +18,7 @@ const ZanzibarMap = lazy(() => import("../components/ZanzibarMap"));
 import AdvertiseSection from "../components/AdvertiseSection";
 import AdvertiseFormModal from "../components/AdvertiseFormModal";
 import PaymentInstructions from "../components/PaymentInstructions";
+import { COLLECTIONS } from "../data/collections";
 
 const DEFAULT_HERO_IMAGE =
   "https://images.unsplash.com/photo-1559827260-dc66d52bef19?w=2400&q=85&auto=format&fit=crop";
@@ -185,6 +186,34 @@ export default function Home() {
       <TravelerStories />
 
       <DealsSection />
+
+      {/* Local collections teaser - report section 5 asks the homepage to
+          surface curated lists, not just raw categories. Shows the first
+          3; the full set lives at /collections. */}
+      <section className="max-w-6xl mx-auto px-4 pb-16">
+        <div className="flex items-end justify-between mb-8">
+          <div>
+            <p className="text-teal-700 font-semibold text-sm uppercase tracking-wide">Curated by us</p>
+            <h2 className="text-2xl sm:text-3xl font-bold text-slate-900">Zanzibar Collections</h2>
+          </div>
+          <Link to="/collections" className="text-teal-700 font-semibold hover:underline hidden md:block">
+            View All →
+          </Link>
+        </div>
+        <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-6">
+          {COLLECTIONS.slice(0, 3).map((c) => (
+            <Link
+              key={c.key}
+              to={`/collections/${c.key}`}
+              className="block bg-white border border-slate-200 rounded-2xl p-6 hover:shadow-lg hover:border-teal-300 transition"
+            >
+              <h3 className="font-bold text-lg text-slate-900 mb-1">{c.title}</h3>
+              <p className="text-teal-700 text-sm font-semibold mb-3">{c.tagline}</p>
+              <p className="text-slate-500 text-sm leading-relaxed">{c.description}</p>
+            </Link>
+          ))}
+        </div>
+      </section>
 
       <AdvertiseSection />
 
