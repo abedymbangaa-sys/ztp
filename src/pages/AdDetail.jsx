@@ -1,6 +1,6 @@
 import { Link, useParams } from "react-router-dom";
 import { useAdvertisement } from "../data/hooks";
-import { MapPin, MessageCircle, ExternalLink, Megaphone } from "lucide-react";
+import { MapPin, MessageCircle, ExternalLink, Megaphone, AlertTriangle, RefreshCw } from "lucide-react";
 import PhotoGallery from "../components/PhotoGallery";
 
 // Detail page for a single paid advertisement, reached via the "View
@@ -9,10 +9,32 @@ import PhotoGallery from "../components/PhotoGallery";
 // an equally polished, "serious" page - not just a thin popup.
 export default function AdDetail() {
   const { id } = useParams();
-  const { ad, loading } = useAdvertisement(id);
+  const { ad, loading, error, retry } = useAdvertisement(id);
 
   if (loading) {
-    return <div className="max-w-3xl mx-auto px-4 py-24 text-center">Loading...</div>;
+    return (
+      <div className="max-w-3xl mx-auto px-4 py-24 text-center animate-pulse">
+        <div className="h-64 bg-slate-200 rounded-2xl mb-6" />
+        <div className="h-6 bg-slate-200 rounded w-1/2 mx-auto mb-3" />
+        <div className="h-4 bg-slate-200 rounded w-1/3 mx-auto" />
+      </div>
+    );
+  }
+
+  if (error) {
+    return (
+      <div className="max-w-3xl mx-auto px-4 py-24 text-center">
+        <AlertTriangle className="w-10 h-10 text-amber-500 mx-auto mb-4" />
+        <h1 className="text-2xl font-bold mb-2">Something went wrong</h1>
+        <p className="text-slate-500 mb-6">We couldn't load this advertisement. Please check your connection and try again.</p>
+        <button
+          onClick={retry}
+          className="inline-flex items-center gap-1.5 bg-teal-700 hover:bg-teal-800 transition text-white font-semibold px-5 py-2.5 rounded-full"
+        >
+          <RefreshCw className="w-4 h-4" /> Try Again
+        </button>
+      </div>
+    );
   }
 
   if (!ad) {
