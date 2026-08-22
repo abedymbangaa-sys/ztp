@@ -435,6 +435,18 @@ export default function AdminDashboard() {
     loadAll();
   }
 
+  // "Verified by ZPT" is a manual, honest signal - it means the admin has
+  // actually confirmed this review is genuine (e.g. matched against a
+  // real enquiry or WhatsApp conversation), not an automatic claim. Only
+  // toggle this on reviews you've actually checked.
+  async function toggleReviewVerified(id, current) {
+    await supabase
+      .from("reviews")
+      .update({ verified_by_admin: !current, verified_at: !current ? new Date().toISOString() : null })
+      .eq("id", id);
+    loadAll();
+  }
+
   // ============================================================
   // TRAVELER STORIES MODERATION
   // ============================================================
@@ -1795,9 +1807,23 @@ export default function AdminDashboard() {
                 <div className="flex items-center gap-2 mb-1">
                   <p className="font-semibold text-slate-900">{r.reviewer_name}</p>
                   <span className="text-amber-500 text-sm">{"★".repeat(r.rating)}{"☆".repeat(5 - r.rating)}</span>
+                  {r.verified_by_admin && (
+                    <span className="text-xs font-semibold text-teal-700 bg-teal-50 px-2 py-0.5 rounded-full">
+                      ✓ Verified
+                    </span>
+                  )}
                 </div>
                 <p className="text-xs text-slate-500 mb-2">Regarding: {r.listings?.title || "—"}</p>
                 {r.comment && <p className="text-sm text-slate-700">{r.comment}</p>}
+                {r.photo_urls?.length > 0 && (
+                  <div className="flex gap-2 mt-2">
+                    {r.photo_urls.map((url, i) => (
+                      <a key={i} href={url} target="_blank" rel="noreferrer" className="w-14 h-14 rounded-lg overflow-hidden border border-slate-200 block">
+                        <img src={url} alt={`Review photo ${i + 1}`} className="w-full h-full object-cover" />
+                      </a>
+                    ))}
+                  </div>
+                )}
               </div>
               <div className="flex items-center gap-2 shrink-0 flex-wrap">
                 <span
@@ -1826,6 +1852,20 @@ export default function AdminDashboard() {
                     className="text-xs font-semibold bg-slate-200 text-slate-700 px-3 py-1.5 rounded-full hover:bg-slate-300"
                   >
                     Reject
+                  </button>
+                )}
+                {r.status === "approved" && (
+                  <button
+                    onClick={() => toggleReviewVerified(r.id, r.verified_by_admin)}
+                    title="Only mark verified if you've actually confirmed this reviewer's stay/booking"
+                    className={
+                      "text-xs font-semibold px-3 py-1.5 rounded-full border " +
+                      (r.verified_by_admin
+                        ? "bg-teal-700 text-white border-teal-700"
+                        : "bg-white text-teal-700 border-teal-600 hover:bg-teal-50")
+                    }
+                  >
+                    {r.verified_by_admin ? "✓ Verified" : "Mark Verified"}
                   </button>
                 )}
               </div>
@@ -2259,48 +2299,4 @@ export default function AdminDashboard() {
             <form onSubmit={addCategory} className="grid sm:grid-cols-3 gap-3">
               <input
                 placeholder="key (e.g. sports)"
-                value={newCat.key}
-                onChange={(e) => setNewCat({ ...newCat, key: e.target.value })}
-                className="border border-slate-300 rounded-lg px-4 py-2.5"
-              />
-              <input
-                placeholder="Name (e.g. Sports)"
-                value={newCat.title}
-                onChange={(e) => setNewCat({ ...newCat, title: e.target.value })}
-                className="border border-slate-300 rounded-lg px-4 py-2.5"
-              />
-              <input
-                placeholder="Tag (e.g. Sports & Fun)"
-                value={newCat.tag}
-                onChange={(e) => setNewCat({ ...newCat, tag: e.target.value })}
-                className="border border-slate-300 rounded-lg px-4 py-2.5"
-              />
-              <button
-                type="submit"
-                className="sm:col-span-3 bg-teal-700 hover:bg-teal-800 transition text-white font-bold py-2.5 rounded-full"
-              >
-                Add Category
-              </button>
-            </form>
-            {message && <p className="text-sm text-teal-700 font-medium mt-3">{message}</p>}
-          </div>
-
-          <div className="space-y-2">
-            {categories.map((c) => (
-              <div key={c.id} className="flex items-center justify-between bg-white border border-slate-200 rounded-xl p-4">
-                <div>
-                  <p className="font-semibold text-slate-900">{c.title}</p>
-                  <p className="text-xs text-slate-500">key: {c.key}</p>
-                </div>
-                <button
-                  onClick={() => toggleCategoryActive(c.id, c.is_active)}
-                  className={
-                    "text-xs font-semibold px-3 py-1.5 rounded-full " +
-                    (c.is_active ? "bg-green-100 text-green-700" : "bg-slate-200 text-slate-600")
-                  }
-                >
-                  {c.is_active ? "Active" : "Hidden"}
-                </button>
-              </div>
-            ))}
-          </div
+           
