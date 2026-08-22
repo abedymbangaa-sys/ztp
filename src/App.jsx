@@ -34,6 +34,8 @@ const Area = lazy(() => import("./pages/Area"));
 const Guides = lazy(() => import("./pages/Guides"));
 const GuideDetail = lazy(() => import("./pages/GuideDetail"));
 const TripBuilder = lazy(() => import("./pages/TripBuilder"));
+const Collections = lazy(() => import("./pages/Collections"));
+const CollectionDetail = lazy(() => import("./pages/CollectionDetail"));
 function PageLoading() {
   return (
     <div className="flex items-center justify-center py-24">
@@ -72,6 +74,10 @@ export default function App() {
                 as sectionKey="area", id="stone-town" and render the wrong
                 page (SectionDetail instead of the area landing page). */}
             <Route path="/area/:areaKey" element={<Area />} />
+            {/* Same reasoning as /area/:areaKey above - must come before
+                the generic /:sectionKey routes. */}
+            <Route path="/collections" element={<Collections />} />
+            <Route path="/collections/:collectionKey" element={<CollectionDetail />} />
             <Route path="/guides" element={<Guides />} />
             <Route path="/guides/:slug" element={<GuideDetail />} />
             <Route path="/trip-builder" element={<TripBuilder />} />
