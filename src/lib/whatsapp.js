@@ -53,6 +53,19 @@ export function buildTripBuilderLink({ dates, area, travelers, budget, interests
   ];
   return `https://wa.me/${SITE_CONTACT_NUMBER}?text=${encodeURIComponent(lines.join("\n"))}`;
 }
+
+// Sent from the full Trip Builder page (/trip-builder) once someone has
+// an instant, real-listings-only itinerary and wants a local expert to
+// confirm availability/pricing. Includes the actual listing names chosen
+// by the planner so the expert isn't starting from scratch.
+export function buildItineraryConfirmLink({ dates, travelers, days, listingTitles }) {
+  const lines = [
+    `Hi, I used the Trip Builder on your site and got a ${days}-day plan${dates ? ` for ${dates}` : ""}${travelers ? `, ${travelers} travelers` : ""}.`,
+    listingTitles?.length ? `It includes: ${listingTitles.join(", ")}.` : "",
+    `Could you confirm availability and pricing for these, please?`,
+  ].filter(Boolean);
+  return `https://wa.me/${SITE_CONTACT_NUMBER}?text=${encodeURIComponent(lines.join("\n"))}`;
+}
 // "Ask Zanzibar Expert" - inatumika kutoka listing detail page (na
 // baadaye listing cards) kumpeleka visitor kwa Wachu Digital Growth
 // moja kwa moja, si kwa biashara husika. Inatumia SITE_CONTACT_NUMBER
