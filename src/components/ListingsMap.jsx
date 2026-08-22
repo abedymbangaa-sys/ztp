@@ -41,7 +41,11 @@ export default function ListingsMap({ listings, sectionKey }) {
       // route GenericCard uses - this used to hardcode "/ad/<id>" (the
       // paid-advertisement route), which sent every listing popup to the
       // wrong page.
-      popupDiv.innerHTML = `<strong>${item.title}</strong><br/><a href="/${sectionKey}/${item.id}" style="color:#0f766e;">View details &rarr;</a>`;
+      // Prefer the item's own category (needed on pages like /area/:key that
+      // mix hotels, tours, restaurants etc in one map) and only fall back to
+      // the page-level sectionKey for single-category listing pages.
+      const linkCategory = item.category_key || sectionKey;
+      popupDiv.innerHTML = `<strong>${item.title}</strong><br/><a href="/${linkCategory}/${item.id}" style="color:#0f766e;">View details &rarr;</a>`;
       marker.bindPopup(popupDiv);
     });
 
