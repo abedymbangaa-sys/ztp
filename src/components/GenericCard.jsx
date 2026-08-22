@@ -9,7 +9,7 @@ import { trackEvent } from "../lib/analytics";
 import { formatLocation } from "../lib/locations";
 import ImageWithFallback from "./ImageWithFallback";
 
-export default function GenericCard({ item, sectionKey }) {
+export default function GenericCard({ item, sectionKey, distanceKm }) {
   const { language } = useLanguage();
   const t = useT();
   const description = (language !== "en" && item[`description_${language}`]) || item.description;
@@ -47,6 +47,11 @@ export default function GenericCard({ item, sectionKey }) {
             <div className="flex items-center gap-1 text-xs text-slate-500 mb-1">
               <MapPin className="w-3.5 h-3.5" />
               <span>{formatLocation(item.location)}</span>
+              {typeof distanceKm === "number" && (
+                <span className="ml-1 font-semibold text-teal-700">
+                  · {distanceKm < 1 ? "under 1 km" : `${distanceKm.toFixed(1)} km`} away
+                </span>
+              )}
             </div>
           )}
           <h3 className="font-bold text-lg text-slate-900 mb-2">{item.title}</h3>
