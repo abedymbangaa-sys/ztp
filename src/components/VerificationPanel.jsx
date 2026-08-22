@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { Check, X, Flag, ChevronDown, HelpCircle } from "lucide-react";
+import { Check, X, Flag, ChevronDown, HelpCircle, UserCog } from "lucide-react";
 import {
   VERIFICATION_CHECKS,
   isCoreVerified,
@@ -14,7 +14,7 @@ import { useT } from "../lib/i18n";
  * Renders nothing but a light "not yet reviewed" note if no checks
  * have been done yet, so it never looks broken on older listings.
  */
-export default function VerificationPanel({ item, onReportIssue }) {
+export default function VerificationPanel({ item, onReportIssue, onClaimBusiness }) {
   const t = useT();
   const verified = isCoreVerified(item);
   const dateLabel = formatVerifiedDate(item.last_verified_at);
@@ -124,6 +124,26 @@ export default function VerificationPanel({ item, onReportIssue }) {
         >
           {expanded ? t("Show less") : t("Show all checks")}
           <ChevronDown className={"w-3.5 h-3.5 transition-transform " + (expanded ? "rotate-180" : "")} aria-hidden="true" />
+        </button>
+      )}
+
+      {/* Always-visible scope disclaimer - never hidden behind the "How
+          we verify" toggle, so no one can miss that verification is an
+          information review, not a guarantee of the business itself. */}
+      <p className="mt-4 pt-3 border-t border-slate-100 text-[11px] leading-relaxed text-slate-400">
+        {t(
+          "Verification means that we reviewed selected business information using our directory checklist. It does not guarantee availability, prices, payment terms or the quality of every service. Travelers should confirm final details directly with the business."
+        )}
+      </p>
+
+      {onClaimBusiness && (
+        <button
+          type="button"
+          onClick={onClaimBusiness}
+          className="mt-2 flex items-center gap-1.5 text-xs font-semibold text-slate-500 hover:text-teal-700"
+        >
+          <UserCog className="w-3.5 h-3.5" />
+          {t("Claim or update this business")}
         </button>
       )}
     </div>
