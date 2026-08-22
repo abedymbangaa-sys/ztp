@@ -33,6 +33,7 @@ const DataSource = lazy(() => import("./pages/DataSource"));
 const Area = lazy(() => import("./pages/Area"));
 const Guides = lazy(() => import("./pages/Guides"));
 const GuideDetail = lazy(() => import("./pages/GuideDetail"));
+const TripBuilder = lazy(() => import("./pages/TripBuilder"));
 function PageLoading() {
   return (
     <div className="flex items-center justify-center py-24">
@@ -73,6 +74,7 @@ export default function App() {
             <Route path="/area/:areaKey" element={<Area />} />
             <Route path="/guides" element={<Guides />} />
             <Route path="/guides/:slug" element={<GuideDetail />} />
+            <Route path="/trip-builder" element={<TripBuilder />} />
             <Route path="/:sectionKey" element={<SectionListing />} />
             <Route path="/:sectionKey/:id" element={<SectionDetail />} />
           </Routes>
