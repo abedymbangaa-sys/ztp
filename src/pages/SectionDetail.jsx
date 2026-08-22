@@ -223,6 +223,10 @@ export default function SectionDetail() {
                 setClaimDefaultType("edit_request");
                 setClaimOpen(true);
               }}
+              onClaimBusiness={() => {
+                setClaimDefaultType("claim");
+                setClaimOpen(true);
+              }}
             />
 
             {(item.weather_policy || item.maps_link) && (
