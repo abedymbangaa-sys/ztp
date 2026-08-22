@@ -399,6 +399,44 @@ async function main() {
     console.warn("[prerender] Could not load itinerary guides, skipping itinerary prerender:", err.message);
   }
 
+  // ---- Homepage ("/") real-content fallback ----
+  // This is the ONE deliberate exception to "never touch dist/index.html"
+  // above: without this, "/" ships as an empty <div id="root"></div> until
+  // React hydrates, which is what made the last audit see a "blank
+  // homepage" - a real visitor's browser still renders the full
+  // interactive homepage a moment later exactly as before; this only adds
+  // real, readable content (category + top listings + area links) for
+  // crawlers, slow connections, and JS-disabled visits, using `template`
+  // (the pristine original), never a version already mutated by the
+  // per-route pages above.
+  try {
+    const topListings = listings.slice(0, 8);
+    const categoryLinks = categories
+      .map((c) => `<li><a href="/${escapeHtml(c.key)}">${escapeHtml(c.title)}</a></li>`)
+      .join("");
+    const listingLinks = topListings
+      .map((l) => `<li><a href="/${escapeHtml(l.category_key)}/${escapeHtml(l.id)}">${escapeHtml(l.title)}</a></li>`)
+      .join("");
+    const areaLinks = AREAS.map((a) => `<li><a href="/area/${a.key}">${escapeHtml(a.name)}</a></li>`).join("");
+
+    const bodyHtml = `
+      <h1>Zanzibar Paradise Tours</h1>
+      <p>A trusted directory of hotels, tours, beaches and attractions in Zanzibar, built by people who know the island well.</p>
+      <nav aria-label="Categories"><ul>${categoryLinks}</ul></nav>
+      <nav aria-label="Areas of Zanzibar"><ul>${areaLinks}</ul></nav>
+      <section aria-label="Featured listings"><ul>${listingLinks}</ul></section>
+    `;
+
+    let html = template
+      .replace(/<meta name="description" content=".*?"\s*\/?>/s, `<meta name="description" content="${escapeHtml("Zanzibar Paradise Tours - a trusted directory of hotels, tours, beaches and attractions in Zanzibar, built by people who know the island well.")}" />`)
+      .replace('<div id="root"></div>', `<div id="root">${bodyHtml}</div>`);
+
+    fs.writeFileSync(path.join(DIST_DIR, "index.html"), html, "utf8");
+    console.log("[prerender] Wrote real-content fallback into dist/index.html for \"/\".");
+  } catch (err) {
+    console.warn("[prerender] Failed to write homepage fallback content:", err.message);
+  }
+
   // ---- sitemap.xml ----
   // Built from the exact same route list search engines are told about above,
   // so it can never drift out of sync with what actually exists on the site.
