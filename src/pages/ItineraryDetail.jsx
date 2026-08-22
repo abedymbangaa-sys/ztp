@@ -255,7 +255,7 @@ export default function ItineraryDetail() {
       )}
 
       <div className="bg-teal-50 border border-teal-100 rounded-2xl p-6 flex flex-wrap items-center justify-between gap-4">
-        <p className="text-slate-700 font-medium">Need help booking? Ask a Zanzibar Expert on WhatsApp.</p>
+        <p className="text-slate-700 font-medium">Need help planning this trip? Ask a Zanzibar Expert on WhatsApp.</p>
         <a
           href={expertLink}
           target="_blank"
