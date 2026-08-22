@@ -9,6 +9,7 @@ import { extractLatLng } from "../lib/mapUtils";
 export default function ListingsMap({ listings, sectionKey }) {
   const mapRef = useRef(null);
   const containerRef = useRef(null);
+  const pointCountRef = useRef(0);
 
   useEffect(() => {
     if (!window.L || !containerRef.current) return;
@@ -19,6 +20,7 @@ export default function ListingsMap({ listings, sectionKey }) {
         return coords ? { ...coords, item } : null;
       })
       .filter(Boolean);
+    pointCountRef.current = points.length;
 
     if (!mapRef.current) {
       mapRef.current = window.L.map(containerRef.current).setView([-6.1659, 39.2026], 10); // Zanzibar center
@@ -35,7 +37,11 @@ export default function ListingsMap({ listings, sectionKey }) {
     points.forEach(({ lat, lng, item }) => {
       const marker = window.L.marker([lat, lng]).addTo(mapRef.current);
       const popupDiv = document.createElement("div");
-      popupDiv.innerHTML = `<strong>${item.title}</strong><br/><a href="/ad/${item.id}" style="color:#0f766e;">View details &rarr;</a>`;
+      // Link to the listing's own detail page (/<sectionKey>/<id>), same
+      // route GenericCard uses - this used to hardcode "/ad/<id>" (the
+      // paid-advertisement route), which sent every listing popup to the
+      // wrong page.
+      popupDiv.innerHTML = `<strong>${item.title}</strong><br/><a href="/${sectionKey}/${item.id}" style="color:#0f766e;">View details &rarr;</a>`;
       marker.bindPopup(popupDiv);
     });
 
@@ -54,10 +60,19 @@ export default function ListingsMap({ listings, sectionKey }) {
     };
   }, []);
 
+  const hasAnyMapsLink = listings.some((item) => !!item.maps_link);
+
   return (
-    <div
-      ref={containerRef}
-      className="w-full h-96 rounded-xl overflow-hidden border border-slate-200 mb-8"
-    />
+    <div className="mb-8">
+      <div
+        ref={containerRef}
+        className="w-full h-96 rounded-xl overflow-hidden border border-slate-200"
+      />
+      {!hasAnyMapsLink && listings.length > 0 && (
+        <p className="text-sm text-slate-500 text-center mt-3">
+          None of these listings have a map location saved yet, so no pins are shown. Switch to List view to browse them.
+        </p>
+      )}
+    </div>
   );
 }
