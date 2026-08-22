@@ -36,6 +36,7 @@ const GuideDetail = lazy(() => import("./pages/GuideDetail"));
 const TripBuilder = lazy(() => import("./pages/TripBuilder"));
 const Collections = lazy(() => import("./pages/Collections"));
 const CollectionDetail = lazy(() => import("./pages/CollectionDetail"));
+const NearMe = lazy(() => import("./pages/NearMe"));
 function PageLoading() {
   return (
     <div className="flex items-center justify-center py-24">
@@ -78,6 +79,7 @@ export default function App() {
                 the generic /:sectionKey routes. */}
             <Route path="/collections" element={<Collections />} />
             <Route path="/collections/:collectionKey" element={<CollectionDetail />} />
+            <Route path="/near-me" element={<NearMe />} />
             <Route path="/guides" element={<Guides />} />
             <Route path="/guides/:slug" element={<GuideDetail />} />
             <Route path="/trip-builder" element={<TripBuilder />} />
