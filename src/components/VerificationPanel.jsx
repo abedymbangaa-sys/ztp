@@ -4,6 +4,7 @@ import {
   VERIFICATION_CHECKS,
   isCoreVerified,
   formatVerifiedDate,
+  getTrustBadges,
   NOT_YET_CHECKED_LABEL,
 } from "../lib/verificationStandard";
 import { useT } from "../lib/i18n";
@@ -26,6 +27,7 @@ export default function VerificationPanel({ item, onReportIssue, onClaimBusiness
   const [expanded, setExpanded] = useState(false);
   const [howWeVerifyOpen, setHowWeVerifyOpen] = useState(false);
   const collapsible = VERIFICATION_CHECKS.length > 3;
+  const trustBadges = getTrustBadges(item);
 
   return (
     <div className="bg-white border border-slate-100 rounded-2xl shadow-sm p-5">
@@ -74,6 +76,19 @@ export default function VerificationPanel({ item, onReportIssue, onClaimBusiness
           </button>
         )}
       </div>
+
+      {trustBadges.length > 0 && (
+        <div className="mt-3 flex flex-wrap gap-1.5">
+          {trustBadges.map((b) => (
+            <span
+              key={b.key}
+              className="inline-flex items-center gap-1 rounded-full bg-teal-50 text-teal-700 text-[11px] font-semibold px-2.5 py-1"
+            >
+              {t(b.label)}
+            </span>
+          ))}
+        </div>
+      )}
 
       <ul
         className={
