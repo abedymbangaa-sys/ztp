@@ -4,7 +4,7 @@ import { supabase } from "../lib/supabase";
 // Shared timeout so a hung Supabase request (dead connection, cold serverless
 // function, flaky mobile network) can't leave a page stuck on "loading"
 // forever. Any request that takes longer than this is treated as failed.
-const FETCH_TIMEOUT_MS = 9000;
+const FETCH_TIMEOUT_MS = 15000;
 
 function withTimeout(promise) {
   const timeoutPromise = new Promise((_, reject) =>
@@ -74,38 +74,10 @@ export function useListings(categoryKey) {
     }
 
     withTimeout(query.order("created_at", { ascending: false }))
-      .then(async ({ data, error }) => {
+      .then(({ data, error }) => {
         if (!mounted) return;
         if (error) throw error;
-        const rows = data || [];
-
-        // Attach a lightweight rating/review-count summary to each card so
-        // listing grids can show trust signals (e.g. "4.8 (12)") without a
-        // separate request per card. Best-effort: if this secondary query
-        // fails, listings still render fine, just without the badge.
-        if (rows.length > 0) {
-          try {
-            const ids = rows.map((r) => r.id);
-            const { data: reviewRows } = await withTimeout(
-              supabase.from("reviews").select("listing_id, rating").eq("status", "approved").in("listing_id", ids)
-            );
-            const statsByListing = {};
-            (reviewRows || []).forEach((r) => {
-              const s = (statsByListing[r.listing_id] ||= { total: 0, count: 0 });
-              s.total += r.rating;
-              s.count += 1;
-            });
-            rows.forEach((row) => {
-              const s = statsByListing[row.id];
-              row.review_avg = s ? Number((s.total / s.count).toFixed(1)) : null;
-              row.review_count = s ? s.count : 0;
-            });
-          } catch (statsErr) {
-            if (import.meta.env.DEV) console.error("useListings: failed to load review stats", statsErr);
-          }
-        }
-
-        setListings(rows);
+        setListings(data || []);
         setLoading(false);
       })
       .catch((err) => {
@@ -133,16 +105,28 @@ export function useDeals(limit = 6) {
   useEffect(() => {
     let mounted = true;
     setLoading(true);
-    supabase
-      .from("listings")
-      .select("*")
-      .eq("status", "approved")
-      .eq("is_deal", true)
-      .order("created_at", { ascending: false })
-      .limit(limit)
+    withTimeout(
+      supabase
+        .from("listings")
+        .select("*")
+        .eq("status", "approved")
+        .eq("is_deal", true)
+        .order("created_at", { ascending: false })
+        .limit(limit)
+    )
       .then(({ data }) => {
         if (mounted) {
           setDeals(data || []);
+          setLoading(false);
+        }
+      })
+      .catch((err) => {
+        // Deals are a bonus strip, not core content - on failure we just
+        // stop loading (the section hides itself) rather than surfacing
+        // an error banner for something optional.
+        if (import.meta.env.DEV) console.error("useDeals: failed to load", err);
+        if (mounted) {
+          setDeals([]);
           setLoading(false);
         }
       });
@@ -165,12 +149,15 @@ export function useAdvertisements(limit = 12) {
 
   useEffect(() => {
     let mounted = true;
-    supabase
-      .from("advertisements")
-      .select("*")
-      .eq("status", "approved")
-      .order("created_at", { ascending: false })
-      .limit(limit * 2) // fetch extra since some may have lapsed
+    setLoading(true);
+    withTimeout(
+      supabase
+        .from("advertisements")
+        .select("*")
+        .eq("status", "approved")
+        .order("created_at", { ascending: false })
+        .limit(limit * 2) // fetch extra since some may have lapsed
+    )
       .then(({ data }) => {
         if (mounted) {
           const now = Date.now();
@@ -178,6 +165,15 @@ export function useAdvertisements(limit = 12) {
             (ad) => !ad.active_until || new Date(ad.active_until).getTime() > now
           );
           setAds(active.slice(0, limit));
+          setLoading(false);
+        }
+      })
+      .catch((err) => {
+        // Same reasoning as useDeals - a bonus strip that hides on
+        // failure instead of showing an error banner.
+        if (import.meta.env.DEV) console.error("useAdvertisements: failed to load", err);
+        if (mounted) {
+          setAds([]);
           setLoading(false);
         }
       });
@@ -203,9 +199,7 @@ export function useSettings() {
 
   useEffect(() => {
     let mounted = true;
-    supabase
-      .from("settings")
-      .select("*")
+    withTimeout(supabase.from("settings").select("*"))
       .then(({ data }) => {
         if (mounted) {
           const map = { ...SETTINGS_DEFAULTS };
@@ -213,6 +207,15 @@ export function useSettings() {
             map[row.key] = row.value;
           });
           setSettings(map);
+          setLoading(false);
+        }
+      })
+      .catch((err) => {
+        // Fall back to defaults rather than leaving the hero image (and
+        // ad price) stuck waiting forever if this request hangs.
+        if (import.meta.env.DEV) console.error("useSettings: failed to load", err);
+        if (mounted) {
+          setSettings(SETTINGS_DEFAULTS);
           setLoading(false);
         }
       });
@@ -242,11 +245,7 @@ export function useListing(id) {
     setLoading(true);
     setError(null);
     withTimeout(
-      supabase
-        .from("listings")
-        .select("*, partners(business_name, email)")
-        .eq("id", id)
-        .single()
+      supabase.from("listings").select("*, partners(business_name, email)").eq("id", id).single()
     )
       .then(({ data, error }) => {
         if (!mounted) return;
@@ -262,10 +261,7 @@ export function useListing(id) {
         setLoading(false);
       })
       .catch((err) => {
-        // Timeout (or any other rejection outside the normal Supabase
-        // {data,error} shape) lands here - surfaced as the same error
-        // state so the retry button always appears within ~9s instead of
-        // the skeleton spinning forever on a hung connection.
+        if (import.meta.env.DEV) console.error("useListing: failed to load", err);
         if (!mounted) return;
         setError(err);
         setListing(null);
@@ -285,30 +281,44 @@ export function useListing(id) {
 
 // Load a handful of other approved listings in the same category, for the
 // "You might also like" section on a listing's detail page.
+// Load a single advertisement for its dedicated detail page (/ad/:id).
+// Has the same timeout + error/retry treatment as useListing, so a hung
+// or failed request resolves to a visible error instead of leaving the
+// page stuck on "Loading" forever.
 export function useAdvertisement(id) {
   const [ad, setAd] = useState(null);
   const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(null);
+  const [refreshKey, setRefreshKey] = useState(0);
 
   useEffect(() => {
     let mounted = true;
     setLoading(true);
-    supabase
-      .from("advertisements")
-      .select("*")
-      .eq("id", id)
-      .single()
-      .then(({ data }) => {
-        if (mounted) {
+    setError(null);
+    withTimeout(supabase.from("advertisements").select("*").eq("id", id).single())
+      .then(({ data, error }) => {
+        if (!mounted) return;
+        if (error && error.code !== "PGRST116") {
+          setError(error);
+          setAd(null);
+        } else {
           setAd(data || null);
-          setLoading(false);
         }
+        setLoading(false);
+      })
+      .catch((err) => {
+        if (import.meta.env.DEV) console.error("useAdvertisement: failed to load", err);
+        if (!mounted) return;
+        setError(err);
+        setAd(null);
+        setLoading(false);
       });
     return () => {
       mounted = false;
     };
-  }, [id]);
+  }, [id, refreshKey]);
 
-  return { ad, loading };
+  return { ad, loading, error, retry: () => setRefreshKey((k) => k + 1) };
 }
 
 export function useRelatedListings(categoryKey, excludeId, limit = 4) {
@@ -323,17 +333,28 @@ export function useRelatedListings(categoryKey, excludeId, limit = 4) {
       return;
     }
     setLoading(true);
-    supabase
-      .from("listings")
-      .select("*")
-      .eq("status", "approved")
-      .eq("category_key", categoryKey)
-      .neq("id", excludeId)
-      .order("created_at", { ascending: false })
-      .limit(limit)
+    withTimeout(
+      supabase
+        .from("listings")
+        .select("*")
+        .eq("status", "approved")
+        .eq("category_key", categoryKey)
+        .neq("id", excludeId)
+        .order("created_at", { ascending: false })
+        .limit(limit)
+    )
       .then(({ data }) => {
         if (mounted) {
           setRelated(data || []);
+          setLoading(false);
+        }
+      })
+      .catch((err) => {
+        // "Explore Nearby" is a supplementary strip - hide it on failure
+        // rather than showing an error for something non-essential.
+        if (import.meta.env.DEV) console.error("useRelatedListings: failed to load", err);
+        if (mounted) {
+          setRelated([]);
           setLoading(false);
         }
       });
@@ -372,6 +393,10 @@ export function useListingRatingSummary(listingId) {
         }
         const avg = data.reduce((sum, r) => sum + r.rating, 0) / data.length;
         setSummary({ average: Number(avg.toFixed(1)), count: data.length, loading: false });
+      })
+      .catch((err) => {
+        if (import.meta.env.DEV) console.error("useListingRatingSummary: failed to load", err);
+        if (mounted) setSummary({ average: null, count: 0, loading: false });
       });
     return () => {
       mounted = false;
