@@ -11,6 +11,7 @@ const MAIN_LINKS = [
   { to: "/things-to-do", label: "Things to Do" },
   { to: "/hotels", label: "Hotels" },
   { to: "/tours", label: "Tours" },
+  { to: "/near-me", label: "Near Me" },
 ];
 
 // The rest are placed inside the "Explore More" dropdown so the navbar
