@@ -1,5 +1,5 @@
 import { Link } from "react-router-dom";
-import { MapPin, BadgeCheck, MessageCircle, Clock, Star, Tag } from "lucide-react";
+import { MapPin, BadgeCheck, MessageCircle, Clock, Star, Tag, Heart } from "lucide-react";
 import { useLanguage } from "../lib/LanguageContext";
 import { useT } from "../lib/i18n";
 import { TAG_OPTIONS } from "../lib/tags";
@@ -7,11 +7,14 @@ import { buildWhatsAppLink } from "../lib/whatsapp";
 import { normalizePhone } from "../lib/phone";
 import { trackEvent } from "../lib/analytics";
 import { formatLocation } from "../lib/locations";
+import { useSavedList } from "../lib/SavedListContext";
 import ImageWithFallback from "./ImageWithFallback";
 
 export default function GenericCard({ item, sectionKey, distanceKm }) {
   const { language } = useLanguage();
   const t = useT();
+  const { isSaved, toggleSaved } = useSavedList();
+  const saved = isSaved(item.id);
   const description = (language !== "en" && item[`description_${language}`]) || item.description;
   const itemTags = TAG_OPTIONS.filter((t) => (item.tags || []).includes(t.key));
 
@@ -27,21 +30,40 @@ export default function GenericCard({ item, sectionKey, distanceKm }) {
     // Image/content still opens the detail page; only the footer row
     // changed.
     <div className="group bg-white rounded-2xl overflow-hidden shadow-sm hover:shadow-xl transition-shadow border border-slate-100">
+      <div className="relative">
+        <Link to={`/${sectionKey}/${item.id}`} className="block">
+          <div className="relative h-48 overflow-hidden">
+            <ImageWithFallback
+              src={item.image_url}
+              alt={item.title}
+              className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
+              loading="lazy"
+            />
+            {item.is_verified && (
+              <span className="absolute top-3 left-3 inline-flex items-center gap-1 bg-white/95 text-teal-700 text-xs font-semibold px-2.5 py-1 rounded-full shadow-sm">
+                <BadgeCheck className="w-3.5 h-3.5" />
+                {t("Verified")}
+              </span>
+            )}
+          </div>
+        </Link>
+        {/* Save button lives as a sibling of the <Link>, not inside it -
+            a <button> nested inside an <a> is invalid HTML (same reason
+            the WhatsApp button below is outside the link too). */}
+        <button
+          type="button"
+          onClick={() => {
+            toggleSaved(item.id);
+            trackEvent(saved ? "unsave_listing" : "save_listing", { listing_id: item.id, listing_name: item.title });
+          }}
+          aria-label={saved ? t("Remove from My Zanzibar") : t("Save to My Zanzibar")}
+          aria-pressed={saved}
+          className="absolute top-3 right-3 flex items-center justify-center w-8 h-8 rounded-full bg-white/95 shadow-sm hover:scale-105 transition"
+        >
+          <Heart className={"w-4 h-4 " + (saved ? "fill-rose-500 text-rose-500" : "text-slate-500")} />
+        </button>
+      </div>
       <Link to={`/${sectionKey}/${item.id}`} className="block">
-        <div className="relative h-48 overflow-hidden">
-          <ImageWithFallback
-            src={item.image_url}
-            alt={item.title}
-            className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
-            loading="lazy"
-          />
-          {item.is_verified && (
-            <span className="absolute top-3 left-3 inline-flex items-center gap-1 bg-white/95 text-teal-700 text-xs font-semibold px-2.5 py-1 rounded-full shadow-sm">
-              <BadgeCheck className="w-3.5 h-3.5" />
-              {t("Verified")}
-            </span>
-          )}
-        </div>
         <div className="p-5 pb-3">
           {item.location && (
             <div className="flex items-center gap-1 text-xs text-slate-500 mb-1">
