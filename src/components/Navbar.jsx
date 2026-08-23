@@ -1,9 +1,10 @@
 import { useState } from "react";
-import { Link } from "react-router-dom";
+import { Link, useLocation } from "react-router-dom";
 import { Menu, X, ChevronDown } from "lucide-react";
 import Logo from "./Logo";
 import { useLanguage, SUPPORTED_LANGUAGES } from "../lib/LanguageContext";
 import { useT } from "../lib/i18n";
+import { getAreaConfig } from "../data/areas";
 
 // Main links shown directly on the navbar
 const MAIN_LINKS = [
@@ -33,11 +34,47 @@ const MORE_LINKS = [
 
 const ALL_LINKS = [...MAIN_LINKS, ...MORE_LINKS];
 
+const SITE_CONTACT_NUMBER = "255635442732";
+
+// Builds a context-aware pre-filled WhatsApp message for the navbar's
+// global "Chat with a Zanzibar Expert" button - flagged in the re-audit
+// for always sending the exact same blank message regardless of what page
+// the visitor is actually on. This can't know a specific listing's name
+// (the navbar renders above/outside the routed page), but it can at least
+// tell the team what part of the site the visitor was looking at, which is
+// far better than a contact with zero context.
+function buildNavbarExpertMessage(pathname) {
+  const base = "Habari Zanzibar Expert, naomba msaada kuhusu safari yangu Zanzibar.";
+  if (pathname.startsWith("/area/")) {
+    const key = pathname.split("/")[2];
+    const area = getAreaConfig(key);
+    if (area) return `${base}\n\nNina interest na eneo la ${area.name}.`;
+  }
+  if (pathname.startsWith("/itinerary")) {
+    return `${base}\n\nNinatafuta msaada wa kupanga itinerary yangu.`;
+  }
+  if (pathname.startsWith("/collections/")) {
+    return `${base}\n\nNiko naangalia collection: ${pathname.split("/")[2]?.replace(/-/g, " ")}.`;
+  }
+  const KNOWN_SECTIONS = ["hotels", "tours", "restaurants", "beaches", "attractions", "heritage", "things-to-do"];
+  const firstSegment = pathname.split("/")[1];
+  if (KNOWN_SECTIONS.includes(firstSegment)) {
+    return `${base}\n\nNiko naangalia sehemu ya ${firstSegment.replace(/-/g, " ")}.`;
+  }
+  return base;
+}
+
+function buildNavbarExpertLink(pathname) {
+  return `https://wa.me/${SITE_CONTACT_NUMBER}?text=${encodeURIComponent(buildNavbarExpertMessage(pathname))}`;
+}
+
 export default function Navbar() {
   const [open, setOpen] = useState(false);
   const [moreOpen, setMoreOpen] = useState(false);
   const { language, setLanguage } = useLanguage();
   const t = useT();
+  const location = useLocation();
+  const expertLink = buildNavbarExpertLink(location.pathname);
 
   return (
     <header className="sticky top-0 z-50 bg-white/95 backdrop-blur border-b border-slate-200">
@@ -90,7 +127,7 @@ export default function Navbar() {
             {t("Own a business? Log in")}
           </Link>
           <a
-            href="https://wa.me/255635442732"
+            href={expertLink}
             target="_blank"
             rel="noreferrer"
             className="bg-teal-700 text-white text-xs sm:text-sm font-semibold px-3 sm:px-4 py-2 rounded-full hover:bg-teal-800 transition whitespace-nowrap"
