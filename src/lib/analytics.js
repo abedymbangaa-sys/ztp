@@ -3,6 +3,7 @@
 // kila mahali. Haiathiri page_view tracking iliyopo tayari kwenye
 // index.html - GA4 script yenyewe haibadilishwi hapa, hii ni wrapper
 // tu ya "event" calls.
+import { getStoredUTM } from "./utm.js";
 
 // Same public URL/key already used in lib/supabase.js - duplicated here
 // (not imported from the shared client) so this file can send a raw
@@ -38,6 +39,11 @@ export function trackEvent(eventName, params = {}) {
   // Fire-and-forget: never blocks or throws for the visitor if this fails.
   if (LEAD_EVENT_TYPES.has(eventName) && params.listing_id) {
     try {
+      // Attaches this session's first-touch UTM/landing/referrer data
+      // (captured once in main.jsx) so the Admin Dashboard can show which
+      // campaign or channel actually produced each lead, not just that
+      // it happened.
+      const utm = getStoredUTM();
       fetch(`${SUPABASE_URL}/rest/v1/lead_events`, {
         method: "POST",
         keepalive: true,
@@ -52,6 +58,11 @@ export function trackEvent(eventName, params = {}) {
           listing_id: params.listing_id,
           listing_title: params.listing_name || null,
           listing_category: params.listing_category || null,
+          utm_source: utm.utm_source || null,
+          utm_medium: utm.utm_medium || null,
+          utm_campaign: utm.utm_campaign || null,
+          landing_page: utm.landing_page || null,
+          referrer: utm.referrer || null,
         }),
       }).catch(() => {});
     } catch {
