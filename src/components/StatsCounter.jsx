@@ -32,15 +32,22 @@ export default function StatsCounter() {
           .from("partners")
           .select("*", { count: "exact", head: true })
           .or("status.neq.rejected,status.is.null"),
+        // Real verified count, not a hardcoded "100%" - the last audit
+        // flagged that claim as unsupported by actual evidence. This
+        // computes the true share of approved listings carrying the
+        // is_verified flag, so the number on screen always matches what
+        // a visitor would actually find if they checked.
+        supabase.from("listings").select("*", { count: "exact", head: true }).eq("status", "approved").eq("is_verified", true),
       ]),
       timeoutPromise,
     ])
-      .then(([{ count: listingsCount }, { count: categoriesCount }, { count: partnersCount }]) => {
+      .then(([{ count: listingsCount }, { count: categoriesCount }, { count: partnersCount }, { count: verifiedCount }]) => {
         if (!mounted) return;
         setStats({
           listings: listingsCount || 0,
           categories: categoriesCount || 0,
           partners: partnersCount || 0,
+          verifiedPercent: listingsCount ? Math.round(((verifiedCount || 0) / listingsCount) * 100) : 0,
         });
         setLoadState("ready");
       })
@@ -79,11 +86,17 @@ export default function StatsCounter() {
   // Real counts only - no artificial floor. If the true partner count is
   // lower than what's shown elsewhere on the site, that's a data-entry
   // gap to fix in the partners table, not something to paper over here.
+  //
+  // "Business Partners" is only shown once there's at least one - a real
+  // "0+" reads as a formatting mistake and undermines trust rather than
+  // building it (flagged in the last audit). The verified stat now shows
+  // the true share of approved listings actually carrying the verified
+  // flag, never a flat unverified "100%" claim.
   const items = [
     { icon: MapPinned, label: "Verified Listings", value: `${stats.listings}+` },
     { icon: Building2, label: "Types of Attractions", value: stats.categories },
-    { icon: Users, label: "Business Partners", value: `${stats.partners}+` },
-    { icon: ShieldCheck, label: "Verified by Our Team", value: "100%" },
+    ...(stats.partners > 0 ? [{ icon: Users, label: "Business Partners", value: `${stats.partners}+` }] : []),
+    { icon: ShieldCheck, label: "Verified by Our Team", value: `${stats.verifiedPercent}%` },
   ];
   return (
     <section className="bg-teal-800 text-white">
