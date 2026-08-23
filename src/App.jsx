@@ -52,6 +52,13 @@ export default function App() {
       <LanguageProvider>
         <SavedListProvider>
         <ScrollToTop />
+        {/* min-h-screen + explicit background here means once React has
+            mounted, real content always covers the entire viewport with
+            the site's normal light background - so the teal body color
+            (set in index.html/index.css) only shows during the brief
+            genuine loading gap, never as a leftover strip on pages
+            shorter than the screen. */}
+        <div className="min-h-screen bg-slate-50 flex flex-col">
         <Navbar />
         <Suspense fallback={<PageLoading />}>
           <Routes>
@@ -92,6 +99,7 @@ export default function App() {
           </Routes>
         </Suspense>
         <Footer />
+        </div>
         <SiteReviewPrompt />
         </SavedListProvider>
       </LanguageProvider>
