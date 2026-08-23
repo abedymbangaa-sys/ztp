@@ -1,5 +1,6 @@
 import { useState, useEffect } from "react";
 import { supabase } from "../lib/supabase";
+import { getCacheEntry, setCacheEntry, isFresh } from "./queryCache";
 
 // Shared timeout so a hung Supabase request (dead connection, cold serverless
 // function, flaky mobile network) can't leave a page stuck on "loading"
@@ -16,16 +17,34 @@ function withTimeout(promise) {
 // Load active categories from Supabase (live - admin can add new ones anytime).
 // Exposes `error` and `retry` so pages relying on categories (page title,
 // icon, tag label) don't silently render blank forever if the request fails.
+//
+// Cached per session (see queryCache.js) - after the first successful
+// load this tab/session, every later mount of this hook shows the cached
+// categories INSTANTLY (no skeleton at all), refetching quietly in the
+// background only once the cache is more than a couple minutes old.
+const CATEGORIES_CACHE_KEY = "categories";
+
 export function useCategories() {
-  const [categories, setCategories] = useState([]);
-  const [loading, setLoading] = useState(true);
+  const cachedEntry = getCacheEntry(CATEGORIES_CACHE_KEY);
+  const [categories, setCategories] = useState(cachedEntry?.data || []);
+  const [loading, setLoading] = useState(!cachedEntry);
   const [error, setError] = useState(null);
   const [refreshKey, setRefreshKey] = useState(0);
 
   useEffect(() => {
     let mounted = true;
-    setLoading(true);
-    setError(null);
+    const entry = getCacheEntry(CATEGORIES_CACHE_KEY);
+    if (entry) {
+      setCategories(entry.data);
+      setLoading(false);
+      setError(null);
+      // Fresh enough - skip the network call entirely rather than
+      // refetching data we just showed a moment ago.
+      if (isFresh(entry) && refreshKey === 0) return;
+    } else {
+      setLoading(true);
+      setError(null);
+    }
 
     withTimeout(
       supabase.from("categories").select("*").eq("is_active", true).order("created_at", { ascending: true })
@@ -33,14 +52,20 @@ export function useCategories() {
       .then(({ data, error }) => {
         if (!mounted) return;
         if (error) throw error;
-        setCategories(data || []);
+        const rows = data || [];
+        setCacheEntry(CATEGORIES_CACHE_KEY, rows);
+        setCategories(rows);
         setLoading(false);
       })
       .catch((err) => {
         if (import.meta.env.DEV) console.error("useCategories: failed to load", err);
         if (!mounted) return;
-        setError("Unable to load categories right now.");
-        setCategories([]);
+        // Had cached data already showing - a failed background refresh
+        // shouldn't wipe out a perfectly good, already-visible list.
+        if (!entry) {
+          setError("Unable to load categories right now.");
+          setCategories([]);
+        }
         setLoading(false);
       });
 
@@ -57,16 +82,33 @@ export function useCategories() {
 // Has a hard timeout + error state so a hung request (dead connection, cold
 // serverless function, flaky mobile network) can't leave the page stuck on
 // "Loading..." forever - it resolves to an error with a retry button instead.
+//
+// Also cached per session (see queryCache.js) - this is the hook behind
+// Hotels, Things to Do, Tours and every other category listing page, plus
+// Area pages and Collections. Once any of those has loaded once this
+// session, revisiting shows the same listings INSTANTLY - no skeleton,
+// no wait - while a fresh copy loads quietly behind it if the cache has
+// gone stale (>2 min old).
 export function useListings(categoryKey) {
-  const [listings, setListings] = useState([]);
-  const [loading, setLoading] = useState(true);
+  const cacheKey = `listings:${categoryKey || "all"}`;
+  const cachedEntry = getCacheEntry(cacheKey);
+  const [listings, setListings] = useState(cachedEntry?.data || []);
+  const [loading, setLoading] = useState(!cachedEntry);
   const [error, setError] = useState(null);
   const [refreshKey, setRefreshKey] = useState(0);
 
   useEffect(() => {
     let mounted = true;
-    setLoading(true);
-    setError(null);
+    const entry = getCacheEntry(cacheKey);
+    if (entry) {
+      setListings(entry.data);
+      setLoading(false);
+      setError(null);
+      if (isFresh(entry) && refreshKey === 0) return;
+    } else {
+      setLoading(true);
+      setError(null);
+    }
 
     let query = supabase.from("listings").select("*").eq("status", "approved");
     if (categoryKey) {
@@ -110,14 +152,19 @@ export function useListings(categoryKey) {
           }
         }
 
+        setCacheEntry(cacheKey, rows);
         setListings(rows);
         setLoading(false);
       })
       .catch((err) => {
         if (import.meta.env.DEV) console.error("useListings: failed to load", err);
         if (!mounted) return;
-        setError("Unable to load listings right now.");
-        setListings([]);
+        // A background refresh failing shouldn't blank out listings that
+        // were already showing fine from cache.
+        if (!entry) {
+          setError("Unable to load listings right now.");
+          setListings([]);
+        }
         setLoading(false);
       });
 
