@@ -2,6 +2,7 @@ import { useParams, Link, Navigate } from "react-router-dom";
 import { useListings } from "../data/hooks";
 import { getCollectionConfig, filterListingsForCollection, COLLECTIONS } from "../data/collections";
 import GenericCard from "../components/GenericCard";
+import ListingsMap from "../components/ListingsMap";
 import { useSEO } from "../lib/useSEO";
 import { ArrowLeft, RefreshCw } from "lucide-react";
 
@@ -59,6 +60,13 @@ export default function CollectionDetail() {
           </p>
         )}
       </div>
+
+      {!loading && !error && matched.length > 0 && (
+        <div className="mb-10">
+          <h2 className="text-lg font-bold text-slate-900 mb-4">{config.title} on the map</h2>
+          <ListingsMap listings={matched} sectionKey={matched[0]?.category_key || "hotels"} />
+        </div>
+      )}
 
       {loading ? (
         <CardSkeletonGrid count={6} />
