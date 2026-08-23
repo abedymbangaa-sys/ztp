@@ -46,6 +46,10 @@ function escapeHtml(str) {
 
 const SITE_URL = "https://visitzanzibarparadise.com";
 const DEFAULT_SHARE_IMAGE = `${SITE_URL}/images/beaches/nungwi-beach.jpeg`;
+// Same fallback used in Home.jsx when no admin-set hero image exists yet -
+// kept in sync manually since this script runs standalone, outside React.
+const DEFAULT_HERO_IMAGE =
+  "https://images.unsplash.com/photo-1559827260-dc66d52bef19?w=2400&q=85&auto=format&fit=crop";
 
 function absoluteUrl(maybeRelative) {
   if (!maybeRelative) return DEFAULT_SHARE_IMAGE;
@@ -410,41 +414,56 @@ async function main() {
   // (the pristine original), never a version already mutated by the
   // per-route pages above.
   try {
+    const PILL_CLASS = "inline-block bg-white border border-slate-200 rounded-full px-4 py-2 text-sm font-semibold text-teal-700 hover:border-teal-400";
     const topListings = listings.slice(0, 8);
     const categoryLinks = categories
-      .map((c) => `<li><a href="/${escapeHtml(c.key)}">${escapeHtml(c.title)}</a></li>`)
+      .map((c) => `<li><a href="/${escapeHtml(c.key)}" class="${PILL_CLASS}">${escapeHtml(c.title)}</a></li>`)
       .join("");
     const listingLinks = topListings
-      .map((l) => `<li><a href="/${escapeHtml(l.category_key)}/${escapeHtml(l.id)}">${escapeHtml(l.title)}</a></li>`)
+      .map((l) => `<li><a href="/${escapeHtml(l.category_key)}/${escapeHtml(l.id)}" class="${PILL_CLASS}">${escapeHtml(l.title)}</a></li>`)
       .join("");
-    const areaLinks = AREAS.map((a) => `<li><a href="/area/${a.key}">${escapeHtml(a.name)}</a></li>`).join("");
+    const areaLinks = AREAS.map((a) => `<li><a href="/area/${a.key}" class="${PILL_CLASS}">${escapeHtml(a.name)}</a></li>`).join("");
 
-    // Two layers, both in the raw HTML:
-    // 1. A branded loading screen (teal gradient matching the real hero,
-    //    ZPT name, a spinner) - this is the ONLY thing a human sees for
-    //    the split second before React hydrates and replaces it, so the
-    //    page never flashes a plain, unstyled list of links.
-    // 2. The actual crawlable content (categories/areas/listings) sits
-    //    right below it, visually hidden (off-screen, zero size, not
-    //    display:none) - this is the same "visually-hidden but
-    //    accessible" technique used across the web for a11y text, and
-    //    search engines fully read it; it's just not something a real
-    //    visitor's eyes ever land on.
+    // Mirrors Home.jsx's actual hero section using the SAME Tailwind
+    // classes Home.jsx uses (already compiled into the build's CSS, since
+    // Home.jsx itself uses them) - so this static version looks visually
+    // identical to the real hero, not a generic placeholder. Real <a>
+    // links work even before React loads. Once React hydrates, it
+    // replaces this with the full interactive homepage (search, stats,
+    // etc.) - the switch should be imperceptible since both look the same.
+    let heroImageUrl = DEFAULT_HERO_IMAGE;
+    try {
+      const { data: settingsRows } = await supabase.from("settings").select("key, value");
+      const heroSetting = (settingsRows || []).find((s) => s.key === "hero_image_url");
+      if (heroSetting?.value) heroImageUrl = heroSetting.value;
+    } catch {
+      // Fall back to DEFAULT_HERO_IMAGE below - never block the build.
+    }
+
     const bodyHtml = `
-      <div style="min-height:100vh;display:flex;align-items:center;justify-content:center;background:linear-gradient(135deg,#134e4a,#0f766e 55%,#0f172a);color:#fff;font-family:system-ui,-apple-system,sans-serif;text-align:center;padding:24px;">
-        <div>
-          <p style="font-size:12px;letter-spacing:0.35em;text-transform:uppercase;color:#fcd34d;margin:0 0 14px;">Welcome to Zanzibar</p>
-          <h1 style="font-size:30px;font-weight:700;margin:0 0 10px;">Zanzibar Paradise Tours</h1>
-          <p style="opacity:0.75;font-size:14px;margin:0 0 22px;max-width:320px;">A trusted directory of hotels, tours and attractions in Zanzibar.</p>
-          <div style="width:28px;height:28px;margin:0 auto;border:3px solid rgba(255,255,255,0.25);border-top-color:#fcd34d;border-radius:50%;animation:spin 0.8s linear infinite;"></div>
-        </div>
-      </div>
-      <style>@keyframes spin{to{transform:rotate(360deg)}}</style>
-      <div style="position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0,0,0,0);white-space:nowrap;">
-        <p>A trusted directory of hotels, tours, beaches and attractions in Zanzibar, built by people who know the island well.</p>
-        <nav aria-label="Categories"><ul>${categoryLinks}</ul></nav>
-        <nav aria-label="Areas of Zanzibar"><ul>${areaLinks}</ul></nav>
-        <section aria-label="Featured listings"><ul>${listingLinks}</ul></section>
+      <div>
+        <section class="relative text-white overflow-hidden min-h-[640px] flex items-center bg-gradient-to-br from-teal-900 via-teal-800 to-slate-900">
+          <img src="${escapeHtml(heroImageUrl)}" alt="Zanzibar coastline" class="absolute inset-0 w-full h-full object-cover scale-105" />
+          <div class="absolute inset-0 bg-gradient-to-b from-slate-950/75 via-teal-950/45 to-slate-950/85"></div>
+          <div class="absolute inset-x-0 bottom-0 h-40 bg-gradient-to-t from-slate-950/90 to-transparent"></div>
+          <div class="relative max-w-6xl mx-auto px-4 py-24 sm:py-32 text-center w-full">
+            <p class="uppercase tracking-[0.35em] text-amber-300 text-xs sm:text-sm font-semibold mb-5">Welcome to Zanzibar</p>
+            <h1 class="font-serif text-5xl sm:text-6xl md:text-8xl font-bold mb-6 leading-[0.98] tracking-tight drop-shadow-2xl">
+              Discover the<br /><span class="italic text-amber-200">Real</span> Zanzibar
+            </h1>
+            <p class="max-w-2xl mx-auto text-slate-100/90 text-base sm:text-xl mb-10 px-2 font-light">
+              A trusted directory of hotels, tours, and attractions in Zanzibar — built by people who know this island well.
+            </p>
+            <div class="flex flex-col sm:flex-row justify-center gap-3 sm:gap-4 px-4 sm:px-0">
+              <a href="/trip-builder" class="bg-amber-500 hover:bg-amber-400 transition text-slate-900 font-bold px-7 py-3.5 rounded-full shadow-lg inline-flex items-center justify-center gap-2">Build My Zanzibar Trip</a>
+              <a href="/things-to-do" class="bg-white text-teal-900 font-bold px-7 py-3.5 rounded-full hover:bg-amber-50 transition shadow-lg">Explore Experiences</a>
+              <a href="https://wa.me/255635442732" class="border-2 border-white/80 font-bold px-7 py-3.5 rounded-full hover:bg-white/10 transition backdrop-blur-sm">Ask Now</a>
+            </div>
+          </div>
+        </section>
+        <nav aria-label="Categories" class="max-w-6xl mx-auto px-4 py-8"><ul class="flex flex-wrap gap-3 list-none p-0 m-0">${categoryLinks}</ul></nav>
+        <nav aria-label="Areas of Zanzibar" class="max-w-6xl mx-auto px-4 py-4"><ul class="flex flex-wrap gap-3 list-none p-0 m-0">${areaLinks}</ul></nav>
+        <section aria-label="Featured listings" class="max-w-6xl mx-auto px-4 py-4 pb-16"><ul class="flex flex-wrap gap-3 list-none p-0 m-0">${listingLinks}</ul></section>
       </div>
     `;
 
