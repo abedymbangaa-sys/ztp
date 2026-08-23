@@ -1,6 +1,8 @@
 import { useState, useEffect, useMemo } from "react";
+import { Link } from "react-router-dom";
 import { useListings, useCategories } from "../data/hooks";
 import { extractLatLng, haversineDistanceKm } from "../lib/mapUtils";
+import { AREAS } from "../data/areas";
 import GenericCard from "../components/GenericCard";
 import { useSEO } from "../lib/useSEO";
 import { Compass, MapPin, RefreshCw, LocateFixed } from "lucide-react";
@@ -25,6 +27,22 @@ function CardSkeletonGrid({ count = 6 }) {
 // the visitor is actually in Zanzibar, so this asks for their live location
 // rather than requiring an account or manual area picker. Never shown or
 // used anywhere except this page/session - not stored.
+function ManualAreaLinks() {
+  return (
+    <div className="flex flex-wrap justify-center gap-2">
+      {AREAS.map((a) => (
+        <Link
+          key={a.key}
+          to={`/area/${a.key}`}
+          className="text-sm font-semibold border border-slate-300 hover:border-teal-600 hover:text-teal-700 text-slate-700 px-4 py-2 rounded-full transition"
+        >
+          {a.name}
+        </Link>
+      ))}
+    </div>
+  );
+}
+
 export default function NearMe() {
   const { categories } = useCategories();
   const { listings, loading: listingsLoading, error, retry } = useListings();
@@ -33,6 +51,15 @@ export default function NearMe() {
   // locationStatus: "idle" | "requesting" | "granted" | "denied" | "unsupported" | "error"
   const [locationStatus, setLocationStatus] = useState("idle");
   const [coords, setCoords] = useState(null);
+  // Some browsers/environments never fire either the success or error
+  // callback if the permission prompt itself stalls (silently blocked by
+  // an embedded webview, a policy, or an automated crawler) - the
+  // geolocation API's own `timeout` option doesn't cover that case since
+  // it only starts counting once a request is actually in flight. This is
+  // a hard backstop: if we're still "requesting" after 6s no matter what,
+  // show the manual area fallback instead of leaving the visitor stuck on
+  // "Asking your browser for your location..." forever.
+  const [showManualFallback, setShowManualFallback] = useState(false);
 
   useSEO({
     title: "What's Near Me in Zanzibar | Zanzibar Paradise Tours",
@@ -41,6 +68,7 @@ export default function NearMe() {
   });
 
   function requestLocation() {
+    setShowManualFallback(false);
     if (!("geolocation" in navigator)) {
       setLocationStatus("unsupported");
       return;
@@ -64,6 +92,12 @@ export default function NearMe() {
     requestLocation();
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
+
+  useEffect(() => {
+    if (locationStatus !== "requesting") return;
+    const timer = setTimeout(() => setShowManualFallback(true), 6000);
+    return () => clearTimeout(timer);
+  }, [locationStatus]);
 
   const withDistance = useMemo(() => {
     if (!coords) return [];
@@ -93,7 +127,13 @@ export default function NearMe() {
 
       {locationStatus === "requesting" && (
         <div className="text-center py-16">
-          <p className="text-slate-500">Asking your browser for your location…</p>
+          <p className="text-slate-500 mb-6">Asking your browser for your location…</p>
+          {showManualFallback && (
+            <div className="max-w-md mx-auto">
+              <p className="text-sm text-slate-500 mb-3">Taking a while? Jump straight to an area instead:</p>
+              <ManualAreaLinks />
+            </div>
+          )}
         </div>
       )}
 
@@ -106,22 +146,18 @@ export default function NearMe() {
           </p>
           <button
             onClick={requestLocation}
-            className="inline-flex items-center gap-1.5 bg-teal-700 hover:bg-teal-800 transition text-white font-semibold px-6 py-2.5 rounded-full"
+            className="inline-flex items-center gap-1.5 bg-teal-700 hover:bg-teal-800 transition text-white font-semibold px-6 py-2.5 rounded-full mb-6"
           >
             <LocateFixed className="w-4 h-4" /> Try again
           </button>
+          <ManualAreaLinks />
         </div>
       )}
 
       {(locationStatus === "unsupported" || locationStatus === "error") && (
-        <div className="text-center py-16">
-          <p className="text-slate-500">
-            We couldn't get your location on this device. Try browsing by{" "}
-            <a href="/area/stone-town" className="text-teal-700 font-semibold hover:underline">
-              area
-            </a>{" "}
-            instead.
-          </p>
+        <div className="text-center py-16 max-w-md mx-auto">
+          <p className="text-slate-500 mb-6">We couldn't get your location on this device. Choose an area instead:</p>
+          <ManualAreaLinks />
         </div>
       )}
 
