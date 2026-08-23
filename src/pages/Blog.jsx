@@ -3,34 +3,62 @@ import { Link } from "react-router-dom";
 import { supabase } from "../lib/supabase";
 import { Newspaper, AlertTriangle, RefreshCw } from "lucide-react";
 import ItineraryDownloadBanner from "../components/ItineraryDownloadBanner";
+import { getCacheEntry, setCacheEntry, isFresh } from "../data/queryCache";
+
+const BLOG_CACHE_KEY = "blog_posts";
+// Same hard-timeout reasoning as data/hooks.js: without this, a hung
+// request (dead connection, cold serverless function, flaky mobile
+// network) leaves "Loading articles..." on screen forever - exactly the
+// stuck state flagged in the audit. This page previously had no timeout
+// at all.
+const FETCH_TIMEOUT_MS = 9000;
+function withTimeout(promise) {
+  const timeoutPromise = new Promise((_, reject) => setTimeout(() => reject(new Error("timeout")), FETCH_TIMEOUT_MS));
+  return Promise.race([promise, timeoutPromise]);
+}
 
 export default function Blog() {
-  const [posts, setPosts] = useState([]);
+  const cachedEntry = getCacheEntry(BLOG_CACHE_KEY);
+  const [posts, setPosts] = useState(cachedEntry?.data || []);
   // "loading" | "ready" | "error"
-  const [status, setStatus] = useState("loading");
+  const [status, setStatus] = useState(cachedEntry ? "ready" : "loading");
 
   const loadPosts = useCallback(() => {
-    setStatus("loading");
-    supabase
-      .from("blog_posts")
-      .select("*")
-      .eq("status", "published")
-      .neq("post_type", "guide")
-      .order("created_at", { ascending: false })
+    const entry = getCacheEntry(BLOG_CACHE_KEY);
+    if (entry) {
+      setPosts(entry.data);
+      setStatus("ready");
+      // Cache still fresh - skip hitting the network again for data we
+      // just showed instantly.
+      if (isFresh(entry)) return;
+    } else {
+      setStatus("loading");
+    }
+
+    withTimeout(
+      supabase
+        .from("blog_posts")
+        .select("*")
+        .eq("status", "published")
+        .neq("post_type", "guide")
+        .order("created_at", { ascending: false })
+    )
       .then(({ data, error }) => {
-        if (error) {
-          setStatus("error");
-          return;
-        }
+        if (error) throw error;
         // Filter client-side (not in the query) so this page keeps working
         // even before the `language` column exists in Supabase - posts
         // without a language set are treated as English (the original,
         // pre-existing behaviour).
         const englishPosts = (data || []).filter((p) => !p.language || p.language === "en");
+        setCacheEntry(BLOG_CACHE_KEY, englishPosts);
         setPosts(englishPosts);
         setStatus("ready");
       })
-      .catch(() => setStatus("error"));
+      .catch(() => {
+        // A failed background refresh shouldn't blank out posts already
+        // showing fine from cache.
+        if (!entry) setStatus("error");
+      });
   }, []);
 
   useEffect(() => {
