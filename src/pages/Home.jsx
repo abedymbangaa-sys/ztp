@@ -28,7 +28,7 @@ export default function Home() {
   const t = useT();
   const { categories } = useCategories();
   const { listings: hotels, loading: hotelsLoading } = useListings("hotels");
-  const { listings: allApproved } = useListings();
+  const { listings: allApproved, loading: listingsLoading } = useListings();
   const { settings, loading: settingsLoading } = useSettings();
   const adPrice = Number(settings.ad_price_usd) || 15;
 
@@ -297,7 +297,7 @@ export default function Home() {
             </div>
           }
         >
-          <ZanzibarMap listings={allApproved} />
+          <ZanzibarMap listings={allApproved} loading={listingsLoading} />
         </Suspense>
       </section>
 
