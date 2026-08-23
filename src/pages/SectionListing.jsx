@@ -79,6 +79,16 @@ export default function SectionListing() {
           <SectionIcon sectionKey={sectionKey} className="w-8 h-8 text-teal-700" />
           {config?.title || sectionKey}
         </h1>
+        {/* Visible result count - flagged in the re-audit: a directory
+            listing page should tell a visitor how many results they're
+            looking at, not just show cards with no count anywhere. */}
+        {!loading && !error && (
+          <p className="text-slate-500 text-sm">
+            {filtered.length === listings.length
+              ? `${listings.length} ${config?.title || sectionKey} in Zanzibar`
+              : `${filtered.length} of ${listings.length} ${config?.title || sectionKey}`}
+          </p>
+        )}
       </div>
 
       <div className="flex flex-col sm:flex-row gap-3 mb-4">
