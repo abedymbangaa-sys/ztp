@@ -5,4 +5,12 @@
 html, body {
   overflow-x: hidden;
   font-family: 'Inter', 'Segoe UI', system-ui, sans-serif;
+  /* Matches the branded prerender fallback's dark teal background (see
+     scripts/prerender.mjs) and the real hero section's gradient start
+     color. Without this, the browser's default white shows through for
+     a frame in any gap between "static fallback content painted" and
+     "React has mounted and painted its own tree" - the classic white
+     flash. A dark baseline here means that gap, if it happens at all,
+     reads as part of the loading experience instead of a broken flash. */
+  background-color: #f8fafc;
 }
