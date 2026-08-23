@@ -14,13 +14,13 @@ L.Icon.Default.mergeOptions({
 
 const ZANZIBAR_CENTER = [-6.1659, 39.2026];
 
-export default function ZanzibarMap({ listings = [] }) {
+export default function ZanzibarMap({ listings = [], loading = false }) {
   const pins = listings
     .map((item) => ({ ...item, coords: parseLatLng(item.maps_link) }))
     .filter((item) => item.coords);
 
   return (
-    <div className="rounded-2xl overflow-hidden border border-slate-200 h-[420px]">
+    <div className="rounded-2xl overflow-hidden border border-slate-200 h-[420px] relative">
       <MapContainer center={ZANZIBAR_CENTER} zoom={10} style={{ height: "100%", width: "100%" }}>
         <TileLayer
           attribution='&copy; OpenStreetMap contributors'
@@ -40,8 +40,24 @@ export default function ZanzibarMap({ listings = [] }) {
           </Marker>
         ))}
       </MapContainer>
-      {pins.length === 0 && (
-        <p className="text-center text-slate-400 text-sm py-4">Loading map markers...</p>
+      {/* Distinguishes "still fetching listings" from "finished, and truly
+          none of them have a usable map location" - the two were
+          previously conflated into a single "Loading map markers..."
+          message that stayed on screen even once loading had genuinely
+          finished with zero valid pins (confirmed in the site re-audit). */}
+      {loading && pins.length === 0 && (
+        <div className="absolute inset-x-0 bottom-3 flex justify-center pointer-events-none">
+          <p className="bg-white/95 text-slate-500 text-sm px-3 py-1.5 rounded-full shadow-sm">
+            Loading map markers…
+          </p>
+        </div>
+      )}
+      {!loading && pins.length === 0 && (
+        <div className="absolute inset-x-0 bottom-3 flex justify-center pointer-events-none">
+          <p className="bg-white/95 text-slate-500 text-sm px-3 py-1.5 rounded-full shadow-sm">
+            No listings with a saved map location yet.
+          </p>
+        </div>
       )}
     </div>
   );
