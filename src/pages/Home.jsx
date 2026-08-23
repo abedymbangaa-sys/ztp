@@ -41,6 +41,16 @@ export default function Home() {
   const heroImageUrl = settingsLoading ? null : settings.hero_image_url || DEFAULT_HERO_IMAGE;
   const topHotels = hotels.slice(0, 6);
 
+  // Fixes a real polish issue: on slower connections, a plain <img> paints
+  // progressively (visibly blocky/incomplete) while text is already
+  // sitting on top of it. Rather than fade the <img> in immediately on
+  // mount (which finishes before slow image bytes even arrive), we only
+  // reveal it once the browser reports the image fully loaded - until
+  // then, visitors see the clean solid gradient behind it with fully
+  // readable text, never a half-loaded photo. This is the same pattern
+  // TripAdvisor/Booking.com use for hero images.
+  const [heroLoaded, setHeroLoaded] = useState(false);
+
   const [adFormOpen, setAdFormOpen] = useState(false);
   const [pendingAd, setPendingAd] = useState(null); // ad row awaiting payment confirmation
   const [tripBuilderOpen, setTripBuilderOpen] = useState(false);
@@ -75,7 +85,12 @@ export default function Home() {
           <img
             src={heroImageUrl}
             alt="Zanzibar coastline"
-            className="absolute inset-0 w-full h-full object-cover scale-105 animate-[fadeIn_0.4s_ease-in]"
+            fetchpriority="high"
+            onLoad={() => setHeroLoaded(true)}
+            className={
+              "absolute inset-0 w-full h-full object-cover scale-105 transition-opacity duration-700 ease-out " +
+              (heroLoaded ? "opacity-100" : "opacity-0")
+            }
             onError={(e) => {
               e.target.style.display = "none";
             }}
