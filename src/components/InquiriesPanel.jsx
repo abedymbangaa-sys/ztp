@@ -53,18 +53,26 @@ export default function InquiriesPanel() {
             </span>
           </div>
           {inq.message && <p className="text-sm text-slate-700">{inq.message}</p>}
-          <span
-            className={
-              "inline-block mt-2 text-[11px] font-semibold px-2 py-0.5 rounded-full " +
-              (inq.status === "closed"
-                ? "bg-slate-100 text-slate-500"
-                : inq.status === "contacted"
-                ? "bg-amber-100 text-amber-700"
-                : "bg-teal-100 text-teal-700")
-            }
-          >
-            {inq.status || "new"}
-          </span>
+          <div className="flex items-center gap-2 mt-2 flex-wrap">
+            <span
+              className={
+                "inline-block text-[11px] font-semibold px-2 py-0.5 rounded-full " +
+                (inq.status === "closed"
+                  ? "bg-slate-100 text-slate-500"
+                  : inq.status === "contacted"
+                  ? "bg-amber-100 text-amber-700"
+                  : "bg-teal-100 text-teal-700")
+              }
+            >
+              {inq.status || "new"}
+            </span>
+            {inq.utm_source && (
+              <span className="inline-block text-[11px] font-semibold px-2 py-0.5 rounded-full bg-indigo-50 text-indigo-700">
+                via {inq.utm_source}
+                {inq.utm_campaign ? ` · ${inq.utm_campaign}` : ""}
+              </span>
+            )}
+          </div>
         </div>
       ))}
     </div>
