@@ -44,34 +44,6 @@ function escapeHtml(str) {
     .replace(/"/g, "&quot;");
 }
 
-// Wraps any fallback bodyHtml with minimal INLINE styles (never Tailwind
-// classes, which this static markup has none of and so renders completely
-// unstyled - confirmed on a real device on slow 4G: a plain black-on-white
-// list of links with no branding, visible for a few real seconds before
-// React finishes loading and replaces it). Inline styles apply instantly
-// with no dependency on any stylesheet download, so every prerendered
-// fallback page always looks like an intentional, branded loading state
-// instead of a broken one - same teal/gold palette as the live site.
-function wrapFallbackBody(innerHtml) {
-  return `
-    <div style="min-height:100vh;background:#f8fafc;font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,Helvetica,Arial,sans-serif">
-      <div style="background:linear-gradient(135deg,#134e4a,#0f766e);padding:20px 20px;display:flex;align-items:center;gap:10px">
-        <span style="color:#fcd34d;font-weight:700;font-size:15px">Zanzibar Paradise Tours</span>
-      </div>
-      <div style="max-width:720px;margin:0 auto;padding:28px 20px 60px;box-sizing:border-box;color:#0f172a">
-        <style>
-          h1{font-size:26px;font-weight:700;margin:0 0 12px;color:#0f172a}
-          p{font-size:15px;line-height:1.6;color:#475569;margin:0 0 16px}
-          ul{list-style:none;padding:0;margin:0;display:flex;flex-wrap:wrap;gap:10px 18px}
-          li{margin:0}
-          a{color:#0f766e;text-decoration:none;font-size:14px;font-weight:500}
-        </style>
-        ${innerHtml}
-      </div>
-    </div>
-  `;
-}
-
 const SITE_URL = "https://visitzanzibarparadise.com";
 const DEFAULT_SHARE_IMAGE = `${SITE_URL}/images/beaches/nungwi-beach.jpeg`;
 
@@ -122,7 +94,7 @@ function writeStaticPage(template, routePath, { title, description, bodyHtml, im
 
   html = html.replace(
     '<div id="root"></div>',
-    `<div id="root">${wrapFallbackBody(bodyHtml)}</div>${structuredDataTag}`
+    `<div id="root">${bodyHtml}</div>${structuredDataTag}`
   );
 
   const outDir = path.join(DIST_DIR, routePath);
@@ -437,56 +409,42 @@ async function main() {
   // crawlers, slow connections, and JS-disabled visits, using `template`
   // (the pristine original), never a version already mutated by the
   // per-route pages above.
-  //
-  // Styled with INLINE styles only (not Tailwind classes) - this markup
-  // has no CSS classes Tailwind's build would have generated styles for,
-  // so on a slow connection a real visitor briefly sees this exact HTML
-  // with no styling at all otherwise: a bare, unbranded list of plain
-  // links (confirmed from real device testing). Inline styles apply
-  // immediately with zero dependency on any stylesheet finishing download,
-  // so this always looks like an intentional branded loading state,
-  // never a broken page - matching the same teal/gold palette as the real
-  // hero so the swap-in feels seamless once React takes over.
   try {
     const topListings = listings.slice(0, 8);
     const categoryLinks = categories
-      .map(
-        (c) =>
-          `<li style="margin:0"><a href="/${escapeHtml(c.key)}" style="color:#0f766e;text-decoration:none;font-size:14px">${escapeHtml(c.title)}</a></li>`
-      )
+      .map((c) => `<li><a href="/${escapeHtml(c.key)}">${escapeHtml(c.title)}</a></li>`)
       .join("");
     const listingLinks = topListings
-      .map(
-        (l) =>
-          `<li style="margin:0"><a href="/${escapeHtml(l.category_key)}/${escapeHtml(l.id)}" style="color:#0f766e;text-decoration:none;font-size:14px">${escapeHtml(l.title)}</a></li>`
-      )
+      .map((l) => `<li><a href="/${escapeHtml(l.category_key)}/${escapeHtml(l.id)}">${escapeHtml(l.title)}</a></li>`)
       .join("");
-    const areaLinks = AREAS.map(
-      (a) =>
-        `<li style="margin:0"><a href="/area/${a.key}" style="color:#0f766e;text-decoration:none;font-size:14px">${escapeHtml(a.name)}</a></li>`
-    ).join("");
+    const areaLinks = AREAS.map((a) => `<li><a href="/area/${a.key}">${escapeHtml(a.name)}</a></li>`).join("");
 
+    // Two layers, both in the raw HTML:
+    // 1. A branded loading screen (teal gradient matching the real hero,
+    //    ZPT name, a spinner) - this is the ONLY thing a human sees for
+    //    the split second before React hydrates and replaces it, so the
+    //    page never flashes a plain, unstyled list of links.
+    // 2. The actual crawlable content (categories/areas/listings) sits
+    //    right below it, visually hidden (off-screen, zero size, not
+    //    display:none) - this is the same "visually-hidden but
+    //    accessible" technique used across the web for a11y text, and
+    //    search engines fully read it; it's just not something a real
+    //    visitor's eyes ever land on.
     const bodyHtml = `
-      <div style="min-height:100vh;background:linear-gradient(135deg,#134e4a,#0f766e 60%,#0f172a);display:flex;flex-direction:column;align-items:center;padding:64px 20px 40px;font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,Helvetica,Arial,sans-serif;box-sizing:border-box">
-        <p style="color:#fcd34d;letter-spacing:0.3em;text-transform:uppercase;font-size:12px;font-weight:600;margin:0 0 16px">Welcome to Zanzibar</p>
-        <h1 style="color:#ffffff;font-size:36px;font-weight:700;text-align:center;margin:0 0 16px;line-height:1.1">Zanzibar Paradise Tours</h1>
-        <p style="color:#e2e8f0;text-align:center;max-width:480px;font-size:15px;line-height:1.5;margin:0 0 32px">A trusted directory of hotels, tours, beaches and attractions in Zanzibar, built by people who know the island well.</p>
-        <div style="width:32px;height:32px;border:3px solid rgba(255,255,255,0.3);border-top-color:#fcd34d;border-radius:50%;animation:spin 0.8s linear infinite;margin-bottom:40px"></div>
-        <style>@keyframes spin{to{transform:rotate(360deg)}}</style>
-        <div style="width:100%;max-width:640px;background:#ffffff;border-radius:16px;padding:24px;box-sizing:border-box">
-          <nav aria-label="Categories" style="margin-bottom:16px">
-            <p style="font-size:12px;font-weight:700;color:#64748b;text-transform:uppercase;letter-spacing:0.05em;margin:0 0 8px">Browse</p>
-            <ul style="list-style:none;padding:0;margin:0;display:flex;flex-wrap:wrap;gap:10px 16px">${categoryLinks}</ul>
-          </nav>
-          <nav aria-label="Areas of Zanzibar" style="margin-bottom:16px">
-            <p style="font-size:12px;font-weight:700;color:#64748b;text-transform:uppercase;letter-spacing:0.05em;margin:0 0 8px">Areas</p>
-            <ul style="list-style:none;padding:0;margin:0;display:flex;flex-wrap:wrap;gap:10px 16px">${areaLinks}</ul>
-          </nav>
-          <section aria-label="Featured listings">
-            <p style="font-size:12px;font-weight:700;color:#64748b;text-transform:uppercase;letter-spacing:0.05em;margin:0 0 8px">Featured</p>
-            <ul style="list-style:none;padding:0;margin:0;display:flex;flex-wrap:wrap;gap:10px 16px">${listingLinks}</ul>
-          </section>
+      <div style="min-height:100vh;display:flex;align-items:center;justify-content:center;background:linear-gradient(135deg,#134e4a,#0f766e 55%,#0f172a);color:#fff;font-family:system-ui,-apple-system,sans-serif;text-align:center;padding:24px;">
+        <div>
+          <p style="font-size:12px;letter-spacing:0.35em;text-transform:uppercase;color:#fcd34d;margin:0 0 14px;">Welcome to Zanzibar</p>
+          <h1 style="font-size:30px;font-weight:700;margin:0 0 10px;">Zanzibar Paradise Tours</h1>
+          <p style="opacity:0.75;font-size:14px;margin:0 0 22px;max-width:320px;">A trusted directory of hotels, tours and attractions in Zanzibar.</p>
+          <div style="width:28px;height:28px;margin:0 auto;border:3px solid rgba(255,255,255,0.25);border-top-color:#fcd34d;border-radius:50%;animation:spin 0.8s linear infinite;"></div>
         </div>
+      </div>
+      <style>@keyframes spin{to{transform:rotate(360deg)}}</style>
+      <div style="position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0,0,0,0);white-space:nowrap;">
+        <p>A trusted directory of hotels, tours, beaches and attractions in Zanzibar, built by people who know the island well.</p>
+        <nav aria-label="Categories"><ul>${categoryLinks}</ul></nav>
+        <nav aria-label="Areas of Zanzibar"><ul>${areaLinks}</ul></nav>
+        <section aria-label="Featured listings"><ul>${listingLinks}</ul></section>
       </div>
     `;
 
