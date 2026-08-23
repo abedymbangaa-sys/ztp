@@ -51,7 +51,13 @@ export default function CollectionDetail() {
       <div className="mb-8 max-w-2xl">
         <p className="text-teal-700 font-semibold text-sm uppercase tracking-wide">{config.tagline}</p>
         <h1 className="text-2xl sm:text-3xl font-bold text-slate-900 mb-2">{config.title}</h1>
-        <p className="text-slate-600">{config.description}</p>
+        <p className="text-slate-600 mb-2">{config.description}</p>
+        {config.criteria && <p className="text-xs text-slate-400">{config.criteria}</p>}
+        {!loading && !error && (
+          <p className="text-sm font-semibold text-slate-500 mt-3">
+            {matched.length} place{matched.length === 1 ? "" : "s"} in this collection
+          </p>
+        )}
       </div>
 
       {loading ? (
