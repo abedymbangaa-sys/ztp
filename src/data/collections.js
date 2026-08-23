@@ -9,6 +9,8 @@ export const COLLECTIONS = [
     tagline: "Places that work well with kids in tow",
     description:
       "Hotels, beaches and activities that are genuinely easy with children - calm water, space to relax, and staff used to families.",
+    criteria: "Selected for calm swimming conditions, family rooms/space, and low-hassle logistics.",
+    coverImage: "/images/beaches/kendwa-rocks-beach.jpeg",
     match: { tags: ["family-friendly"] },
   },
   {
@@ -17,6 +19,8 @@ export const COLLECTIONS = [
     tagline: "Real value without cutting the experience short",
     description:
       "For travellers (Tanzanian or international) who want an honest, affordable Zanzibar trip - no compromise on the good parts.",
+    criteria: "Selected for genuine value for money, not just the lowest sticker price.",
+    coverImage: "/images/beaches/jambiani-beach.jpeg",
     match: { tags: ["budget"] },
   },
   {
@@ -24,6 +28,8 @@ export const COLLECTIONS = [
     title: "Luxury Escapes",
     tagline: "The island's most refined stays and experiences",
     description: "For travellers who want Zanzibar at its most polished - private, high-end, detail-oriented.",
+    criteria: "Selected for high-end finish, service standard and privacy.",
+    coverImage: "/images/hotels/zanzibar-serena.jpeg",
     match: { tags: ["luxury"] },
   },
   {
@@ -31,6 +37,8 @@ export const COLLECTIONS = [
     title: "Quiet Beaches",
     tagline: "Away from the crowds",
     description: "Beaches and beachfront stays picked for calm, low-crowd relaxation rather than nightlife.",
+    criteria: "Selected for low crowds and distance from the busiest nightlife strips.",
+    coverImage: "/images/beaches/matemwe-beach.jpeg",
     match: { tags: ["quiet-private"], categories: ["beaches", "hotels"] },
   },
   {
@@ -38,6 +46,8 @@ export const COLLECTIONS = [
     title: "Eco-Conscious Zanzibar",
     tagline: "Businesses doing right by the island",
     description: "Places with real eco or community-benefiting practices, not just a green label.",
+    criteria: "Selected for documented eco-certification or community-benefit practices.",
+    coverImage: "/images/nature/mangrove-forests.jpeg",
     match: { tags: ["eco-certified"] },
   },
   {
@@ -45,6 +55,8 @@ export const COLLECTIONS = [
     title: "Stone Town in One Day",
     tagline: "The old town, done right in a single visit",
     description: "Everything worth seeing, eating and doing in Stone Town if you only have one day there.",
+    criteria: "Selected for walkability within Stone Town and being manageable in a single day.",
+    coverImage: "/images/heritage/stone-town.jpeg",
     match: { areas: ["stone-town"] },
   },
 ];
