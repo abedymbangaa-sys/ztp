@@ -5,6 +5,7 @@ import { buildRichInquiryLink, SITE_CONTACT_NUMBER } from "../lib/whatsapp";
 import { normalizePhone } from "../lib/phone";
 import { sendNotificationEmail } from "../lib/email";
 import { supabase } from "../lib/supabase";
+import { getStoredUTM } from "../lib/utm";
 import { SectionIcon } from "../lib/icons";
 import { formatLocation } from "../lib/locations";
 import { buildDirectionsUrl } from "../lib/maps";
@@ -82,6 +83,7 @@ export default function SectionDetail() {
 
   async function handleInquirySubmit(details) {
     try {
+      const utm = getStoredUTM();
       await supabase.from("inquiries").insert({
         hotel_id: item.id,
         hotel_name: item.title,
@@ -94,6 +96,9 @@ export default function SectionDetail() {
         notes: details.notes,
         used_fallback_number: !hasOwnNumber,
         created_at: new Date().toISOString(),
+        utm_source: utm.utm_source || null,
+        utm_medium: utm.utm_medium || null,
+        utm_campaign: utm.utm_campaign || null,
       });
     } catch (err) {
       console.error("Could not log inquiry", err);
