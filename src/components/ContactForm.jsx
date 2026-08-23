@@ -1,5 +1,6 @@
 import { useState } from "react";
 import { supabase } from "../lib/supabase";
+import { getStoredUTM } from "../lib/utm";
 import { Loader2, CheckCircle2 } from "lucide-react";
 
 // General-purpose contact form (not tied to a specific hotel/listing).
@@ -18,10 +19,14 @@ export default function ContactForm() {
     if (!form.name.trim() || !form.email.trim() || !form.message.trim()) return;
 
     setStatus("sending");
+    const utm = getStoredUTM();
     const { error } = await supabase.from("inquiries").insert({
       visitor_name: form.name.trim(),
       visitor_email: form.email.trim(),
       message: form.message.trim(),
+      utm_source: utm.utm_source || null,
+      utm_medium: utm.utm_medium || null,
+      utm_campaign: utm.utm_campaign || null,
     });
 
     if (error) {
