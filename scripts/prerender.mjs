@@ -57,7 +57,7 @@ function absoluteUrl(maybeRelative) {
   return `${SITE_URL}${maybeRelative}`;
 }
 
-function writeStaticPage(template, routePath, { title, description, bodyHtml, image, url, structuredData }) {
+function writeStaticPage(template, routePath, { title, description, bodyHtml, image, url, structuredData, preload }) {
   let html = template;
 
   if (title) {
@@ -96,9 +96,23 @@ function writeStaticPage(template, routePath, { title, description, bodyHtml, im
     ? `<script type="application/ld+json">${JSON.stringify(structuredData)}</script>`
     : "";
 
+  // Embeds the already-fetched data (listing, category listings, etc.)
+  // as JSON right in the static HTML. Without this, the first thing React
+  // does on mount is blank out this real content and show an empty grey
+  // "skeleton" while it re-fetches the SAME data from Supabase over the
+  // network. If a crawler (or a slow connection) evaluates the page during
+  // that empty window, it sees a blank page and can flag it as thin/soft-404
+  // - even though this rich prerendered HTML was there a moment earlier.
+  // The relevant hook reads window.__ZTP_PRELOAD__ on first render and uses
+  // it immediately instead of starting from nothing, then quietly
+  // re-fetches in the background to stay fresh.
+  const preloadTag = preload
+    ? `<script>window.__ZTP_PRELOAD__=${JSON.stringify(preload).replace(/</g, "\\u003c")};</script>`
+    : "";
+
   html = html.replace(
     '<div id="root"></div>',
-    `<div id="root">${bodyHtml}</div>${structuredDataTag}`
+    `<div id="root">${bodyHtml}</div>${structuredDataTag}${preloadTag}`
   );
 
   const outDir = path.join(DIST_DIR, routePath);
@@ -153,6 +167,7 @@ async function main() {
         title: `${cat.title || cat.key} | Zanzibar Paradise Tours`,
         description: `${cat.title || cat.key} in Zanzibar — ${catListings.length} listings, curated by Zanzibar Paradise Tours.`,
         bodyHtml: `<h1>${escapeHtml(cat.title || cat.key)}</h1><ul>${listItems}</ul>`,
+        preload: { type: "listings", categoryKey: cat.key, data: catListings },
       });
       generated++;
     } catch (err) {
@@ -182,6 +197,7 @@ async function main() {
             url: pageUrl,
             address: l.location || undefined,
           },
+          preload: { type: "listing", id: l.id, data: l },
         });
         generated++;
       } catch (err) {
@@ -506,3 +522,4 @@ main()
     // Never fail the build because of this script.
     process.exit(0);
   });
+
