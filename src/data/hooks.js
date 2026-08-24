@@ -14,6 +14,24 @@ function withTimeout(promise) {
   return Promise.race([promise, timeoutPromise]);
 }
 
+// Reads the data scripts/prerender.mjs already embedded in THIS exact
+// page's static HTML (window.__ZTP_PRELOAD__). Without this, the first
+// thing a detail page does on mount is throw away the real, readable
+// content that was just sitting in the HTML and show an empty grey
+// skeleton while it re-fetches the SAME data from Supabase over the
+// network. A search engine crawler (or anyone on a slow connection)
+// evaluating the page during that gap sees a blank page - which is how a
+// perfectly good listing ends up flagged as thin/soft-404. Used only to
+// avoid that initial blank flash; the hook still refetches in the
+// background afterwards so the data stays current.
+function readPreload(type, match) {
+  if (typeof window === "undefined") return undefined;
+  const preload = window.__ZTP_PRELOAD__;
+  if (!preload || preload.type !== type) return undefined;
+  if (match && !match(preload)) return undefined;
+  return preload.data;
+}
+
 // Load active categories from Supabase (live - admin can add new ones anytime).
 // Exposes `error` and `retry` so pages relying on categories (page title,
 // icon, tag label) don't silently render blank forever if the request fails.
@@ -92,19 +110,29 @@ export function useCategories() {
 export function useListings(categoryKey) {
   const cacheKey = `listings:${categoryKey || "all"}`;
   const cachedEntry = getCacheEntry(cacheKey);
-  const [listings, setListings] = useState(cachedEntry?.data || []);
-  const [loading, setLoading] = useState(!cachedEntry);
+  const preloaded = cachedEntry
+    ? undefined
+    : readPreload("listings", (p) => p.categoryKey === categoryKey);
+  const [listings, setListings] = useState(cachedEntry?.data || preloaded || []);
+  const [loading, setLoading] = useState(!cachedEntry && !preloaded);
   const [error, setError] = useState(null);
   const [refreshKey, setRefreshKey] = useState(0);
 
   useEffect(() => {
     let mounted = true;
     const entry = getCacheEntry(cacheKey);
+    const preload = entry ? undefined : readPreload("listings", (p) => p.categoryKey === categoryKey);
     if (entry) {
       setListings(entry.data);
       setLoading(false);
       setError(null);
       if (isFresh(entry) && refreshKey === 0) return;
+    } else if (preload) {
+      // Same category page this data was prerendered for - show the real
+      // list immediately instead of a skeleton grid, then quietly refetch.
+      setListings(preload);
+      setLoading(false);
+      setError(null);
     } else {
       setLoading(true);
       setError(null);
@@ -160,8 +188,8 @@ export function useListings(categoryKey) {
         if (import.meta.env.DEV) console.error("useListings: failed to load", err);
         if (!mounted) return;
         // A background refresh failing shouldn't blank out listings that
-        // were already showing fine from cache.
-        if (!entry) {
+        // were already showing fine from cache or the prerendered page.
+        if (!entry && !preload) {
           setError("Unable to load listings right now.");
           setListings([]);
         }
@@ -284,15 +312,36 @@ export function useSettings() {
 // fails (network issue, Supabase down, etc.) rather than the listing
 // genuinely not existing.
 export function useListing(id) {
-  const [listing, setListing] = useState(null);
-  const [loading, setLoading] = useState(true);
+  const cacheKey = `listing:${id}`;
+  const cachedEntry = getCacheEntry(cacheKey);
+  const preloaded = cachedEntry ? undefined : readPreload("listing", (p) => p.id === id);
+  const initialListing = cachedEntry?.data ?? preloaded ?? null;
+  const [listing, setListing] = useState(initialListing);
+  const [loading, setLoading] = useState(!initialListing);
   const [error, setError] = useState(null);
   const [refreshKey, setRefreshKey] = useState(0);
 
   useEffect(() => {
     let mounted = true;
-    setLoading(true);
-    setError(null);
+    const entry = getCacheEntry(cacheKey);
+    const preload = entry ? undefined : readPreload("listing", (p) => p.id === id);
+    if (entry) {
+      setListing(entry.data);
+      setLoading(false);
+      setError(null);
+      if (isFresh(entry) && refreshKey === 0) return;
+    } else if (preload) {
+      // Nothing cached yet, but this is the exact page the listing was
+      // prerendered for - show it immediately instead of a skeleton, then
+      // fall through to the fetch below to quietly confirm/refresh it.
+      setListing(preload);
+      setLoading(false);
+      setError(null);
+    } else {
+      setLoading(true);
+      setError(null);
+    }
+
     withTimeout(
       supabase
         .from("listings")
@@ -306,9 +355,14 @@ export function useListing(id) {
         // "this listing doesn't exist", not a failure, so we treat it the
         // same as before (listing stays null, no error state shown).
         if (error && error.code !== "PGRST116") {
-          setError(error);
-          setListing(null);
+          // A background refresh failing shouldn't blank out a listing
+          // that's already showing fine from cache or the prerendered page.
+          if (!entry && !preload) {
+            setError(error);
+            setListing(null);
+          }
         } else {
+          setCacheEntry(cacheKey, data || null);
           setListing(data || null);
         }
         setLoading(false);
@@ -317,10 +371,13 @@ export function useListing(id) {
         // Timeout (or any other rejection outside the normal Supabase
         // {data,error} shape) lands here - surfaced as the same error
         // state so the retry button always appears within ~9s instead of
-        // the skeleton spinning forever on a hung connection.
+        // the skeleton spinning forever on a hung connection, UNLESS we
+        // already have cached/prerendered data to keep showing.
         if (!mounted) return;
-        setError(err);
-        setListing(null);
+        if (!entry && !preload) {
+          setError(err);
+          setListing(null);
+        }
         setLoading(false);
       });
     return () => {
