@@ -5,10 +5,12 @@ import { Upload, X, Loader2 } from "lucide-react";
 const BUCKET = "listing-photos";
 
 // Resizes/compresses an image in the browser before upload, so large phone
-// photos (often 4-8MB) become small, fast-loading JPEGs (typically under
-// 300KB) without a visible quality difference at the sizes we display them.
-// Falls back to the original file if anything goes wrong.
-function compressImage(file, { maxWidth = 1600, maxHeight = 1600, quality = 0.8 } = {}) {
+// photos (often 4-8MB) become fast-loading JPEGs without a visible quality
+// difference at the sizes we display them. Falls back to the original file
+// if anything goes wrong. maxWidth/maxHeight and quality kept generous
+// (2200px, 90%) so photos still look sharp when a visitor opens the full
+// gallery view, not just as small thumbnails.
+function compressImage(file, { maxWidth = 2200, maxHeight = 2200, quality = 0.9 } = {}) {
   return new Promise((resolve) => {
     if (!file.type.startsWith("image/") || file.type === "image/gif" || file.type === "image/svg+xml") {
       resolve(file); // don't touch animated GIFs or vector SVGs
@@ -198,3 +200,4 @@ export function MultiPhotoUploader({ value = [], onChange, label }) {
     </div>
   );
 }
+
