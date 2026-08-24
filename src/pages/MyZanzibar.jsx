@@ -6,6 +6,7 @@ import GenericCard from "../components/GenericCard";
 import { useSEO } from "../lib/useSEO";
 import { Heart, Share2, Copy, Check, MessageCircle } from "lucide-react";
 import { getStamp, STAMP_TYPES } from "../lib/stamps";
+import StampSeal from "../components/StampSeal";
 
 function CardSkeletonGrid({ count = 6 }) {
   return (
@@ -113,7 +114,7 @@ export default function MyZanzibar() {
                   backgroundColor: count ? `${meta.color}14` : "transparent",
                 }}
               >
-                <span aria-hidden="true">{meta.emoji}</span>
+                <StampSeal stampKey={key} color={count ? meta.color : "#94a3b8"} size={18} />
                 {meta.label} · {count}
               </span>
             );
@@ -194,7 +195,7 @@ export default function MyZanzibar() {
                   className="inline-flex items-center gap-1 text-[11px] font-semibold mb-1.5"
                   style={{ color: stamp.color }}
                 >
-                  <span aria-hidden="true">{stamp.emoji}</span>
+                  <StampSeal stampKey={stamp.key} color={stamp.color} size={16} />
                   {stamp.label}
                 </div>
                 <GenericCard item={item} sectionKey={item.category_key} />
