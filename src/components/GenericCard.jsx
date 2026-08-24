@@ -1,3 +1,4 @@
+import { useState } from "react";
 import { Link } from "react-router-dom";
 import { MapPin, BadgeCheck, MessageCircle, Clock, Star, Tag, Heart } from "lucide-react";
 import { useLanguage } from "../lib/LanguageContext";
@@ -15,6 +16,7 @@ export default function GenericCard({ item, sectionKey, distanceKm }) {
   const t = useT();
   const { isSaved, toggleSaved } = useSavedList();
   const saved = isSaved(item.id);
+  const [toast, setToast] = useState(null); // "saved" | "removed" | null
   const description = (language !== "en" && item[`description_${language}`]) || item.description;
   const itemTags = TAG_OPTIONS.filter((t) => (item.tags || []).includes(t.key));
 
@@ -53,8 +55,11 @@ export default function GenericCard({ item, sectionKey, distanceKm }) {
         <button
           type="button"
           onClick={() => {
+            const wasSaved = saved;
             toggleSaved(item.id);
-            trackEvent(saved ? "unsave_listing" : "save_listing", { listing_id: item.id, listing_name: item.title });
+            trackEvent(wasSaved ? "unsave_listing" : "save_listing", { listing_id: item.id, listing_name: item.title });
+            setToast(wasSaved ? "removed" : "saved");
+            window.setTimeout(() => setToast(null), 3000);
           }}
           aria-label={saved ? t("Remove from My Zanzibar") : t("Save to My Zanzibar")}
           aria-pressed={saved}
@@ -62,6 +67,23 @@ export default function GenericCard({ item, sectionKey, distanceKm }) {
         >
           <Heart className={"w-4 h-4 " + (saved ? "fill-rose-500 text-rose-500" : "text-slate-500")} />
         </button>
+        {toast && (
+          <div className="absolute top-12 right-3 z-10 flex items-center gap-2 bg-slate-900/95 text-white text-[11px] font-semibold px-3 py-1.5 rounded-full shadow-lg whitespace-nowrap">
+            {toast === "saved" ? "Saved to My Zanzibar" : "Removed from My Zanzibar"}
+            {toast === "removed" && (
+              <button
+                type="button"
+                onClick={() => {
+                  toggleSaved(item.id);
+                  setToast(null);
+                }}
+                className="underline decoration-white/60 hover:decoration-white"
+              >
+                Undo
+              </button>
+            )}
+          </div>
+        )}
       </div>
       <Link to={`/${sectionKey}/${item.id}`} className="block">
         <div className="p-5 pb-3">
