@@ -20,7 +20,7 @@ const DAY_PLANS = {
       day: 1,
       title: "Stone Town",
       area: "Stone Town",
-      activities: "Stone Town Heritage Tour in the afternoon, then Forodhani Night Food Tour at sunset",
+      activities: "Guided walk through Stone Town's historic streets, old doors and waterfront, then Forodhani Night Market at sunset for Zanzibar pizza, urojo, mishkaki and fresh seafood",
       links: [
         { label: "Heritage sites", to: "/heritage" },
         { label: "Tours", to: "/tours" },
@@ -29,8 +29,8 @@ const DAY_PLANS = {
     {
       day: 2,
       title: "Safari Blue",
-      area: "South Coast, Fumba",
-      activities: "Full-day dhow sail, mangroves, snorkelling and a sandbank seafood lunch",
+      area: "Menai Bay, South Coast",
+      activities: "Full-day traditional dhow trip around Menai Bay - visit a sandbank, snorkel in clear water and enjoy a fresh seafood lunch",
       links: [
         { label: "Tours", to: "/tours" },
         { label: "South Coast", to: "/area/south" },
@@ -38,31 +38,31 @@ const DAY_PLANS = {
     },
     {
       day: 3,
-      title: "North coast",
-      area: "Nungwi",
-      activities: "Nungwi Turtle Aquarium & Village Tour, then relax on Nungwi Beach at sunset",
+      title: "Jozani Forest",
+      area: "Jozani Forest & Spice Farm",
+      activities: "Guided walk through Jozani Forest to see the red colobus monkey, then continue to a spice farm to learn about Zanzibar's famous cloves, cinnamon and tropical fruits",
+      links: [
+        { label: "Nature", to: "/nature" },
+        { label: "Tours", to: "/tours" },
+      ],
+    },
+    {
+      day: 4,
+      title: "Nungwi & Kendwa",
+      area: "North Coast",
+      activities: "A day on the north coast - clear water, beach time, a turtle aquarium visit and a sunset dhow cruise",
       links: [
         { label: "Hotels", to: "/hotels" },
         { label: "Beaches", to: "/beaches" },
       ],
     },
     {
-      day: 4,
-      title: "Marine day",
-      area: "Mnemba Atoll",
-      activities: "Full-day snorkelling trip to the Mnemba Atoll Marine Conservation Area",
-      links: [
-        { label: "Tours", to: "/tours" },
-        { label: "Experiences", to: "/experiences" },
-      ],
-    },
-    {
       day: 5,
-      title: "Spice farm & Prison Island",
-      area: "Central Zanzibar / Stone Town",
-      activities: "Kidichi Spice Farm Tour in the morning, Prison Island Excursion before departure",
+      title: "Paje & Departure",
+      area: "Paje, East Coast",
+      activities: "A slow morning on Paje Beach with a lagoon activity if the tide allows, then departure with enough time for your airport or ferry transfer",
       links: [
-        { label: "Tours", to: "/tours" },
+        { label: "Beaches", to: "/beaches" },
         { label: "Things to Do", to: "/things-to-do" },
       ],
     },
