@@ -5,6 +5,7 @@ import { useSavedList } from "../lib/SavedListContext";
 import GenericCard from "../components/GenericCard";
 import { useSEO } from "../lib/useSEO";
 import { Heart, Share2, Copy, Check, MessageCircle } from "lucide-react";
+import { getStamp, STAMP_TYPES } from "../lib/stamps";
 
 function CardSkeletonGrid({ count = 6 }) {
   return (
@@ -54,6 +55,13 @@ export default function MyZanzibar() {
   const activeIds = isSharedView ? sharedIds : savedIds;
   const items = listings.filter((l) => activeIds.includes(l.id));
 
+  // Stamp counts for the strip below — pure derived data, no new state.
+  const stampCounts = items.reduce((acc, item) => {
+    const { key } = getStamp(item.category_key);
+    acc[key] = (acc[key] || 0) + 1;
+    return acc;
+  }, {});
+
   const shareUrl = `https://visitzanzibarparadise.com/my-zanzibar?ids=${savedIds.join(",")}`;
 
   function handleCopyLink() {
@@ -89,6 +97,29 @@ export default function MyZanzibar() {
             : "Places you've saved with the heart icon across the site. Share this list with whoever you're travelling with."}
         </p>
       </div>
+
+      {items.length > 0 && (
+        <div className="flex flex-wrap gap-2 mb-8">
+          {Object.entries(STAMP_TYPES).map(([key, meta]) => {
+            const count = stampCounts[key] || 0;
+            return (
+              <span
+                key={key}
+                className="inline-flex items-center gap-1.5 text-xs font-semibold px-3 py-1.5 rounded-full border"
+                style={{
+                  borderColor: count ? meta.color : "#e2e8f0",
+                  borderStyle: count ? "solid" : "dashed",
+                  color: count ? meta.color : "#94a3b8",
+                  backgroundColor: count ? `${meta.color}14` : "transparent",
+                }}
+              >
+                <span aria-hidden="true">{meta.emoji}</span>
+                {meta.label} · {count}
+              </span>
+            );
+          })}
+        </div>
+      )}
 
       {isSharedView && sharedIds.length > 0 && (
         <div className="bg-teal-50 border border-teal-200 rounded-2xl p-5 mb-8 flex flex-wrap items-center justify-between gap-3">
@@ -155,9 +186,21 @@ export default function MyZanzibar() {
         </div>
       ) : (
         <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-6">
-          {items.map((item) => (
-            <GenericCard key={item.id} item={item} sectionKey={item.category_key} />
-          ))}
+          {items.map((item) => {
+            const stamp = getStamp(item.category_key);
+            return (
+              <div key={item.id}>
+                <div
+                  className="inline-flex items-center gap-1 text-[11px] font-semibold mb-1.5"
+                  style={{ color: stamp.color }}
+                >
+                  <span aria-hidden="true">{stamp.emoji}</span>
+                  {stamp.label}
+                </div>
+                <GenericCard item={item} sectionKey={item.category_key} />
+              </div>
+            );
+          })}
         </div>
       )}
     </div>
