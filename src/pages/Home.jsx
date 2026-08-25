@@ -20,7 +20,7 @@ const ZanzibarMap = lazy(() => import("../components/ZanzibarMap"));
 import AdvertiseSection from "../components/AdvertiseSection";
 import AdvertiseFormModal from "../components/AdvertiseFormModal";
 import PaymentInstructions from "../components/PaymentInstructions";
-import { COLLECTIONS } from "../data/collections";
+import { COLLECTIONS, filterListingsForCollection } from "../data/collections";
 
 const DEFAULT_HERO_IMAGE =
   "https://images.unsplash.com/photo-1559827260-dc66d52bef19?w=2400&q=85&auto=format&fit=crop";
@@ -258,17 +258,36 @@ export default function Home() {
           </Link>
         </div>
         <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-6">
-          {COLLECTIONS.slice(0, 3).map((c) => (
-            <Link
-              key={c.key}
-              to={`/collections/${c.key}`}
-              className="block bg-white border border-slate-200 rounded-2xl p-6 hover:shadow-lg hover:border-teal-300 transition"
-            >
-              <h3 className="font-bold text-lg text-slate-900 mb-1">{c.title}</h3>
-              <p className="text-teal-700 text-sm font-semibold mb-3">{c.tagline}</p>
-              <p className="text-slate-500 text-sm leading-relaxed">{c.description}</p>
-            </Link>
-          ))}
+          {COLLECTIONS.slice(0, 3).map((c) => {
+            const count = filterListingsForCollection(allApproved, c.match).length;
+            return (
+              <Link
+                key={c.key}
+                to={`/collections/${c.key}`}
+                className="group block bg-white border border-slate-200 rounded-2xl overflow-hidden hover:shadow-lg hover:border-teal-300 transition"
+              >
+                {c.coverImage && (
+                  <div className="h-36 overflow-hidden">
+                    <img
+                      src={c.coverImage}
+                      alt={c.title}
+                      className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
+                      loading="lazy"
+                    />
+                  </div>
+                )}
+                <div className="p-6">
+                  <h3 className="font-bold text-lg text-slate-900 mb-1">{c.title}</h3>
+                  <p className="text-teal-700 text-sm font-semibold mb-3">{c.tagline}</p>
+                  <p className="text-slate-500 text-sm leading-relaxed mb-3">{c.description}</p>
+                  <p className="text-xs font-semibold text-slate-400">
+                    {count} place{count === 1 ? "" : "s"}
+                    {c.estimatedTime ? ` · ${c.estimatedTime}` : ""}
+                  </p>
+                </div>
+              </Link>
+            );
+          })}
         </div>
       </section>
 
