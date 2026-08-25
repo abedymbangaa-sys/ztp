@@ -31,6 +31,7 @@ const BeforeYouGo = lazy(() => import("./pages/BeforeYouGo"));
 const Privacy = lazy(() => import("./pages/Privacy"));
 const Terms = lazy(() => import("./pages/Terms"));
 const DataSource = lazy(() => import("./pages/DataSource"));
+const HowWeVerify = lazy(() => import("./pages/HowWeVerify"));
 const Area = lazy(() => import("./pages/Area"));
 const Guides = lazy(() => import("./pages/Guides"));
 const GuideDetail = lazy(() => import("./pages/GuideDetail"));
@@ -77,6 +78,7 @@ export default function App() {
             <Route path="/privacy" element={<Privacy />} />
             <Route path="/terms" element={<Terms />} />
             <Route path="/data-source" element={<DataSource />} />
+            <Route path="/how-we-verify" element={<HowWeVerify />} />
             <Route path="/things-to-do" element={<ThingsToDo />} />
             <Route path="/kwa-watanzania" element={<ForTanzanians />} />
             <Route path="/ad/:id" element={<AdDetail />} />
