@@ -10,6 +10,8 @@ import DealsSection from "../components/DealsSection";
 import SearchAutocomplete from "../components/SearchAutocomplete";
 import TripBuilderModal from "../components/TripBuilderModal";
 import { AREAS } from "../data/areas";
+import { STAMP_TYPES } from "../lib/stamps";
+import StampSeal from "../components/StampSeal";
 import { ShieldCheck, MapPin, MessageCircle, BadgeCheck, Compass } from "lucide-react";
 import { useT } from "../lib/i18n";
 // Leaflet + react-leaflet is a heavy library (~150kB). Lazy-loading it
@@ -166,6 +168,46 @@ export default function Home() {
       </section>
 
       <TripBuilderModal open={tripBuilderOpen} onClose={() => setTripBuilderOpen(false)} />
+
+      {/* Choose Your Zanzibar Story - homepage packaging around the same
+          5 categories used by the My Zanzibar Passport stamps (see
+          src/lib/stamps.js), so the whole site tells one consistent
+          story instead of two separate systems. */}
+      <section className="max-w-6xl mx-auto px-4 py-16">
+        <div className="mb-8 text-center">
+          <p className="text-teal-700 font-semibold text-sm uppercase tracking-wide">Where do you start?</p>
+          <h2 className="text-2xl sm:text-3xl font-bold text-slate-900">Choose Your Zanzibar Story</h2>
+          <p className="text-slate-500 mt-1 max-w-xl mx-auto">
+            Everyone's Zanzibar looks a little different. Pick the story that matches yours — save places along the
+            way and earn the matching Passport stamp.
+          </p>
+        </div>
+        <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-4">
+          {["beach", "heritage", "food", "nature", "local"].map((key) => {
+            const meta = STAMP_TYPES[key];
+            return (
+              <Link
+                key={key}
+                to={meta.route}
+                className="group rounded-2xl border p-5 flex flex-col items-center text-center gap-2 bg-white hover:shadow-lg transition"
+                style={{ borderColor: `${meta.color}33` }}
+              >
+                <span
+                  className="flex items-center justify-center w-14 h-14 rounded-full mb-1 group-hover:scale-105 transition"
+                  style={{ backgroundColor: `${meta.color}14` }}
+                >
+                  <StampSeal stampKey={key} color={meta.color} size={30} />
+                </span>
+                <p className="font-bold text-slate-900 text-sm">{meta.label.replace(" Stamp", "")}</p>
+                <p className="text-xs text-slate-500 leading-snug">{meta.description}</p>
+                <span className="text-xs font-semibold mt-1" style={{ color: meta.color }}>
+                  Start this story →
+                </span>
+              </Link>
+            );
+          })}
+        </div>
+      </section>
 
       {/* Explore by area - internal links for visitors comparing where to
           stay, and a crawl path search engines can follow to each area's
