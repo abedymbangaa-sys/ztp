@@ -49,16 +49,29 @@ export default function CollectionDetail() {
         <ArrowLeft className="w-4 h-4" /> All collections
       </Link>
 
+      {config.coverImage && (
+        <div className="rounded-2xl overflow-hidden h-56 sm:h-72 mb-6">
+          <img src={config.coverImage} alt={config.title} className="w-full h-full object-cover" />
+        </div>
+      )}
+
       <div className="mb-8 max-w-2xl">
         <p className="text-teal-700 font-semibold text-sm uppercase tracking-wide">{config.tagline}</p>
         <h1 className="text-2xl sm:text-3xl font-bold text-slate-900 mb-2">{config.title}</h1>
         <p className="text-slate-600 mb-2">{config.description}</p>
         {config.criteria && <p className="text-xs text-slate-400">{config.criteria}</p>}
-        {!loading && !error && (
-          <p className="text-sm font-semibold text-slate-500 mt-3">
-            {matched.length} place{matched.length === 1 ? "" : "s"} in this collection
-          </p>
-        )}
+        <div className="flex flex-wrap items-center gap-x-4 gap-y-1 mt-3">
+          {!loading && !error && (
+            <p className="text-sm font-semibold text-slate-500">
+              {matched.length} place{matched.length === 1 ? "" : "s"} in this collection
+            </p>
+          )}
+          {config.estimatedTime && (
+            <p className="text-sm text-slate-500">
+              <span className="text-slate-300">·</span> {config.estimatedTime}
+            </p>
+          )}
+        </div>
       </div>
 
       {!loading && !error && matched.length > 0 && (
