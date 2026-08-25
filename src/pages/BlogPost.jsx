@@ -3,18 +3,31 @@ import { useParams, Link } from "react-router-dom";
 import { supabase } from "../lib/supabase";
 import { useSEO } from "../lib/useSEO";
 import { trackEvent } from "../lib/analytics";
+import { readPreload } from "../data/hooks";
 import { AlertTriangle, RefreshCw, MapPin, Hotel, Compass, BookOpenText } from "lucide-react";
 
 const SITE_URL = "https://visitzanzibarparadise.com";
 
 export default function BlogPost() {
   const { slug } = useParams();
-  const [post, setPost] = useState(null);
+  const preloaded = readPreload("blog_post", (p) => p.slug === slug);
+  const [post, setPost] = useState(preloaded || null);
   // "loading" | "ready" | "not_found" | "error"
-  const [status, setStatus] = useState("loading");
+  const [status, setStatus] = useState(preloaded ? "ready" : "loading");
 
   const load = useCallback(() => {
-    setStatus("loading");
+    // Same slug this page was prerendered for - show that content
+    // immediately instead of "Loading article...", then quietly confirm/
+    // refresh it below. Without this, every visit (and every crawler
+    // pass) briefly replaces a fully-written article with a loading
+    // message before the same data comes back from Supabase.
+    const preload = readPreload("blog_post", (p) => p.slug === slug);
+    if (preload) {
+      setPost(preload);
+      setStatus("ready");
+    } else {
+      setStatus("loading");
+    }
     supabase
       .from("blog_posts")
       .select("*")
@@ -23,13 +36,17 @@ export default function BlogPost() {
       .single()
       .then(({ data, error }) => {
         if (error) {
-          setStatus(error.code === "PGRST116" ? "not_found" : "error");
+          // A background refresh failing shouldn't blank out an article
+          // that's already showing fine from the prerendered page.
+          if (!preload) setStatus(error.code === "PGRST116" ? "not_found" : "error");
           return;
         }
         setPost(data || null);
         setStatus(data ? "ready" : "not_found");
       })
-      .catch(() => setStatus("error"));
+      .catch(() => {
+        if (!preload) setStatus("error");
+      });
   }, [slug]);
 
   useEffect(() => {
