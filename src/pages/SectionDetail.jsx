@@ -15,6 +15,7 @@ import RelatedListings from "../components/RelatedListings";
 import PhotoGallery from "../components/PhotoGallery";
 import AtAGlance from "../components/AtAGlance";
 import LocalLens from "../components/LocalLens";
+import SuitabilityCard from "../components/SuitabilityCard";
 import InquiryModal from "../components/InquiryModal";
 import ClaimListingModal from "../components/ClaimListingModal";
 import VerificationPanel from "../components/VerificationPanel";
@@ -236,6 +237,8 @@ export default function SectionDetail() {
             />
 
             <LocalLens item={item} />
+
+            <SuitabilityCard item={item} />
 
             {(item.weather_policy || item.maps_link) && (
               <div className="bg-white border border-slate-100 rounded-2xl shadow-sm p-5 space-y-4">
