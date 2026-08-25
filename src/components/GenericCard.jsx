@@ -4,6 +4,7 @@ import { MapPin, BadgeCheck, MessageCircle, Clock, Star, Tag, Heart } from "luci
 import { useLanguage } from "../lib/LanguageContext";
 import { useT } from "../lib/i18n";
 import { TAG_OPTIONS } from "../lib/tags";
+import { SUITABILITY_OPTIONS } from "../lib/suitability";
 import { buildWhatsAppLink } from "../lib/whatsapp";
 import { normalizePhone } from "../lib/phone";
 import { trackEvent } from "../lib/analytics";
@@ -19,6 +20,7 @@ export default function GenericCard({ item, sectionKey, distanceKm }) {
   const [toast, setToast] = useState(null); // "saved" | "removed" | null
   const description = (language !== "en" && item[`description_${language}`]) || item.description;
   const itemTags = TAG_OPTIONS.filter((t) => (item.tags || []).includes(t.key));
+  const goodForChips = SUITABILITY_OPTIONS.filter((s) => (item.good_for || []).includes(s.key)).slice(0, 2);
 
   const ownerNumber = normalizePhone(item.whatsapp_number);
   const whatsappUrl = ownerNumber
@@ -136,6 +138,24 @@ export default function GenericCard({ item, sectionKey, distanceKm }) {
             </div>
           )}
           <p className="text-sm text-slate-600 line-clamp-3">{description}</p>
+          {item.lens_local_tip && (
+            <p className="text-xs text-teal-700 mt-2 line-clamp-2">
+              <span className="font-semibold">Why this place:</span> {item.lens_local_tip}
+            </p>
+          )}
+          {goodForChips.length > 0 && (
+            <div className="flex flex-wrap gap-1.5 mt-2">
+              {goodForChips.map((s) => (
+                <span
+                  key={s.key}
+                  className="inline-flex items-center gap-1 bg-slate-50 text-slate-500 text-[11px] font-medium px-2 py-0.5 rounded-full"
+                >
+                  <s.icon className="w-3 h-3" strokeWidth={2} />
+                  {s.label}
+                </span>
+              ))}
+            </div>
+          )}
         </div>
       </Link>
 
