@@ -11,6 +11,7 @@ export const COLLECTIONS = [
       "Hotels, beaches and activities that are genuinely easy with children - calm water, space to relax, and staff used to families.",
     criteria: "Selected for calm swimming conditions, family rooms/space, and low-hassle logistics.",
     coverImage: "/images/beaches/kendwa-rocks-beach.jpeg",
+    estimatedTime: "Best as a half-day to full-day plan",
     match: { tags: ["family-friendly"] },
   },
   {
@@ -21,6 +22,7 @@ export const COLLECTIONS = [
       "For travellers (Tanzanian or international) who want an honest, affordable Zanzibar trip - no compromise on the good parts.",
     criteria: "Selected for genuine value for money, not just the lowest sticker price.",
     coverImage: "/images/beaches/jambiani-beach.jpeg",
+    estimatedTime: "Mix and match across your whole trip",
     match: { tags: ["budget"] },
   },
   {
@@ -30,6 +32,7 @@ export const COLLECTIONS = [
     description: "For travellers who want Zanzibar at its most polished - private, high-end, detail-oriented.",
     criteria: "Selected for high-end finish, service standard and privacy.",
     coverImage: "/images/hotels/zanzibar-serena.jpeg",
+    estimatedTime: "Best for a full stay, 3+ nights",
     match: { tags: ["luxury"] },
   },
   {
@@ -39,6 +42,7 @@ export const COLLECTIONS = [
     description: "Beaches and beachfront stays picked for calm, low-crowd relaxation rather than nightlife.",
     criteria: "Selected for low crowds and distance from the busiest nightlife strips.",
     coverImage: "/images/beaches/matemwe-beach.jpeg",
+    estimatedTime: "Half a day per beach, no rush",
     match: { tags: ["quiet-private"], categories: ["beaches", "hotels"] },
   },
   {
@@ -48,6 +52,7 @@ export const COLLECTIONS = [
     description: "Places with real eco or community-benefiting practices, not just a green label.",
     criteria: "Selected for documented eco-certification or community-benefit practices.",
     coverImage: "/images/nature/mangrove-forests.jpeg",
+    estimatedTime: "Mix and match across your whole trip",
     match: { tags: ["eco-certified"] },
   },
   {
@@ -57,6 +62,7 @@ export const COLLECTIONS = [
     description: "Everything worth seeing, eating and doing in Stone Town if you only have one day there.",
     criteria: "Selected for walkability within Stone Town and being manageable in a single day.",
     coverImage: "/images/heritage/stone-town.jpeg",
+    estimatedTime: "One full day, on foot",
     match: { areas: ["stone-town"] },
   },
 ];
