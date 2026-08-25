@@ -197,7 +197,12 @@ async function main() {
             url: pageUrl,
             address: l.location || undefined,
           },
-          preload: { type: "listing", id: l.id, data: l },
+          preload: {
+            type: "listing",
+            id: l.id,
+            data: l,
+            related: catListings.filter((x) => x.id !== l.id).slice(0, 8),
+          },
         });
         generated++;
       } catch (err) {
@@ -279,6 +284,7 @@ async function main() {
             publisher: { "@type": "Organization", name: "Zanzibar Paradise Tours" },
             mainEntityOfPage: pageUrl,
           },
+          preload: { type: "guide", slug: g.slug, data: g },
         });
         generated++;
         sitemapRoutes.push(`/guides/${g.slug}`);
@@ -357,6 +363,7 @@ async function main() {
             publisher: { "@type": "Organization", name: "Zanzibar Paradise Tours" },
             mainEntityOfPage: pageUrl,
           },
+          preload: { type: "blog_post", slug: post.slug, data: post },
         });
         generated++;
         sitemapRoutes.push(`/blog/${post.slug}`);
@@ -522,4 +529,3 @@ main()
     // Never fail the build because of this script.
     process.exit(0);
   });
-
