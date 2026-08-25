@@ -2,6 +2,7 @@ import { useState, useEffect, useCallback } from "react";
 import { useParams, Link } from "react-router-dom";
 import { supabase } from "../lib/supabase";
 import { useSEO } from "../lib/useSEO";
+import { readPreload } from "../data/hooks";
 import { AlertTriangle, RefreshCw, MapPin, Hotel, Compass, BookOpenText } from "lucide-react";
 
 const SITE_URL = "https://visitzanzibarparadise.com";
@@ -11,12 +12,19 @@ const SITE_URL = "https://visitzanzibarparadise.com";
 // so both stay easy to maintain from the same Admin Dashboard editor.
 export default function GuideDetail() {
   const { slug } = useParams();
-  const [post, setPost] = useState(null);
+  const preloaded = readPreload("guide", (p) => p.slug === slug);
+  const [post, setPost] = useState(preloaded || null);
   // "loading" | "ready" | "not_found" | "error"
-  const [status, setStatus] = useState("loading");
+  const [status, setStatus] = useState(preloaded ? "ready" : "loading");
 
   const load = useCallback(() => {
-    setStatus("loading");
+    const preload = readPreload("guide", (p) => p.slug === slug);
+    if (preload) {
+      setPost(preload);
+      setStatus("ready");
+    } else {
+      setStatus("loading");
+    }
     supabase
       .from("blog_posts")
       .select("*")
@@ -26,13 +34,15 @@ export default function GuideDetail() {
       .single()
       .then(({ data, error }) => {
         if (error) {
-          setStatus(error.code === "PGRST116" ? "not_found" : "error");
+          if (!preload) setStatus(error.code === "PGRST116" ? "not_found" : "error");
           return;
         }
         setPost(data || null);
         setStatus(data ? "ready" : "not_found");
       })
-      .catch(() => setStatus("error"));
+      .catch(() => {
+        if (!preload) setStatus("error");
+      });
   }, [slug]);
 
   useEffect(() => {
