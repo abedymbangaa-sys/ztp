@@ -24,7 +24,7 @@ function withTimeout(promise) {
 // perfectly good listing ends up flagged as thin/soft-404. Used only to
 // avoid that initial blank flash; the hook still refetches in the
 // background afterwards so the data stays current.
-function readPreload(type, match) {
+export function readPreload(type, match) {
   if (typeof window === "undefined") return undefined;
   const preload = window.__ZTP_PRELOAD__;
   if (!preload || preload.type !== type) return undefined;
@@ -421,8 +421,16 @@ export function useAdvertisement(id) {
 }
 
 export function useRelatedListings(categoryKey, excludeId, limit = 4) {
-  const [related, setRelated] = useState([]);
-  const [loading, setLoading] = useState(true);
+  // The listing detail page's own preload (see useListing above) already
+  // carries a ready-made "related" list computed at prerender time for
+  // this exact listing. Reading it here means "Explore Nearby" - which
+  // doubles as the internal linking that helps other listing pages get
+  // discovered and indexed - is present in the very first HTML instead
+  // of rendering nothing (this hook returned an empty array/loading=true)
+  // until a second network request finishes.
+  const preloaded = readPreload("listing", (p) => p.id === excludeId)?.related;
+  const [related, setRelated] = useState(preloaded || []);
+  const [loading, setLoading] = useState(!preloaded);
 
   useEffect(() => {
     let mounted = true;
@@ -431,7 +439,13 @@ export function useRelatedListings(categoryKey, excludeId, limit = 4) {
       setLoading(false);
       return;
     }
-    setLoading(true);
+    const preload = readPreload("listing", (p) => p.id === excludeId)?.related;
+    if (preload) {
+      setRelated(preload);
+      setLoading(false);
+    } else {
+      setLoading(true);
+    }
     supabase
       .from("listings")
       .select("*")
