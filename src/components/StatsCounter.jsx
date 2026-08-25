@@ -1,4 +1,5 @@
 import { useEffect, useState } from "react";
+import { Link } from "react-router-dom";
 import { supabase } from "../lib/supabase";
 import { Building2, MapPinned, Users, ShieldCheck } from "lucide-react";
 
@@ -96,18 +97,45 @@ export default function StatsCounter() {
     { icon: MapPinned, label: "Verified Listings", value: `${stats.listings}+` },
     { icon: Building2, label: "Types of Attractions", value: stats.categories },
     ...(stats.partners > 0 ? [{ icon: Users, label: "Business Partners", value: `${stats.partners}+` }] : []),
-    { icon: ShieldCheck, label: "Verified by Our Team", value: `${stats.verifiedPercent}%` },
+    {
+      icon: ShieldCheck,
+      label: "Verified by Our Team",
+      value: `${stats.verifiedPercent}%`,
+      // This is the one stat a visitor is likely to ask "verified how?"
+      // about - link it to the plain-language explanation instead of
+      // leaving a bare percentage with no way to find out what it means
+      // or why it isn't 100%.
+      to: "/how-we-verify",
+    },
   ];
   return (
     <section className="bg-teal-800 text-white">
       <div className="max-w-6xl mx-auto px-4 py-12 grid grid-cols-2 md:grid-cols-4 gap-6">
-        {items.map((it, i) => (
-          <div key={i} className="text-center">
-            <it.icon className="w-7 h-7 mx-auto mb-2 text-teal-300" />
-            <p className="text-2xl md:text-3xl font-extrabold">{it.value}</p>
-            <p className="text-teal-200 text-xs md:text-sm mt-1">{it.label}</p>
-          </div>
-        ))}
+        {items.map((it, i) => {
+          const content = (
+            <>
+              <it.icon className="w-7 h-7 mx-auto mb-2 text-teal-300" />
+              <p className="text-2xl md:text-3xl font-extrabold">{it.value}</p>
+              <p
+                className={
+                  "text-teal-200 text-xs md:text-sm mt-1" +
+                  (it.to ? " underline decoration-teal-500 decoration-dotted underline-offset-4" : "")
+                }
+              >
+                {it.label}
+              </p>
+            </>
+          );
+          return it.to ? (
+            <Link key={i} to={it.to} className="text-center block">
+              {content}
+            </Link>
+          ) : (
+            <div key={i} className="text-center">
+              {content}
+            </div>
+          );
+        })}
       </div>
     </section>
   );
