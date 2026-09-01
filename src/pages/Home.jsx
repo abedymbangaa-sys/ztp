@@ -218,7 +218,13 @@ export default function Home() {
       <section className="max-w-6xl mx-auto px-4 py-16">
         <div className="mb-8">
           <h2 className="text-2xl sm:text-3xl font-bold text-slate-900">Explore Zanzibar by Area</h2>
-          <p className="text-slate-500 mt-1">Not sure where to stay? Start with a region.</p>
+          <p className="text-slate-500 mt-1">
+            Not sure where to stay?{" "}
+            <Link to="/where-should-i-stay" className="text-teal-700 font-semibold hover:underline">
+              Answer 2 quick questions
+            </Link>{" "}
+            and we'll point you to the right one.
+          </p>
         </div>
         <div className="grid grid-cols-2 sm:grid-cols-3 gap-4">
           {AREAS.map((a) => (
