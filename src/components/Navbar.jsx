@@ -19,6 +19,7 @@ const MAIN_LINKS = [
 // doesn't get cramped or overflow the screen on desktop widths
 const MORE_LINKS = [
   { to: "/where-should-i-stay", label: "Where Should I Stay?" },
+  { to: "/zanzibar-by-budget", label: "Zanzibar by Budget" },
   { to: "/my-zanzibar", label: "My Zanzibar" },
   { to: "/before-you-go", label: "Before You Go" },
   { to: "/guides", label: "Travel Guides" },
