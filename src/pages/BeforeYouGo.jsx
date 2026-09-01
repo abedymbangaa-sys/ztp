@@ -1,4 +1,4 @@
-import { Stamp, ShieldCheck, CircleDollarSign, Sun, Briefcase, Shirt, MessageCircle, Car } from "lucide-react";
+import { Stamp, ShieldCheck, CircleDollarSign, Sun, Briefcase, Shirt, MessageCircle, Car, Plane, Wifi, Waves } from "lucide-react";
 
 function SectionIcon({ icon: Icon }) {
   return (
@@ -72,6 +72,54 @@ export default function BeforeYouGo() {
             You may be refused entry without it, so budget for this as a fixed cost of your trip and try to
             arrange it before you fly if an online option is available.
           </p>
+        </section>
+
+        {/* GETTING TO ZANZIBAR */}
+        <section>
+          <div className="flex items-center gap-3 mb-3">
+            <SectionIcon icon={Plane} />
+            <h2 className="text-xl font-bold text-slate-900">How to Get to Zanzibar</h2>
+          </div>
+          <ul className="list-disc pl-6 space-y-2">
+            <li>
+              <strong>By air:</strong> Most international visitors fly into <strong>Abeid Amani Karume
+              International Airport (ZNZ)</strong>, just outside Stone Town. Direct flights run from several
+              European and Middle Eastern hubs; many other travelers connect through Dar es Salaam, Nairobi, or
+              Addis Ababa first.
+            </li>
+            <li>
+              <strong>By ferry from Dar es Salaam:</strong> If you're already on mainland Tanzania, fast ferries
+              connect Dar es Salaam to Zanzibar's Stone Town port in a few hours. Book with a licensed operator
+              and arrive early — sailings can be delayed or cancelled in rough weather, especially in the
+              April–May rains.
+            </li>
+            <li>
+              On arrival, most hotels and tour operators can arrange an airport or port pickup — worth confirming
+              with them directly before you land, especially for a late flight.
+            </li>
+          </ul>
+        </section>
+
+        {/* SIM & INTERNET */}
+        <section>
+          <div className="flex items-center gap-3 mb-3">
+            <SectionIcon icon={Wifi} />
+            <h2 className="text-xl font-bold text-slate-900">SIM Cards & Internet</h2>
+          </div>
+          <ul className="list-disc pl-6 space-y-2">
+            <li>
+              Local SIM cards (Vodacom, Airtel, Tigo, Zantel) are inexpensive and widely available at the airport
+              and in Stone Town — bring your passport, as registration is required by law.
+            </li>
+            <li>
+              Coverage is generally good along the main coastal areas and Stone Town; expect it to thin out in
+              more remote inland or south-coast spots.
+            </li>
+            <li>
+              Most hotels and many restaurants offer WiFi, but speeds vary — if you need reliable connectivity for
+              work, a local data SIM is usually more consistent than relying on hotel WiFi alone.
+            </li>
+          </ul>
         </section>
 
         {/* MONEY */}
@@ -188,6 +236,33 @@ export default function BeforeYouGo() {
           </ul>
         </section>
 
+        {/* BEACH & MARINE SAFETY */}
+        <section>
+          <div className="flex items-center gap-3 mb-3">
+            <SectionIcon icon={Waves} />
+            <h2 className="text-xl font-bold text-slate-900">Beach & Marine Safety</h2>
+          </div>
+          <ul className="list-disc pl-6 space-y-2">
+            <li>
+              Zanzibar has a big tidal range — some east coast beaches (Paje, Bwejuu, Jambiani) largely empty of
+              water at low tide, while the north coast (Nungwi, Kendwa) stays swimmable most of the time. Check
+              tide times before planning a swim on the east coast.
+            </li>
+            <li>
+              For snorkeling and diving, book with an operator who provides a briefing, working equipment, and a
+              guide in the water with you — reef conditions and currents vary by site and season.
+            </li>
+            <li>
+              Coral cuts and sea urchin spines are the most common minor injuries — reef shoes are worth packing,
+              especially for rockier stretches of coast.
+            </li>
+            <li>
+              If you're not a confident swimmer, stay within your depth and ask hotel or tour staff about local
+              current conditions before swimming off an unfamiliar beach.
+            </li>
+          </ul>
+        </section>
+
         {/* PRACTICAL TIPS */}
         <section>
           <div className="flex items-center gap-3 mb-3">
@@ -204,6 +279,21 @@ export default function BeforeYouGo() {
             <li>Average stay for international visitors is around a week — plan a mix of beach time, a Stone
               Town day, and at least one cultural or spice tour to get the full picture of the island.</li>
           </ul>
+        </section>
+
+        {/* REGIONS */}
+        <section>
+          <p className="mb-3">
+            Ready to pick where to base yourself? See{" "}
+            <a href="/where-should-i-stay" className="text-teal-700 font-semibold hover:underline">
+              Where Should I Stay in Zanzibar
+            </a>{" "}
+            for a 2-question guide to the island's regions, or browse{" "}
+            <a href="/collections" className="text-teal-700 font-semibold hover:underline">
+              Zanzibar Collections
+            </a>{" "}
+            for hand-picked lists by trip type.
+          </p>
         </section>
 
         <p className="text-sm text-slate-400 pt-4 border-t border-slate-100">
