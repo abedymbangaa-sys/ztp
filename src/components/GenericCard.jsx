@@ -137,7 +137,7 @@ export default function GenericCard({ item, sectionKey, distanceKm }) {
               ))}
             </div>
           )}
-          <p className="text-sm text-slate-600 line-clamp-3">{description}</p>
+          <p className="text-sm text-slate-600 line-clamp-2">{description}</p>
           {item.lens_local_tip && (
             <p className="text-xs text-teal-700 mt-2 line-clamp-2">
               <span className="font-semibold">Why this place:</span> {item.lens_local_tip}
