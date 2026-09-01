@@ -1,13 +1,14 @@
 import { useState } from "react";
-import { useParams, useSearchParams } from "react-router-dom";
+import { useParams, useSearchParams, Link } from "react-router-dom";
 import { useListings, useCategories } from "../data/hooks";
 import GenericCard from "../components/GenericCard";
 import ListingsMap from "../components/ListingsMap";
 import { SectionIcon } from "../lib/icons";
 import { TAG_OPTIONS } from "../lib/tags";
 import { LOCATION_OPTIONS, locationMatches } from "../lib/locations";
-import { Map, List, RefreshCw } from "lucide-react";
+import { Map, List, RefreshCw, Scale } from "lucide-react";
 import TideWidget from "../components/TideWidget";
+import { useCompareList } from "../lib/CompareContext";
 
 // Skeleton card matching GenericCard's layout, so the grid doesn't jump
 // around once real content arrives and there's no bare "Loading..." flash.
@@ -58,6 +59,7 @@ export default function SectionListing() {
   const { categories } = useCategories();
   const { listings, loading, error, retry } = useListings(sectionKey);
   const config = categories.find((c) => c.key === sectionKey);
+  const { sectionKey: compareSectionKey, compareIds, clearCompare } = useCompareList();
 
   function toggleTag(key) {
     setActiveTags((prev) => (prev.includes(key) ? prev.filter((t) => t !== key) : [...prev, key]));
@@ -194,6 +196,30 @@ export default function SectionListing() {
           {filtered.map((item) => (
             <GenericCard key={item.id} item={item} sectionKey={sectionKey} />
           ))}
+        </div>
+      )}
+
+      {/* Floating compare bar - only shows once 2+ items from THIS category
+          are selected (comparing 1 item against nothing isn't useful yet). */}
+      {compareSectionKey === sectionKey && compareIds.length >= 2 && (
+        <div className="fixed bottom-4 left-1/2 -translate-x-1/2 z-30 bg-slate-900 text-white rounded-full shadow-xl pl-5 pr-2 py-2 flex items-center gap-3">
+          <span className="text-sm font-semibold inline-flex items-center gap-2">
+            <Scale className="w-4 h-4" /> Compare {compareIds.length} {config?.title || sectionKey}
+          </span>
+          <Link
+            to={`/compare?section=${sectionKey}&ids=${compareIds.join(",")}`}
+            className="bg-teal-600 hover:bg-teal-500 transition text-white text-sm font-bold px-4 py-2 rounded-full"
+          >
+            Compare Now
+          </Link>
+          <button
+            type="button"
+            onClick={clearCompare}
+            aria-label="Clear compare selection"
+            className="text-slate-300 hover:text-white text-lg px-2"
+          >
+            ×
+          </button>
         </div>
       )}
     </div>
