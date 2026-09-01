@@ -149,6 +149,14 @@ export default function TravelerStories() {
 
   const categoryLabel = (value) => FILTERS.find((f) => f.value === value)?.label || value;
 
+  // True empty state: nothing has ever been shared, no filter/search applied.
+  // Manus audit flagged the bare "no stories yet" line as hurting perceived
+  // activity — so when there's genuinely nothing (not just a narrow filter
+  // result), we skip the filter bar entirely and show one warm invite card
+  // instead of an empty grid with a grey caption underneath it.
+  const isTrulyEmpty =
+    !loading && !loadError && stories.length === 0 && activeFilter === "all" && !locationSearch.trim();
+
   return (
     <section className="max-w-6xl mx-auto px-4 py-16">
       <div className="mb-6">
@@ -158,36 +166,52 @@ export default function TravelerStories() {
         <p className="text-xs text-slate-400 mt-2">Photos are reviewed before publication.</p>
       </div>
 
-      {/* Filters */}
-      <div className="flex flex-col sm:flex-row sm:items-center gap-3 mb-6">
-        <div className="flex flex-wrap gap-2">
-          {FILTERS.map((f) => (
-            <button
-              key={f.value}
-              onClick={() => setActiveFilter(f.value)}
-              className={`text-xs sm:text-sm font-semibold px-3 py-1.5 rounded-full border transition ${
-                activeFilter === f.value
-                  ? "bg-teal-700 text-white border-teal-700"
-                  : "bg-white text-slate-600 border-slate-200 hover:border-teal-400"
-              }`}
-            >
-              {f.label}
-            </button>
-          ))}
+      {/* Filters - hidden in the true-empty state since there's nothing to filter yet */}
+      {!isTrulyEmpty && (
+        <div className="flex flex-col sm:flex-row sm:items-center gap-3 mb-6">
+          <div className="flex flex-wrap gap-2">
+            {FILTERS.map((f) => (
+              <button
+                key={f.value}
+                onClick={() => setActiveFilter(f.value)}
+                className={`text-xs sm:text-sm font-semibold px-3 py-1.5 rounded-full border transition ${
+                  activeFilter === f.value
+                    ? "bg-teal-700 text-white border-teal-700"
+                    : "bg-white text-slate-600 border-slate-200 hover:border-teal-400"
+                }`}
+              >
+                {f.label}
+              </button>
+            ))}
+          </div>
+          <div className="sm:ml-auto w-full sm:w-56">
+            <input
+              type="text"
+              placeholder="Search by location…"
+              value={locationSearch}
+              onChange={(e) => setLocationSearch(e.target.value)}
+              className="w-full text-sm border border-slate-200 rounded-full px-4 py-1.5"
+            />
+          </div>
         </div>
-        <div className="sm:ml-auto w-full sm:w-56">
-          <input
-            type="text"
-            placeholder="Search by location…"
-            value={locationSearch}
-            onChange={(e) => setLocationSearch(e.target.value)}
-            className="w-full text-sm border border-slate-200 rounded-full px-4 py-1.5"
-          />
-        </div>
-      </div>
+      )}
 
-      {/* Gallery grid */}
-      {loadError ? (
+      {/* True empty state: one inviting card instead of an empty grid */}
+      {isTrulyEmpty ? (
+        <button
+          onClick={() => setUploadOpen(true)}
+          className="w-full border-2 border-dashed border-teal-200 hover:border-teal-400 hover:bg-teal-50/40 transition rounded-2xl py-14 px-6 flex flex-col items-center justify-center text-center gap-3"
+        >
+          <span className="flex items-center justify-center w-14 h-14 rounded-full bg-teal-50 text-teal-700">
+            <Plus className="w-6 h-6" />
+          </span>
+          <p className="font-bold text-slate-900">Be the first to share your Zanzibar</p>
+          <p className="text-sm text-slate-500 max-w-sm">
+            Upload a photo from your trip — sunrise in Paje, a Stone Town door, a plate of Zanzibar mix. Yours could
+            be the first story travelers see.
+          </p>
+        </button>
+      ) : loadError ? (
         <div className="text-center py-10">
           <p className="text-slate-500 mb-3">Couldn't load stories right now.</p>
           <button
@@ -247,9 +271,9 @@ export default function TravelerStories() {
         </div>
       )}
 
-      {!loading && !loadError && stories.length === 0 && (
+      {!isTrulyEmpty && !loading && !loadError && stories.length === 0 && (
         <p className="text-sm text-slate-400 mt-4">
-          No stories here yet — be the first to share a photo!
+          No stories match that filter yet — try "All" or a different location.
         </p>
       )}
 
