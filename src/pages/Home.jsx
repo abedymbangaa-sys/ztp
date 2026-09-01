@@ -106,32 +106,35 @@ export default function Home() {
             Welcome to Zanzibar
           </p>
           <h1 className="font-serif text-5xl sm:text-6xl md:text-8xl font-bold mb-6 leading-[0.98] tracking-tight drop-shadow-2xl">
-            {t("Discover the")}
+            {t("Find Your")}
             <br />
-            <span className="italic text-amber-200">{t("Real")}</span> {t("Zanzibar")}
+            <span className="italic text-amber-200">{t("Zanzibar")}</span>
           </h1>
           <p className="max-w-2xl mx-auto text-slate-100/90 text-base sm:text-xl mb-10 px-2 font-light">
-            {t("A trusted directory of hotels, tours, and attractions in Zanzibar — built by people who know this island well.")}
+            {t("Hotels, experiences and local places — curated by people who know the island.")}
           </p>
 
           <SearchAutocomplete
             listings={allApproved}
-            placeholder={t("Search hotels, tours, beaches...")}
+            placeholder={t("Where do you want to go in Zanzibar?")}
             className="max-w-xl mx-auto mb-10"
           />
 
+          {/* CTA hierarchy: one primary action, one browsing path, one
+              direct-help path — instead of 3-4 competing equal buttons,
+              so a first-time visitor has one obvious next step. */}
           <div className="flex flex-col sm:flex-row justify-center gap-3 sm:gap-4 px-4 sm:px-0">
             <button
               onClick={() => setTripBuilderOpen(true)}
               className="bg-amber-500 hover:bg-amber-400 transition text-slate-900 font-bold px-7 py-3.5 rounded-full shadow-lg inline-flex items-center justify-center gap-2"
             >
-              <Compass className="w-5 h-5" /> Build My Zanzibar Trip
+              <Compass className="w-5 h-5" /> Plan My Zanzibar Trip
             </button>
             <Link
               to="/things-to-do"
               className="bg-white text-teal-900 font-bold px-7 py-3.5 rounded-full hover:bg-amber-50 transition shadow-lg"
             >
-              {t("Explore Experiences")}
+              {t("Explore Zanzibar")}
             </Link>
             <a
               href="https://wa.me/255635442732"
@@ -139,7 +142,7 @@ export default function Home() {
               rel="noreferrer"
               className="border-2 border-white/80 font-bold px-7 py-3.5 rounded-full hover:bg-white/10 transition backdrop-blur-sm"
             >
-              Ask Now
+              Talk to a Local Expert
             </a>
           </div>
 
@@ -176,10 +179,10 @@ export default function Home() {
       <section className="max-w-6xl mx-auto px-4 py-16">
         <div className="mb-8 text-center">
           <p className="text-teal-700 font-semibold text-sm uppercase tracking-wide">Where do you start?</p>
-          <h2 className="text-2xl sm:text-3xl font-bold text-slate-900">Choose Your Zanzibar Story</h2>
+          <h2 className="text-2xl sm:text-3xl font-bold text-slate-900">What Kind of Zanzibar Are You Looking For?</h2>
           <p className="text-slate-500 mt-1 max-w-xl mx-auto">
-            Everyone's Zanzibar looks a little different. Pick the story that matches yours — save places along the
-            way and earn the matching Passport stamp.
+            Beach days, Stone Town heritage, island flavours, wild nature, or experiences that bring you closer to
+            local life — save places along the way and earn the matching Passport stamp.
           </p>
         </div>
         <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-4">
