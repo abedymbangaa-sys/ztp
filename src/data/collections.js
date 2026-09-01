@@ -65,6 +65,76 @@ export const COLLECTIONS = [
     estimatedTime: "One full day, on foot",
     match: { areas: ["stone-town"] },
   },
+  {
+    key: "couples",
+    title: "Zanzibar for Couples",
+    tagline: "Places that work well for two",
+    description: "Hotels, tours and dinners chosen with couples in mind - privacy, atmosphere and easy logistics for two.",
+    criteria: "Selected because the business itself has marked these as suited to couples.",
+    coverImage: "/images/hotels/zanzibar-serena.jpeg",
+    estimatedTime: "Mix and match across your whole trip",
+    match: { goodFor: ["couples"] },
+  },
+  {
+    key: "honeymoon",
+    title: "Zanzibar Honeymoon",
+    tagline: "Our couples picks, narrowed to the more private and high-end end",
+    description: "Pulled from the same couples-suited listings, filtered down to the ones also marked luxury - for a trip you only plan once.",
+    criteria: "Selected as couples-suited AND tagged luxury - both set by the business, not guessed.",
+    coverImage: "/images/hotels/zanzibar-serena.jpeg",
+    estimatedTime: "Best for a full stay, 3+ nights",
+    match: { goodFor: ["couples"], tags: ["luxury"] },
+  },
+  {
+    key: "solo-travelers",
+    title: "Zanzibar for Solo Travellers",
+    tagline: "Easy to navigate alone, easy to meet people",
+    description: "Places and tours that work well if you're travelling by yourself - straightforward logistics, no single-supplement guesswork needed to browse.",
+    criteria: "Selected because the business has marked these as suited to solo travelers.",
+    coverImage: "/images/beaches/paje-beach-kite-surfing-hub.jpeg",
+    estimatedTime: "Mix and match across your whole trip",
+    match: { goodFor: ["solo-travelers"] },
+  },
+  {
+    key: "adventure",
+    title: "Zanzibar for Adventure",
+    tagline: "Kitesurfing, diving, and more active days",
+    description: "Activities and tours for travellers who want to move - water sports, diving, and other active experiences.",
+    criteria: "Selected because the business has marked these as suited to adventure seekers.",
+    coverImage: "/images/beaches/paje-beach-kite-surfing-hub.jpeg",
+    estimatedTime: "Best spread across a few days",
+    match: { goodFor: ["adventure-seekers"] },
+  },
+  {
+    key: "food-lovers",
+    title: "Zanzibar for Food Lovers",
+    tagline: "Restaurants worth building a meal around",
+    description: "From Stone Town street food stalls to beachfront seafood grills - restaurants and food experiences across the island.",
+    criteria: "All approved restaurant listings on the site.",
+    coverImage: "/images/tours/kidichi-spice-farm-tour.jpeg",
+    estimatedTime: "Mix and match across your whole trip",
+    match: { categories: ["restaurants"] },
+  },
+  {
+    key: "beach-lovers",
+    title: "Zanzibar for Beach Lovers",
+    tagline: "The best sand and swimming on the island",
+    description: "Beaches and beachfront stays for travellers whose trip revolves around the water.",
+    criteria: "Selected beach listings and hotels tagged beachfront.",
+    coverImage: "/images/beaches/nungwi-beach.jpeg",
+    estimatedTime: "Half a day per beach, no rush",
+    match: { categories: ["beaches"] },
+  },
+  {
+    key: "culture",
+    title: "Zanzibar for Culture",
+    tagline: "Heritage sites and history worth the detour",
+    description: "Stone Town heritage sites and cultural attractions for travellers who want the island's history, not just its beaches.",
+    criteria: "All approved heritage and attraction listings on the site.",
+    coverImage: "/images/heritage/stone-town.jpeg",
+    estimatedTime: "Half a day to a full day",
+    match: { categories: ["heritage", "attractions"] },
+  },
 ];
 
 export function getCollectionConfig(key) {
@@ -78,6 +148,7 @@ export function filterListingsForCollection(listings, match) {
   if (!match) return [];
   return listings.filter((item) => {
     if (match.tags && !match.tags.some((tag) => (item.tags || []).includes(tag))) return false;
+    if (match.goodFor && !match.goodFor.some((key) => (item.good_for || []).includes(key))) return false;
     if (match.categories && !match.categories.includes(item.category_key)) return false;
     if (match.areas && !match.areas.includes(item.area)) return false;
     return true;
