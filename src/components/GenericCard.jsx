@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { Link } from "react-router-dom";
-import { MapPin, BadgeCheck, MessageCircle, Clock, Star, Tag, Heart } from "lucide-react";
+import { MapPin, BadgeCheck, MessageCircle, Clock, Star, Tag, Heart, Scale } from "lucide-react";
 import { useLanguage } from "../lib/LanguageContext";
 import { useT } from "../lib/i18n";
 import { TAG_OPTIONS } from "../lib/tags";
@@ -10,6 +10,7 @@ import { normalizePhone } from "../lib/phone";
 import { trackEvent } from "../lib/analytics";
 import { formatLocation } from "../lib/locations";
 import { useSavedList } from "../lib/SavedListContext";
+import { useCompareList } from "../lib/CompareContext";
 import ImageWithFallback from "./ImageWithFallback";
 
 export default function GenericCard({ item, sectionKey, distanceKm }) {
@@ -17,6 +18,9 @@ export default function GenericCard({ item, sectionKey, distanceKm }) {
   const t = useT();
   const { isSaved, toggleSaved } = useSavedList();
   const saved = isSaved(item.id);
+  const { isComparing, toggleCompare, compareIds, sectionKey: compareSectionKey, maxCompare } = useCompareList();
+  const comparing = isComparing(item.id, sectionKey);
+  const compareFull = compareSectionKey === sectionKey && compareIds.length >= maxCompare && !comparing;
   const [toast, setToast] = useState(null); // "saved" | "removed" | null
   const description = (language !== "en" && item[`description_${language}`]) || item.description;
   const itemTags = TAG_OPTIONS.filter((t) => (item.tags || []).includes(t.key));
@@ -68,6 +72,38 @@ export default function GenericCard({ item, sectionKey, distanceKm }) {
           className="absolute top-3 right-3 flex items-center justify-center w-8 h-8 rounded-full bg-white/95 shadow-sm hover:scale-105 transition"
         >
           <Heart className={"w-4 h-4 " + (saved ? "fill-rose-500 text-rose-500" : "text-slate-500")} />
+        </button>
+        {/* Compare checkbox (Priority 3 - Compare Before You Choose). Sits
+            below the Save heart, same visual weight. Disabled once 3 items
+            from this category are already selected, rather than hiding it -
+            a visitor should see the cap exists, not wonder why it stopped
+            responding. */}
+        <button
+          type="button"
+          onClick={(e) => {
+            e.preventDefault();
+            if (compareFull) return;
+            toggleCompare(item.id, sectionKey);
+            trackEvent(comparing ? "compare_remove" : "compare_add", {
+              listing_id: item.id,
+              listing_name: item.title,
+              listing_category: sectionKey,
+            });
+          }}
+          disabled={compareFull}
+          aria-label={comparing ? "Remove from compare" : "Add to compare"}
+          aria-pressed={comparing}
+          title={compareFull ? `You can compare up to ${maxCompare} at a time` : undefined}
+          className={
+            "absolute top-14 right-3 flex items-center justify-center w-8 h-8 rounded-full shadow-sm transition " +
+            (comparing
+              ? "bg-teal-700 text-white"
+              : compareFull
+              ? "bg-white/70 text-slate-300 cursor-not-allowed"
+              : "bg-white/95 text-slate-500 hover:scale-105")
+          }
+        >
+          <Scale className="w-4 h-4" />
         </button>
         {toast && (
           <div className="absolute top-12 right-3 z-10 flex items-center gap-2 bg-slate-900/95 text-white text-[11px] font-semibold px-3 py-1.5 rounded-full shadow-lg whitespace-nowrap">
