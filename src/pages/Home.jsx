@@ -241,41 +241,6 @@ export default function Home() {
 
       <StatsCounter />
 
-      {/* How verification works - Manus audit flagged that "Verified" badges
-          appear on cards with no explanation of what they mean. Copy here
-          reuses the real check keys from src/lib/verificationStandard.js -
-          no invented claims, just the same checks already shown on listing
-          detail pages. */}
-      <section className="bg-teal-900 text-white">
-        <div className="max-w-6xl mx-auto px-4 py-16">
-          <div className="max-w-2xl mb-10">
-            <p className="text-amber-300 font-semibold text-sm uppercase tracking-wide">How we verify</p>
-            <h2 className="text-2xl sm:text-3xl font-bold mb-3">Not every place is the same. We help you choose well.</h2>
-            <p className="text-teal-100/90">
-              Our local team checks the details that matter, so you can spend less time guessing and more time
-              enjoying Zanzibar.
-            </p>
-          </div>
-          <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-5">
-            {[
-              { icon: BadgeCheck, label: "Identity & contact checked", desc: "The business is real and its WhatsApp/phone details are reachable." },
-              { icon: MapPin, label: "Location checked", desc: "The map pin and address match where the business actually operates." },
-              { icon: ShieldCheck, label: "Photos checked", desc: "Photos shown are current and belong to this specific business." },
-            ].map((c) => (
-              <div key={c.label} className="bg-white/10 rounded-2xl p-5 flex items-start gap-3">
-                <span className="flex items-center justify-center w-10 h-10 rounded-full bg-amber-500 text-slate-900 shrink-0">
-                  <c.icon className="w-5 h-5" />
-                </span>
-                <div>
-                  <p className="font-bold">{c.label}</p>
-                  <p className="text-sm text-teal-100/80 mt-1">{c.desc}</p>
-                </div>
-              </div>
-            ))}
-          </div>
-        </div>
-      </section>
-
       <WebsiteReviews />
 
       <TravelerStories />
