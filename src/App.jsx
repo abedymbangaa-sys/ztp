@@ -43,6 +43,7 @@ const NearMe = lazy(() => import("./pages/NearMe"));
 const MyZanzibar = lazy(() => import("./pages/MyZanzibar"));
 const Compare = lazy(() => import("./pages/Compare"));
 const WhereShouldIStay = lazy(() => import("./pages/WhereShouldIStay"));
+const ZanzibarByBudget = lazy(() => import("./pages/ZanzibarByBudget"));
 function PageLoading() {
   return (
     <div className="flex items-center justify-center py-24">
@@ -99,6 +100,7 @@ export default function App() {
             <Route path="/my-zanzibar" element={<MyZanzibar />} />
             <Route path="/compare" element={<Compare />} />
             <Route path="/where-should-i-stay" element={<WhereShouldIStay />} />
+            <Route path="/zanzibar-by-budget" element={<ZanzibarByBudget />} />
             <Route path="/guides" element={<Guides />} />
             <Route path="/guides/:slug" element={<GuideDetail />} />
             <Route path="/trip-builder" element={<TripBuilder />} />
