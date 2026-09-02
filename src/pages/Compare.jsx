@@ -21,6 +21,91 @@ import { BadgeCheck, MessageCircle, X } from "lucide-react";
 // is computed or guessed - a blank cell shows "Not provided" rather than
 // being hidden or filled in, per the brief's "do not invent business
 // information" rule.
+//
+// Layout: a wide side-by-side table works on desktop but on a phone-width
+// screen it either gets cut off or forces sideways scrolling with no clear
+// indication there's more content - both read as broken. Below sm we
+// switch to one full-width card per listing, all fields stacked vertically,
+// no horizontal scroll at all. The same ROWS array drives both layouts so
+// they can never drift out of sync with each other.
+const ROWS = [
+  {
+    label: "Location",
+    render: (item) => formatLocation(item.location) || "Not provided",
+  },
+  {
+    label: "Price range",
+    render: (item) => item.price_range || "Contact provider for current price",
+  },
+  {
+    label: "Duration",
+    showIf: (sectionKey) => sectionKey !== "hotels",
+    render: (item) => item.duration || "Not provided",
+  },
+  {
+    label: "Reviews",
+    render: (item) =>
+      item.review_count > 0 ? `${item.review_count} review${item.review_count === 1 ? "" : "s"}` : "No reviews yet",
+  },
+  {
+    label: "Best for",
+    render: (item) => {
+      const chips = SUITABILITY_OPTIONS.filter((s) => (item.good_for || []).includes(s.key));
+      return chips.length ? (
+        <div className="flex flex-wrap gap-1">
+          {chips.map((c) => (
+            <span key={c.key} className="bg-teal-50 text-teal-800 text-xs font-semibold px-2 py-0.5 rounded-full">
+              {c.label}
+            </span>
+          ))}
+        </div>
+      ) : (
+        "Not specified"
+      );
+    },
+  },
+  {
+    label: "Amenities",
+    render: (item) => {
+      const chips = TAG_OPTIONS.filter((t) => (item.tags || []).includes(t.key));
+      return chips.length ? (
+        <div className="flex flex-wrap gap-1">
+          {chips.map((c) => (
+            <span key={c.key} className="bg-slate-100 text-slate-700 text-xs font-semibold px-2 py-0.5 rounded-full">
+              {c.label}
+            </span>
+          ))}
+        </div>
+      ) : (
+        "Not specified"
+      );
+    },
+  },
+  {
+    label: "Description",
+    render: (item) => <p className="text-slate-600 line-clamp-4">{item.description || "Not provided"}</p>,
+  },
+  {
+    label: "Contact",
+    render: (item) => {
+      const num = normalizePhone(item.whatsapp_number);
+      const url = num ? buildWhatsAppLink(item.title, item.location, num) : null;
+      return url ? (
+        <a
+          href={url}
+          target="_blank"
+          rel="noreferrer"
+          className="inline-flex items-center gap-1.5 bg-green-600 hover:bg-green-700 transition text-white text-xs font-semibold px-3 py-2 rounded-full"
+        >
+          <MessageCircle className="w-3.5 h-3.5" /> WhatsApp
+        </a>
+      ) : (
+        "Not provided"
+      );
+    },
+  },
+];
+
 export default function Compare() {
   const [searchParams] = useSearchParams();
   const sectionKey = searchParams.get("section") || "";
@@ -31,12 +116,14 @@ export default function Compare() {
 
   const { categories } = useCategories();
   const { listings, loading, error } = useListings(sectionKey);
-  const { toggleCompare, isComparing } = useCompareList();
+  const { toggleCompare } = useCompareList();
   const config = categories.find((c) => c.key === sectionKey);
 
   const items = ids
     .map((id) => listings.find((l) => String(l.id) === String(id)))
     .filter(Boolean);
+
+  const rows = ROWS.filter((r) => !r.showIf || r.showIf(sectionKey));
 
   useSEO({
     title: config ? `Compare ${config.title} | Zanzibar Paradise Tours` : "Compare | Zanzibar Paradise Tours",
@@ -84,145 +171,98 @@ export default function Compare() {
           )}
         </div>
       ) : (
-        <div className="overflow-x-auto -mx-4 px-4">
-          <table className="w-full min-w-[640px] border-collapse">
-            <thead>
-              <tr>
-                <th className="w-40"></th>
-                {items.map((item) => (
-                  <th key={item.id} className="text-left align-top pb-4 px-3 min-w-[220px]">
-                    <div className="relative">
-                      <button
-                        type="button"
-                        onClick={() => removeFromCompare(item)}
-                        aria-label={`Remove ${item.title} from compare`}
-                        className="absolute -top-2 -right-2 z-10 bg-white shadow rounded-full w-6 h-6 flex items-center justify-center text-slate-500 hover:text-rose-600"
-                      >
-                        <X className="w-3.5 h-3.5" />
-                      </button>
-                      <div className="h-32 rounded-xl overflow-hidden mb-2">
-                        <ImageWithFallback
-                          src={item.image_url}
-                          alt={item.title}
-                          className="w-full h-full object-cover"
-                        />
+        <>
+          {/* MOBILE: one full-width card per listing, fields stacked - no
+              horizontal scrolling, nothing gets cut off at the screen edge. */}
+          <div className="space-y-6 sm:hidden">
+            {items.map((item) => (
+              <div key={item.id} className="bg-white border border-slate-200 rounded-2xl overflow-hidden">
+                <div className="relative">
+                  <button
+                    type="button"
+                    onClick={() => removeFromCompare(item)}
+                    aria-label={`Remove ${item.title} from compare`}
+                    className="absolute top-3 right-3 z-10 bg-white shadow rounded-full w-7 h-7 flex items-center justify-center text-slate-500 hover:text-rose-600"
+                  >
+                    <X className="w-4 h-4" />
+                  </button>
+                  <div className="h-40">
+                    <ImageWithFallback src={item.image_url} alt={item.title} className="w-full h-full object-cover" />
+                  </div>
+                </div>
+                <div className="p-4">
+                  <Link to={`/${sectionKey}/${item.id}`} className="font-bold text-slate-900 hover:text-teal-700 leading-snug block">
+                    {item.title}
+                  </Link>
+                  {item.is_verified && (
+                    <span className="inline-flex items-center gap-1 text-teal-700 text-xs font-semibold mt-1">
+                      <BadgeCheck className="w-3.5 h-3.5" /> Verified
+                    </span>
+                  )}
+                  <dl className="mt-4 divide-y divide-slate-100">
+                    {rows.map((row) => (
+                      <div key={row.label} className="py-3 first:pt-0">
+                        <dt className="text-xs font-semibold text-slate-400 uppercase tracking-wide mb-1">{row.label}</dt>
+                        <dd className="text-sm text-slate-700">{row.render(item)}</dd>
                       </div>
-                      <Link to={`/${sectionKey}/${item.id}`} className="font-bold text-slate-900 hover:text-teal-700 leading-snug block">
-                        {item.title}
-                      </Link>
-                      {item.is_verified && (
-                        <span className="inline-flex items-center gap-1 text-teal-700 text-xs font-semibold mt-1">
-                          <BadgeCheck className="w-3.5 h-3.5" /> Verified
-                        </span>
-                      )}
-                    </div>
-                  </th>
+                    ))}
+                  </dl>
+                </div>
+              </div>
+            ))}
+          </div>
+
+          {/* DESKTOP / TABLET: real side-by-side table, columns sized so
+              2-3 items fit without needing to scroll on a normal laptop
+              screen. */}
+          <div className="hidden sm:block overflow-x-auto -mx-4 px-4">
+            <table className="w-full border-collapse">
+              <thead>
+                <tr>
+                  <th className="w-32 lg:w-40"></th>
+                  {items.map((item) => (
+                    <th key={item.id} className="text-left align-top pb-4 px-3 min-w-[200px]">
+                      <div className="relative">
+                        <button
+                          type="button"
+                          onClick={() => removeFromCompare(item)}
+                          aria-label={`Remove ${item.title} from compare`}
+                          className="absolute -top-2 -right-2 z-10 bg-white shadow rounded-full w-6 h-6 flex items-center justify-center text-slate-500 hover:text-rose-600"
+                        >
+                          <X className="w-3.5 h-3.5" />
+                        </button>
+                        <div className="h-32 rounded-xl overflow-hidden mb-2">
+                          <ImageWithFallback src={item.image_url} alt={item.title} className="w-full h-full object-cover" />
+                        </div>
+                        <Link to={`/${sectionKey}/${item.id}`} className="font-bold text-slate-900 hover:text-teal-700 leading-snug block">
+                          {item.title}
+                        </Link>
+                        {item.is_verified && (
+                          <span className="inline-flex items-center gap-1 text-teal-700 text-xs font-semibold mt-1">
+                            <BadgeCheck className="w-3.5 h-3.5" /> Verified
+                          </span>
+                        )}
+                      </div>
+                    </th>
+                  ))}
+                </tr>
+              </thead>
+              <tbody className="text-sm">
+                {rows.map((row) => (
+                  <tr key={row.label} className="border-t border-slate-200">
+                    <td className="py-4 pr-3 font-semibold text-slate-500 align-top whitespace-nowrap">{row.label}</td>
+                    {items.map((item) => (
+                      <td key={item.id} className="py-4 px-3 align-top text-slate-700">
+                        {row.render(item)}
+                      </td>
+                    ))}
+                  </tr>
                 ))}
-              </tr>
-            </thead>
-            <tbody className="text-sm">
-              <CompareRow
-                label="Location"
-                items={items}
-                render={(item) => formatLocation(item.location) || "Not provided"}
-              />
-              <CompareRow
-                label="Price range"
-                items={items}
-                render={(item) => item.price_range || "Contact provider for current price"}
-              />
-              {sectionKey !== "hotels" && (
-                <CompareRow
-                  label="Duration"
-                  items={items}
-                  render={(item) => item.duration || "Not provided"}
-                />
-              )}
-              <CompareRow
-                label="Reviews"
-                items={items}
-                render={(item) => (item.review_count > 0 ? `${item.review_count} review${item.review_count === 1 ? "" : "s"}` : "No reviews yet")}
-              />
-              <CompareRow
-                label="Best for"
-                items={items}
-                render={(item) => {
-                  const chips = SUITABILITY_OPTIONS.filter((s) => (item.good_for || []).includes(s.key));
-                  return chips.length ? (
-                    <div className="flex flex-wrap gap-1">
-                      {chips.map((c) => (
-                        <span key={c.key} className="bg-teal-50 text-teal-800 text-xs font-semibold px-2 py-0.5 rounded-full">
-                          {c.label}
-                        </span>
-                      ))}
-                    </div>
-                  ) : (
-                    "Not specified"
-                  );
-                }}
-              />
-              <CompareRow
-                label="Amenities"
-                items={items}
-                render={(item) => {
-                  const chips = TAG_OPTIONS.filter((t) => (item.tags || []).includes(t.key));
-                  return chips.length ? (
-                    <div className="flex flex-wrap gap-1">
-                      {chips.map((c) => (
-                        <span key={c.key} className="bg-slate-100 text-slate-700 text-xs font-semibold px-2 py-0.5 rounded-full">
-                          {c.label}
-                        </span>
-                      ))}
-                    </div>
-                  ) : (
-                    "Not specified"
-                  );
-                }}
-              />
-              <CompareRow
-                label="Description"
-                items={items}
-                render={(item) => (
-                  <p className="text-slate-600 line-clamp-4">{item.description || "Not provided"}</p>
-                )}
-              />
-              <CompareRow
-                label="Contact"
-                items={items}
-                render={(item) => {
-                  const num = normalizePhone(item.whatsapp_number);
-                  const url = num ? buildWhatsAppLink(item.title, item.location, num) : null;
-                  return url ? (
-                    <a
-                      href={url}
-                      target="_blank"
-                      rel="noreferrer"
-                      className="inline-flex items-center gap-1.5 bg-green-600 hover:bg-green-700 transition text-white text-xs font-semibold px-3 py-2 rounded-full"
-                    >
-                      <MessageCircle className="w-3.5 h-3.5" /> WhatsApp
-                    </a>
-                  ) : (
-                    "Not provided"
-                  );
-                }}
-              />
-            </tbody>
-          </table>
-        </div>
+              </tbody>
+            </table>
+          </div>
+        </>
       )}
     </div>
-  );
-}
-
-function CompareRow({ label, items, render }) {
-  return (
-    <tr className="border-t border-slate-200">
-      <td className="py-4 pr-3 font-semibold text-slate-500 align-top whitespace-nowrap">{label}</td>
-      {items.map((item) => (
-        <td key={item.id} className="py-4 px-3 align-top text-slate-700">
-          {render(item)}
-        </td>
-      ))}
-    </tr>
   );
 }
