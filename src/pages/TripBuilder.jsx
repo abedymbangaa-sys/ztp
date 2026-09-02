@@ -14,6 +14,24 @@ const DAY_OPTIONS = [
   { value: 8, label: "7+ days" },
 ];
 
+// Priority 2 asks for traveller type and budget as explicit selectors, not
+// free text. Both map to real columns already used elsewhere on the site
+// (good_for / tags) - see suitability.js and tags.js - so this reuses the
+// same fields Compare and the Collections already read, nothing new.
+const TRAVELER_TYPES = [
+  { key: "couple", label: "Couple", goodFor: ["couples"] },
+  { key: "family", label: "Family", goodFor: ["families-with-kids"] },
+  { key: "solo", label: "Solo", goodFor: ["solo-travelers"] },
+  { key: "friends", label: "Friends", goodFor: ["groups"] },
+  { key: "honeymoon", label: "Honeymoon", goodFor: ["couples"], tags: ["luxury"] },
+];
+
+const BUDGET_TIERS = [
+  { key: "budget", label: "Budget", tags: ["budget"] },
+  { key: "mid-range", label: "Mid-range", tags: [] },
+  { key: "luxury", label: "Luxury", tags: ["luxury"] },
+];
+
 // Maps a friendly interest label to the category_key values already used
 // in the listings table (checked against real data, not guessed).
 const INTERESTS = [
@@ -30,8 +48,28 @@ const INTERESTS = [
 // It never invents a business, price, or activity. If there aren't
 // enough matching listings, it says so plainly instead of padding the
 // plan with irrelevant results.
-function buildItinerary(listings, days) {
-  const hotels = listings.filter((l) => l.category_key === "hotels");
+//
+// travelerType/budgetTier PRIORITIZE matching hotels to the front rather
+// than excluding non-matches - a couple travelling budget-conscious should
+// still see hotels if none happen to be tagged "budget", just with the
+// best-fitting ones shown first.
+function scoreHotel(item, travelerType, budgetTier) {
+  let score = 0;
+  if (travelerType?.goodFor?.some((k) => (item.good_for || []).includes(k))) score += 2;
+  if (travelerType?.tags?.some((t) => (item.tags || []).includes(t))) score += 1;
+  if (budgetTier?.key === "mid-range") {
+    const isExtreme = (item.tags || []).some((t) => t === "budget" || t === "luxury");
+    if (!isExtreme) score += 2;
+  } else if (budgetTier?.tags?.some((t) => (item.tags || []).includes(t))) {
+    score += 2;
+  }
+  return score;
+}
+
+function buildItinerary(listings, days, travelerType, budgetTier) {
+  const hotels = [...listings.filter((l) => l.category_key === "hotels")].sort(
+    (a, b) => scoreHotel(b, travelerType, budgetTier) - scoreHotel(a, travelerType, budgetTier)
+  );
   const activities = listings.filter((l) => l.category_key !== "hotels");
 
   const dayPlans = Array.from({ length: days }, () => []);
@@ -47,6 +85,8 @@ export default function TripBuilder() {
   const [days, setDays] = useState(5);
   const [area, setArea] = useState("");
   const [selectedInterests, setSelectedInterests] = useState(["beaches", "tours"]);
+  const [travelerTypeKey, setTravelerTypeKey] = useState("");
+  const [budgetTierKey, setBudgetTierKey] = useState("");
   const [travelers, setTravelers] = useState("");
   const [dates, setDates] = useState("");
   const [loading, setLoading] = useState(false);
@@ -89,10 +129,18 @@ export default function TripBuilder() {
       if (activitiesError) throw activitiesError;
 
       const combined = [...(hotelsData || []), ...(activitiesData || [])];
-      const plan = buildItinerary(combined, days);
+      const travelerType = TRAVELER_TYPES.find((t) => t.key === travelerTypeKey);
+      const budgetTier = BUDGET_TIERS.find((b) => b.key === budgetTierKey);
+      const plan = buildItinerary(combined, days, travelerType, budgetTier);
       setResult(plan);
       setStep("results");
-      trackEvent("trip_builder_generated", { days, area: area || "any", interests: selectedInterests.join(",") });
+      trackEvent("trip_builder_generated", {
+        days,
+        area: area || "any",
+        interests: selectedInterests.join(","),
+        traveler_type: travelerTypeKey || "unspecified",
+        budget_tier: budgetTierKey || "unspecified",
+      });
     } catch (err) {
       if (import.meta.env.DEV) console.error("TripBuilder: failed to generate", err);
       setError("Something went wrong building your itinerary. Please try again.");
@@ -108,7 +156,14 @@ export default function TripBuilder() {
       ...result.dayPlans.flat().map((a) => a.title),
     ];
     trackEvent("trip_builder_confirm_expert", {});
-    const link = buildItineraryConfirmLink({ dates, travelers, days, listingTitles: allListingTitles });
+    const link = buildItineraryConfirmLink({
+      dates,
+      travelers,
+      days,
+      listingTitles: allListingTitles,
+      travelerTypeLabel: TRAVELER_TYPES.find((t) => t.key === travelerTypeKey)?.label,
+      budgetTierLabel: BUDGET_TIERS.find((b) => b.key === budgetTierKey)?.label,
+    });
     window.open(link, "_blank");
   }
 
@@ -188,6 +243,52 @@ export default function TripBuilder() {
             </div>
           </div>
 
+          <div>
+            <label className="block text-sm font-semibold text-slate-700 mb-2">
+              Who's travelling? <span className="text-slate-400 font-normal">(optional)</span>
+            </label>
+            <div className="flex flex-wrap gap-2">
+              {TRAVELER_TYPES.map((t) => (
+                <button
+                  key={t.key}
+                  type="button"
+                  onClick={() => setTravelerTypeKey((prev) => (prev === t.key ? "" : t.key))}
+                  className={
+                    "py-2 px-4 rounded-full text-sm font-semibold border transition " +
+                    (travelerTypeKey === t.key
+                      ? "bg-teal-700 text-white border-teal-700"
+                      : "bg-white text-slate-700 border-slate-300 hover:border-teal-400")
+                  }
+                >
+                  {t.label}
+                </button>
+              ))}
+            </div>
+          </div>
+
+          <div>
+            <label className="block text-sm font-semibold text-slate-700 mb-2">
+              Approximate budget <span className="text-slate-400 font-normal">(optional)</span>
+            </label>
+            <div className="flex flex-wrap gap-2">
+              {BUDGET_TIERS.map((b) => (
+                <button
+                  key={b.key}
+                  type="button"
+                  onClick={() => setBudgetTierKey((prev) => (prev === b.key ? "" : b.key))}
+                  className={
+                    "py-2 px-4 rounded-full text-sm font-semibold border transition " +
+                    (budgetTierKey === b.key
+                      ? "bg-teal-700 text-white border-teal-700"
+                      : "bg-white text-slate-700 border-slate-300 hover:border-teal-400")
+                  }
+                >
+                  {b.label}
+                </button>
+              ))}
+            </div>
+          </div>
+
           <div className="grid grid-cols-2 gap-4">
             <div>
               <label className="block text-sm font-semibold text-slate-700 mb-1">
@@ -202,12 +303,15 @@ export default function TripBuilder() {
             </div>
             <div>
               <label className="block text-sm font-semibold text-slate-700 mb-1">
-                Travelers <span className="text-slate-400 font-normal">(optional)</span>
+                Number of travelers <span className="text-slate-400 font-normal">(optional)</span>
               </label>
               <input
+                type="number"
+                min="1"
+                inputMode="numeric"
                 value={travelers}
                 onChange={(e) => setTravelers(e.target.value)}
-                placeholder="e.g. 2 adults"
+                placeholder="e.g. 2"
                 className="w-full border border-slate-300 rounded-lg px-4 py-2.5"
               />
             </div>
@@ -234,6 +338,8 @@ export default function TripBuilder() {
             <div>
               <p className="text-sm text-slate-500 inline-flex items-center gap-1.5">
                 <MapPin className="w-4 h-4" /> {areaName} · {days <= 3 ? "1-3" : days <= 5 ? "4-6" : "7+"} days
+                {travelerTypeKey && ` · ${TRAVELER_TYPES.find((t) => t.key === travelerTypeKey)?.label}`}
+                {budgetTierKey && ` · ${BUDGET_TIERS.find((b) => b.key === budgetTierKey)?.label}`}
               </p>
             </div>
             <button
