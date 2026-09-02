@@ -58,9 +58,14 @@ export function buildTripBuilderLink({ dates, area, travelers, budget, interests
 // an instant, real-listings-only itinerary and wants a local expert to
 // confirm availability/pricing. Includes the actual listing names chosen
 // by the planner so the expert isn't starting from scratch.
-export function buildItineraryConfirmLink({ dates, travelers, days, listingTitles }) {
+export function buildItineraryConfirmLink({ dates, travelers, days, listingTitles, travelerTypeLabel, budgetTierLabel }) {
+  const tripDescriptors = [
+    travelers ? `${travelers} travelers` : "",
+    travelerTypeLabel || "",
+    budgetTierLabel ? `${budgetTierLabel} budget` : "",
+  ].filter(Boolean);
   const lines = [
-    `Hi, I used the Trip Builder on your site and got a ${days}-day plan${dates ? ` for ${dates}` : ""}${travelers ? `, ${travelers} travelers` : ""}.`,
+    `Hi, I used the Trip Builder on your site and got a ${days}-day plan${dates ? ` for ${dates}` : ""}${tripDescriptors.length ? `, ${tripDescriptors.join(", ")}` : ""}.`,
     listingTitles?.length ? `It includes: ${listingTitles.join(", ")}.` : "",
     `Could you confirm availability and pricing for these, please?`,
   ].filter(Boolean);
