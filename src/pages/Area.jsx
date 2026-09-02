@@ -3,9 +3,23 @@ import { useParams, Link, Navigate } from "react-router-dom";
 import { supabase } from "../lib/supabase";
 import { useSEO } from "../lib/useSEO";
 import { getAreaConfig, AREAS } from "../data/areas";
+import { LOCATION_OPTIONS } from "../lib/locations";
 import GenericCard from "../components/GenericCard";
 import ListingsMap from "../components/ListingsMap";
 import { MapPin, RefreshCw, Users, CalendarClock } from "lucide-react";
+
+// Village-level detail within each broad area, used to link to the
+// /best/:categoryKey/:locationKey pages. Not every LOCATION_OPTIONS village
+// maps cleanly to a broad area (central Zanzibar is spice-farm country
+// without its own resort village, so it's left out here on purpose rather
+// than force-matched).
+const VILLAGES_BY_AREA = {
+  "stone-town": ["stone-town"],
+  north: ["nungwi", "kendwa"],
+  east: ["paje", "bwejuu", "jambiani", "matemwe"],
+  south: ["kizimkazi", "michamvi", "fumba"],
+  pemba: ["pemba"],
+};
 
 const FETCH_TIMEOUT_MS = 15000;
 
@@ -86,6 +100,7 @@ export default function Area() {
   const hotels = listings.filter((l) => l.category_key === "hotels");
   const others = listings.filter((l) => l.category_key !== "hotels");
   const otherAreas = AREAS.filter((a) => a.key !== areaKey);
+  const villages = VILLAGES_BY_AREA[areaKey] || [];
 
   return (
     <div>
@@ -181,6 +196,44 @@ export default function Area() {
                 </div>
               </div>
             )}
+          </div>
+        )}
+
+        {/* Village-level SEO landing pages (Priority 1 - "best hotels in
+            Nungwi" style searches). Only shown when this area actually has
+            named villages/beaches to link to. */}
+        {villages.length > 0 && (
+          <div className="mt-16 pt-8 border-t border-slate-200">
+            <h2 className="text-lg font-bold text-slate-900 mb-4">Browse by Beach & Village</h2>
+            <div className="space-y-4">
+              {villages.map((villageKey) => {
+                const village = LOCATION_OPTIONS.find((l) => l.key === villageKey);
+                if (!village) return null;
+                return (
+                  <div key={villageKey} className="flex flex-wrap items-center gap-2">
+                    <span className="font-semibold text-slate-700 text-sm w-28 shrink-0">{village.label}:</span>
+                    <Link
+                      to={`/best/hotels/${villageKey}`}
+                      className="bg-slate-50 hover:bg-teal-50 hover:text-teal-700 transition text-slate-600 text-sm font-medium px-3 py-1.5 rounded-full"
+                    >
+                      Best Hotels
+                    </Link>
+                    <Link
+                      to={`/best/tours/${villageKey}`}
+                      className="bg-slate-50 hover:bg-teal-50 hover:text-teal-700 transition text-slate-600 text-sm font-medium px-3 py-1.5 rounded-full"
+                    >
+                      Best Tours
+                    </Link>
+                    <Link
+                      to={`/best/restaurants/${villageKey}`}
+                      className="bg-slate-50 hover:bg-teal-50 hover:text-teal-700 transition text-slate-600 text-sm font-medium px-3 py-1.5 rounded-full"
+                    >
+                      Best Restaurants
+                    </Link>
+                  </div>
+                );
+              })}
+            </div>
           </div>
         )}
 
