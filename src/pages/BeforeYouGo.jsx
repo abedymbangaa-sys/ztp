@@ -292,7 +292,8 @@ export default function BeforeYouGo() {
             <a href="/collections" className="text-teal-700 font-semibold hover:underline">
               Zanzibar Collections
             </a>{" "}
-            for hand-picked lists by trip type.
+            for hand-picked lists by trip type. More common questions answered on the{" "}
+            <a href="/faq" className="text-teal-700 font-semibold hover:underline">Zanzibar Travel FAQ</a>.
           </p>
         </section>
 
