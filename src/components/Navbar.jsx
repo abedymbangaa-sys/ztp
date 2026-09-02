@@ -20,6 +20,7 @@ const MAIN_LINKS = [
 const MORE_LINKS = [
   { to: "/where-should-i-stay", label: "Where Should I Stay?" },
   { to: "/zanzibar-by-budget", label: "Zanzibar by Budget" },
+  { to: "/faq", label: "FAQ" },
   { to: "/my-zanzibar", label: "My Zanzibar" },
   { to: "/before-you-go", label: "Before You Go" },
   { to: "/guides", label: "Travel Guides" },
