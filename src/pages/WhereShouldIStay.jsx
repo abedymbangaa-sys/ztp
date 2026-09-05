@@ -4,6 +4,7 @@ import { AREAS } from "../data/areas";
 import { useSEO } from "../lib/useSEO";
 import { trackEvent } from "../lib/analytics";
 import { Compass, RefreshCw, ArrowRight } from "lucide-react";
+import { useT } from "../lib/i18n";
 
 // Priority 4 - "Where Should I Stay?". A short quiz that maps a visitor's
 // priority + travel type to one or two areas from src/data/areas.js, and
@@ -55,6 +56,7 @@ function rankAreas(priorityKey, travelerKey) {
 }
 
 export default function WhereShouldIStay() {
+  const t = useT();
   const [priorityKey, setPriorityKey] = useState(null);
   const [travelerKey, setTravelerKey] = useState(null);
   const [step, setStep] = useState("priority"); // "priority" | "traveler" | "result"
@@ -91,17 +93,17 @@ export default function WhereShouldIStay() {
     <div className="max-w-3xl mx-auto px-4 py-10">
       <div className="mb-8 text-center">
         <p className="text-teal-700 font-semibold text-sm uppercase tracking-wide inline-flex items-center gap-1.5 justify-center">
-          <Compass className="w-4 h-4" /> Where Should I Stay?
+          <Compass className="w-4 h-4" /> {t("Where Should I Stay?")}
         </p>
-        <h1 className="text-2xl sm:text-3xl font-bold text-slate-900 mt-1">Find the right part of Zanzibar</h1>
+        <h1 className="text-2xl sm:text-3xl font-bold text-slate-900 mt-1">{t("Find the right part of Zanzibar")}</h1>
         <p className="text-slate-500 mt-2 max-w-xl mx-auto">
-          Two quick questions - we'll point you to the area that actually fits, and explain why.
+          {t("Two quick questions - we'll point you to the area that actually fits, and explain why.")}
         </p>
       </div>
 
       {step === "priority" && (
         <div className="bg-white border border-slate-200 rounded-2xl p-6">
-          <p className="font-semibold text-slate-900 mb-4">What matters most for this trip?</p>
+          <p className="font-semibold text-slate-900 mb-4">{t("What matters most for this trip?")}</p>
           <div className="grid sm:grid-cols-2 gap-3">
             {PRIORITY_OPTIONS.map((p) => (
               <button
@@ -110,7 +112,7 @@ export default function WhereShouldIStay() {
                 onClick={() => choosePriority(p.key)}
                 className="text-left py-3 px-4 rounded-xl border border-slate-300 hover:border-teal-500 hover:bg-teal-50 transition font-medium text-slate-700"
               >
-                {p.label}
+                {t(p.label)}
               </button>
             ))}
           </div>
@@ -124,18 +126,18 @@ export default function WhereShouldIStay() {
             onClick={() => setStep("priority")}
             className="text-xs font-semibold text-slate-400 hover:text-teal-700 mb-4"
           >
-            ← Back
+            ← {t("Back")}
           </button>
-          <p className="font-semibold text-slate-900 mb-4">Who's travelling?</p>
+          <p className="font-semibold text-slate-900 mb-4">{t("Who's travelling?")}</p>
           <div className="grid sm:grid-cols-2 gap-3">
-            {TRAVELER_OPTIONS.map((t) => (
+            {TRAVELER_OPTIONS.map((opt) => (
               <button
-                key={t.key}
+                key={opt.key}
                 type="button"
-                onClick={() => chooseTraveler(t.key)}
+                onClick={() => chooseTraveler(opt.key)}
                 className="text-left py-3 px-4 rounded-xl border border-slate-300 hover:border-teal-500 hover:bg-teal-50 transition font-medium text-slate-700"
               >
-                {t.label}
+                {t(opt.label)}
               </button>
             ))}
           </div>
@@ -146,21 +148,21 @@ export default function WhereShouldIStay() {
         <div>
           <div className="flex items-center justify-between mb-6">
             <p className="text-sm text-slate-500">
-              Because you want <span className="font-semibold text-slate-700">{priorityLabel?.toLowerCase()}</span>
+              {t("Because you want")} <span className="font-semibold text-slate-700">{priorityLabel ? t(priorityLabel).toLowerCase() : ""}</span>
             </p>
             <button
               type="button"
               onClick={restart}
               className="text-sm font-semibold text-teal-700 hover:underline inline-flex items-center gap-1"
             >
-              <RefreshCw className="w-3.5 h-3.5" /> Start over
+              <RefreshCw className="w-3.5 h-3.5" /> {t("Start over")}
             </button>
           </div>
 
           {rankedAreas.length === 0 ? (
             <p className="text-slate-500 text-center py-10">
-              We couldn't match that combination yet - browse{" "}
-              <Link to="/collections" className="text-teal-700 font-semibold hover:underline">all areas</Link> instead.
+              {t("We couldn't match that combination yet - browse")}{" "}
+              <Link to="/collections" className="text-teal-700 font-semibold hover:underline">{t("all areas")}</Link> {t("instead.")}
             </p>
           ) : (
             <div className="space-y-5">
@@ -179,20 +181,20 @@ export default function WhereShouldIStay() {
                     <div className="p-5 flex-1">
                       {i === 0 && (
                         <span className="inline-block bg-teal-700 text-white text-[11px] font-bold uppercase tracking-wide px-2.5 py-1 rounded-full mb-2">
-                          Best match
+                          {t("Best match")}
                         </span>
                       )}
                       <h2 className="text-lg font-bold text-slate-900">{area.name}</h2>
-                      <p className="text-teal-700 text-sm font-semibold mb-2">{area.tagline}</p>
-                      <p className="text-sm text-slate-600 mb-2">{area.description}</p>
+                      <p className="text-teal-700 text-sm font-semibold mb-2">{t(area.tagline)}</p>
+                      <p className="text-sm text-slate-600 mb-2">{t(area.description)}</p>
                       <p className="text-xs text-slate-400 mb-3">
-                        <span className="font-semibold text-slate-500">Best for:</span> {area.whoItSuits}
+                        <span className="font-semibold text-slate-500">{t("Best for:")}</span> {t(area.whoItSuits)}
                       </p>
                       <Link
                         to={`/area/${area.key}`}
                         className="inline-flex items-center gap-1.5 text-teal-700 font-semibold text-sm hover:underline"
                       >
-                        See places to stay in {area.name} <ArrowRight className="w-3.5 h-3.5" />
+                        {t("See places to stay in")} {area.name} <ArrowRight className="w-3.5 h-3.5" />
                       </Link>
                     </div>
                   </div>
@@ -202,15 +204,15 @@ export default function WhereShouldIStay() {
           )}
 
           <div className="bg-teal-50 border border-teal-200 rounded-2xl p-6 text-center mt-8">
-            <p className="font-bold text-slate-900 mb-1">Not sure yet, or splitting your trip across areas?</p>
+            <p className="font-bold text-slate-900 mb-1">{t("Not sure yet, or splitting your trip across areas?")}</p>
             <p className="text-sm text-slate-600 mb-4">
-              The Trip Builder can put together a full day-by-day plan across more than one area.
+              {t("The Trip Builder can put together a full day-by-day plan across more than one area.")}
             </p>
             <Link
               to="/trip-builder"
               className="inline-flex items-center gap-2 bg-teal-700 hover:bg-teal-800 transition text-white font-bold px-6 py-3 rounded-full"
             >
-              <Compass className="w-4 h-4" /> Build My Zanzibar Trip
+              <Compass className="w-4 h-4" /> {t("Build My Zanzibar Trip")}
             </Link>
           </div>
         </div>
