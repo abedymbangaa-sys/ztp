@@ -7,6 +7,7 @@ import { buildItineraryConfirmLink } from "../lib/whatsapp";
 import { trackEvent } from "../lib/analytics";
 import GenericCard from "../components/GenericCard";
 import { Compass, MapPin, Hotel as HotelIcon, RefreshCw, MessageCircle } from "lucide-react";
+import { useT } from "../lib/i18n";
 
 const DAY_OPTIONS = [
   { value: 3, label: "1-3 days" },
@@ -81,6 +82,7 @@ function buildItinerary(listings, days, travelerType, budgetTier) {
 }
 
 export default function TripBuilder() {
+  const t = useT();
   const [step, setStep] = useState("form"); // "form" | "results"
   const [days, setDays] = useState(5);
   const [area, setArea] = useState("");
@@ -208,7 +210,7 @@ export default function TripBuilder() {
 
           <div>
             <label className="block text-sm font-semibold text-slate-700 mb-2">
-              Where are you staying? <span className="text-slate-400 font-normal">(optional)</span>
+              {t("Where are you staying?")} <span className="text-slate-400 font-normal">{t("(optional)")}</span>
             </label>
             <select
               value={area}
@@ -245,22 +247,22 @@ export default function TripBuilder() {
 
           <div>
             <label className="block text-sm font-semibold text-slate-700 mb-2">
-              Who's travelling? <span className="text-slate-400 font-normal">(optional)</span>
+              {t("Who's travelling?")} <span className="text-slate-400 font-normal">{t("(optional)")}</span>
             </label>
             <div className="flex flex-wrap gap-2">
-              {TRAVELER_TYPES.map((t) => (
+              {TRAVELER_TYPES.map((opt) => (
                 <button
-                  key={t.key}
+                  key={opt.key}
                   type="button"
-                  onClick={() => setTravelerTypeKey((prev) => (prev === t.key ? "" : t.key))}
+                  onClick={() => setTravelerTypeKey((prev) => (prev === opt.key ? "" : opt.key))}
                   className={
                     "py-2 px-4 rounded-full text-sm font-semibold border transition " +
-                    (travelerTypeKey === t.key
+                    (travelerTypeKey === opt.key
                       ? "bg-teal-700 text-white border-teal-700"
                       : "bg-white text-slate-700 border-slate-300 hover:border-teal-400")
                   }
                 >
-                  {t.label}
+                  {t(opt.label)}
                 </button>
               ))}
             </div>
@@ -268,7 +270,7 @@ export default function TripBuilder() {
 
           <div>
             <label className="block text-sm font-semibold text-slate-700 mb-2">
-              Approximate budget <span className="text-slate-400 font-normal">(optional)</span>
+              {t("Approximate budget")} <span className="text-slate-400 font-normal">{t("(optional)")}</span>
             </label>
             <div className="flex flex-wrap gap-2">
               {BUDGET_TIERS.map((b) => (
@@ -283,7 +285,7 @@ export default function TripBuilder() {
                       : "bg-white text-slate-700 border-slate-300 hover:border-teal-400")
                   }
                 >
-                  {b.label}
+                  {t(b.label)}
                 </button>
               ))}
             </div>
@@ -292,7 +294,7 @@ export default function TripBuilder() {
           <div className="grid grid-cols-2 gap-4">
             <div>
               <label className="block text-sm font-semibold text-slate-700 mb-1">
-                Travel dates <span className="text-slate-400 font-normal">(optional)</span>
+                {t("Travel dates")} <span className="text-slate-400 font-normal">{t("(optional)")}</span>
               </label>
               <input
                 value={dates}
@@ -303,7 +305,7 @@ export default function TripBuilder() {
             </div>
             <div>
               <label className="block text-sm font-semibold text-slate-700 mb-1">
-                Number of travelers <span className="text-slate-400 font-normal">(optional)</span>
+                {t("Number of travelers")} <span className="text-slate-400 font-normal">{t("(optional)")}</span>
               </label>
               <input
                 type="number"
