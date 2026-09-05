@@ -7,6 +7,7 @@ import { LOCATION_OPTIONS } from "../lib/locations";
 import GenericCard from "../components/GenericCard";
 import ListingsMap from "../components/ListingsMap";
 import { MapPin, RefreshCw, Users, CalendarClock } from "lucide-react";
+import { useT } from "../lib/i18n";
 
 // Village-level detail within each broad area, used to link to the
 // /best/:categoryKey/:locationKey pages. Not every LOCATION_OPTIONS village
@@ -50,6 +51,7 @@ function CardSkeletonGrid({ count = 6 }) {
 // the other areas. Built for both visitors deciding "where should I stay"
 // and for search engines - each area has a unique, indexable URL.
 export default function Area() {
+  const t = useT();
   const { areaKey } = useParams();
   const config = getAreaConfig(areaKey);
 
@@ -112,12 +114,12 @@ export default function Area() {
             <MapPin className="w-4 h-4" /> Zanzibar Area Guide
           </p>
           <h1 className="text-3xl sm:text-4xl font-bold text-white">{config.name}</h1>
-          <p className="text-slate-200 mt-1 max-w-2xl">{config.tagline}</p>
+          <p className="text-slate-200 mt-1 max-w-2xl">{t(config.tagline)}</p>
         </div>
       </section>
 
       <div className="max-w-5xl mx-auto px-4 py-10">
-        <p className="text-slate-700 max-w-3xl leading-relaxed mb-6">{config.description}</p>
+        <p className="text-slate-700 max-w-3xl leading-relaxed mb-6">{t(config.description)}</p>
 
         {/* Who it's for + a simple day plan - answers "does this area fit
             me?" and "what would I actually do here?" without the visitor
@@ -129,7 +131,7 @@ export default function Area() {
                 <h2 className="flex items-center gap-2 font-bold text-slate-900 mb-2">
                   <Users className="w-5 h-5 text-teal-700" /> Who {config.name} suits
                 </h2>
-                <p className="text-slate-700 text-sm leading-relaxed">{config.whoItSuits}</p>
+                <p className="text-slate-700 text-sm leading-relaxed">{t(config.whoItSuits)}</p>
               </div>
             )}
             {config.dayPlan && (
@@ -204,7 +206,7 @@ export default function Area() {
             named villages/beaches to link to. */}
         {villages.length > 0 && (
           <div className="mt-16 pt-8 border-t border-slate-200">
-            <h2 className="text-lg font-bold text-slate-900 mb-4">Browse by Beach & Village</h2>
+            <h2 className="text-lg font-bold text-slate-900 mb-4">{t("Browse by Beach & Village")}</h2>
             <div className="space-y-4">
               {villages.map((villageKey) => {
                 const village = LOCATION_OPTIONS.find((l) => l.key === villageKey);
@@ -216,19 +218,19 @@ export default function Area() {
                       to={`/best/hotels/${villageKey}`}
                       className="bg-slate-50 hover:bg-teal-50 hover:text-teal-700 transition text-slate-600 text-sm font-medium px-3 py-1.5 rounded-full"
                     >
-                      Best Hotels
+                      {t("Best Hotels")}
                     </Link>
                     <Link
                       to={`/best/tours/${villageKey}`}
                       className="bg-slate-50 hover:bg-teal-50 hover:text-teal-700 transition text-slate-600 text-sm font-medium px-3 py-1.5 rounded-full"
                     >
-                      Best Tours
+                      {t("Best Tours")}
                     </Link>
                     <Link
                       to={`/best/restaurants/${villageKey}`}
                       className="bg-slate-50 hover:bg-teal-50 hover:text-teal-700 transition text-slate-600 text-sm font-medium px-3 py-1.5 rounded-full"
                     >
-                      Best Restaurants
+                      {t("Best Restaurants")}
                     </Link>
                   </div>
                 );
