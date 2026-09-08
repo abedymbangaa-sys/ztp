@@ -2,6 +2,7 @@ import { useState, useEffect } from "react";
 import { X, BadgeCheck } from "lucide-react";
 import { supabase } from "../../lib/supabase";
 import { VERIFICATION_CHECKS, CORE_CHECK_KEYS, formatVerifiedDate } from "../../lib/verificationStandard";
+import { SinglePhotoUploader } from "../ImageUploader";
 
 /**
  * Admin modal for setting the graded "Verified Zanzibar Standard" checks
@@ -15,6 +16,8 @@ export default function VerificationManager({ open, onClose, listing, onSaved })
   const [verifiedBy, setVerifiedBy] = useState("");
   const [source, setSource] = useState("");
   const [notes, setNotes] = useState("");
+  const [publicNote, setPublicNote] = useState("");
+  const [photoUrl, setPhotoUrl] = useState("");
   const [saving, setSaving] = useState(false);
 
   useEffect(() => {
@@ -27,6 +30,8 @@ export default function VerificationManager({ open, onClose, listing, onSaved })
     setVerifiedBy(listing.verified_by || "");
     setSource(listing.verification_source || "");
     setNotes(listing.verification_notes || "");
+    setPublicNote(listing.public_verification_note || "");
+    setPhotoUrl(listing.verification_photo_url || "");
   }, [listing]);
 
   if (!open || !listing) return null;
@@ -47,6 +52,8 @@ export default function VerificationManager({ open, onClose, listing, onSaved })
         verified_by: verifiedBy.trim() || null,
         verification_source: source.trim() || null,
         verification_notes: notes.trim() || null,
+        public_verification_note: publicNote.trim() || null,
+        verification_photo_url: photoUrl || null,
         last_verified_at: anyChecked ? new Date().toISOString() : null,
         is_verified: coreVerified,
       })
@@ -126,6 +133,26 @@ export default function VerificationManager({ open, onClose, listing, onSaved })
               rows={2}
               className="w-full border border-slate-300 rounded-lg px-3 py-2 text-sm"
             />
+          </div>
+
+          <div className="border-t border-slate-100 pt-4">
+            <p className="text-xs font-bold text-teal-700 mb-2">
+              Public "How we verified this" evidence — travelers see this
+            </p>
+            <label className="block text-xs font-semibold text-slate-600 mb-1">
+              What we saw (public, e.g. "We visited on 12 Aug 2026 — the beach access was clear and staff were on
+              site")
+            </label>
+            <textarea
+              value={publicNote}
+              onChange={(e) => setPublicNote(e.target.value)}
+              rows={3}
+              placeholder="Short, factual, written for a traveler — not internal shorthand."
+              className="w-full border border-slate-300 rounded-lg px-3 py-2 text-sm"
+            />
+            <div className="mt-3">
+              <SinglePhotoUploader value={photoUrl} onChange={setPhotoUrl} label="Site visit photo (public)" />
+            </div>
           </div>
 
           {listing.last_verified_at && (
