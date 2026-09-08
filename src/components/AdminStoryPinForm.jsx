@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { supabase } from "../lib/supabaseClient"; // adjust path to match your project
+import { supabase } from "../lib/supabase";
 
 const emptyForm = {
   title: "",
