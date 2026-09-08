@@ -14,6 +14,10 @@ const emptyForm = {
   tourists_told_text: "",
 };
 
+const inputClass =
+  "w-full border border-slate-300 rounded-lg px-4 py-2.5 focus:outline-none focus:ring-2 focus:ring-teal-600 focus:border-transparent";
+const labelClass = "block text-sm font-medium text-slate-600 mb-1";
+
 export default function AdminStoryPinForm({ onSaved }) {
   const [form, setForm] = useState(emptyForm);
   const [audioFile, setAudioFile] = useState(null);
@@ -21,6 +25,7 @@ export default function AdminStoryPinForm({ onSaved }) {
   const [narratorPhoto, setNarratorPhoto] = useState(null);
   const [saving, setSaving] = useState(false);
   const [error, setError] = useState("");
+  const [success, setSuccess] = useState(false);
 
   const handleChange = (e) => {
     setForm({ ...form, [e.target.name]: e.target.value });
@@ -42,6 +47,7 @@ export default function AdminStoryPinForm({ onSaved }) {
     e.preventDefault();
     setSaving(true);
     setError("");
+    setSuccess(false);
     try {
       const audio_url = await uploadFile(audioFile, "audio");
       const video_url = await uploadFile(videoFile, "video");
@@ -64,8 +70,8 @@ export default function AdminStoryPinForm({ onSaved }) {
       setAudioFile(null);
       setVideoFile(null);
       setNarratorPhoto(null);
+      setSuccess(true);
       onSaved?.();
-      alert("Story pin imehifadhiwa. Nenda kwenye orodha ku-publish.");
     } catch (err) {
       setError(err.message);
     } finally {
@@ -74,59 +80,119 @@ export default function AdminStoryPinForm({ onSaved }) {
   };
 
   return (
-    <form onSubmit={handleSubmit} className="max-w-lg mx-auto p-4 space-y-3">
-      <h2 className="text-lg font-bold text-teal-800">Ongeza Story Pin</h2>
+    <div>
+      <div className="bg-white border border-slate-200 rounded-2xl p-6 mb-6">
+        <h2 className="font-bold text-lg mb-1">Ongeza Story Pin</h2>
+        <p className="text-sm text-slate-500 mb-5">
+          Story mpya haitaonekana kwa umma mpaka ui-"publish" kwenye Supabase (is_published).
+        </p>
 
-      {error && <p className="text-red-600 text-sm">{error}</p>}
+        {error && (
+          <div className="bg-red-50 border border-red-200 text-red-700 text-sm rounded-lg px-4 py-2.5 mb-4">
+            {error}
+          </div>
+        )}
+        {success && (
+          <div className="bg-teal-50 border border-teal-200 text-teal-700 text-sm rounded-lg px-4 py-2.5 mb-4">
+            Story pin imehifadhiwa. Nenda Supabase kui-publish.
+          </div>
+        )}
 
-      <input name="title" value={form.title} onChange={handleChange}
-        placeholder="Jina la mahali (mfano: Bi Asha's Spice Corner)"
-        className="w-full border rounded p-2" required />
+        <form onSubmit={handleSubmit} className="space-y-4">
+          <div>
+            <label className={labelClass}>Jina la mahali</label>
+            <input name="title" value={form.title} onChange={handleChange}
+              placeholder="mfano: Bi Asha's Spice Corner"
+              className={inputClass} required />
+          </div>
 
-      <input name="area_key" value={form.area_key} onChange={handleChange}
-        placeholder="Area key (mfano: nungwi, stone-town)"
-        className="w-full border rounded p-2" />
+          <div>
+            <label className={labelClass}>Area key</label>
+            <input name="area_key" value={form.area_key} onChange={handleChange}
+              placeholder="mfano: nungwi, stone-town"
+              className={inputClass} />
+          </div>
 
-      <div className="flex gap-2">
-        <input name="lat" value={form.lat} onChange={handleChange}
-          placeholder="Latitude" className="w-1/2 border rounded p-2" required />
-        <input name="lng" value={form.lng} onChange={handleChange}
-          placeholder="Longitude" className="w-1/2 border rounded p-2" required />
+          <div className="grid grid-cols-2 gap-4">
+            <div>
+              <label className={labelClass}>Latitude</label>
+              <input name="lat" value={form.lat} onChange={handleChange}
+                className={inputClass} required />
+            </div>
+            <div>
+              <label className={labelClass}>Longitude</label>
+              <input name="lng" value={form.lng} onChange={handleChange}
+                className={inputClass} required />
+            </div>
+          </div>
+
+          <div>
+            <label className={labelClass}>Jina la msimuliaji</label>
+            <input name="narrator_name" value={form.narrator_name} onChange={handleChange}
+              placeholder="mfano: Mzee Juma"
+              className={inputClass} required />
+          </div>
+
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+            <div>
+              <label className={labelClass}>Picha ya msimuliaji</label>
+              <input type="file" accept="image/*"
+                onChange={(e) => setNarratorPhoto(e.target.files[0])}
+                className="w-full text-sm border border-slate-300 rounded-lg px-3 py-2" />
+            </div>
+            <div>
+              <label className={labelClass}>Audio (Kiswahili)</label>
+              <input type="file" accept="audio/*"
+                onChange={(e) => setAudioFile(e.target.files[0])}
+                className="w-full text-sm border border-slate-300 rounded-lg px-3 py-2" />
+            </div>
+            <div>
+              <label className={labelClass}>Video (hiari, &lt;30s)</label>
+              <input type="file" accept="video/*"
+                onChange={(e) => setVideoFile(e.target.files[0])}
+                className="w-full text-sm border border-slate-300 rounded-lg px-3 py-2" />
+            </div>
+          </div>
+
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+            <div>
+              <label className={labelClass}>Hadithi kwa Kiswahili</label>
+              <textarea name="story_text_sw" value={form.story_text_sw} onChange={handleChange}
+                className={inputClass} rows={3} />
+            </div>
+            <div>
+              <label className={labelClass}>Story in English</label>
+              <textarea name="story_text_en" value={form.story_text_en} onChange={handleChange}
+                className={inputClass} rows={3} />
+            </div>
+          </div>
+
+          <div>
+            <label className={labelClass}>Siri ya mtaa</label>
+            <textarea name="local_secret" value={form.local_secret} onChange={handleChange}
+              placeholder="mfano: hapa jioni 5:30 kuna chai ya tangawizi bure..."
+              className={inputClass} rows={2} />
+          </div>
+
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+            <div>
+              <label className={labelClass}>Wenyeji wanafanya nini hapa</label>
+              <textarea name="locals_do_text" value={form.locals_do_text} onChange={handleChange}
+                className={inputClass} rows={2} />
+            </div>
+            <div>
+              <label className={labelClass}>Watalii wanaambiwa nini</label>
+              <textarea name="tourists_told_text" value={form.tourists_told_text} onChange={handleChange}
+                className={inputClass} rows={2} />
+            </div>
+          </div>
+
+          <button type="submit" disabled={saving}
+            className="bg-teal-700 hover:bg-teal-800 transition text-white font-bold px-6 py-2.5 rounded-full disabled:opacity-50">
+            {saving ? "Inahifadhi..." : "Hifadhi Story Pin"}
+          </button>
+        </form>
       </div>
-
-      <input name="narrator_name" value={form.narrator_name} onChange={handleChange}
-        placeholder="Jina la msimuliaji (mfano: Mzee Juma)"
-        className="w-full border rounded p-2" required />
-
-      <label className="block text-sm text-gray-600">Picha ya msimuliaji</label>
-      <input type="file" accept="image/*" onChange={(e) => setNarratorPhoto(e.target.files[0])} />
-
-      <label className="block text-sm text-gray-600">Audio (Kiswahili)</label>
-      <input type="file" accept="audio/*" onChange={(e) => setAudioFile(e.target.files[0])} />
-
-      <label className="block text-sm text-gray-600">Video (hiari, chini ya sekunde 30)</label>
-      <input type="file" accept="video/*" onChange={(e) => setVideoFile(e.target.files[0])} />
-
-      <textarea name="story_text_sw" value={form.story_text_sw} onChange={handleChange}
-        placeholder="Hadithi kwa Kiswahili" className="w-full border rounded p-2" rows={2} />
-
-      <textarea name="story_text_en" value={form.story_text_en} onChange={handleChange}
-        placeholder="Story in English" className="w-full border rounded p-2" rows={2} />
-
-      <textarea name="local_secret" value={form.local_secret} onChange={handleChange}
-        placeholder="Siri ya mtaa (mfano: hapa jioni 5:30 kuna chai bure...)"
-        className="w-full border rounded p-2" rows={2} />
-
-      <textarea name="locals_do_text" value={form.locals_do_text} onChange={handleChange}
-        placeholder="Wenyeji wanafanya nini hapa" className="w-full border rounded p-2" rows={2} />
-
-      <textarea name="tourists_told_text" value={form.tourists_told_text} onChange={handleChange}
-        placeholder="Watalii wanaambiwa nini" className="w-full border rounded p-2" rows={2} />
-
-      <button type="submit" disabled={saving}
-        className="w-full bg-teal-700 text-white rounded p-2 font-semibold disabled:opacity-50">
-        {saving ? "Inahifadhi..." : "Hifadhi Story Pin"}
-      </button>
-    </form>
+    </div>
   );
 }
