@@ -77,6 +77,27 @@ export default function VerificationPanel({ item, onReportIssue, onClaimBusiness
         )}
       </div>
 
+      {(item.public_verification_note || item.verification_photo_url) && (
+        <div className="mt-3 rounded-xl border border-teal-100 bg-teal-50/60 p-3">
+          <p className="text-xs font-bold text-teal-800">
+            {dateLabel
+              ? `${t("We visited on")} ${dateLabel} — ${t("here's what we saw")}`
+              : t("Here's what we saw on our visit")}
+          </p>
+          {item.verification_photo_url && (
+            <img
+              src={item.verification_photo_url}
+              alt={t("Photo from our verification site visit")}
+              className="mt-2 w-full max-h-56 object-cover rounded-lg"
+              loading="lazy"
+            />
+          )}
+          {item.public_verification_note && (
+            <p className="mt-2 text-xs text-slate-600 leading-relaxed">{item.public_verification_note}</p>
+          )}
+        </div>
+      )}
+
       {trustBadges.length > 0 && (
         <div className="mt-3 flex flex-wrap gap-1.5">
           {trustBadges.map((b) => (
