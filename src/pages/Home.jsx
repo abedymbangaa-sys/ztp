@@ -9,6 +9,7 @@ import TravelerStories from "../components/TravelerStories";
 import DealsSection from "../components/DealsSection";
 import SearchAutocomplete from "../components/SearchAutocomplete";
 import TripBuilderModal from "../components/TripBuilderModal";
+import LocalPulse from "../components/LocalPulse";
 import { AREAS } from "../data/areas";
 import { STAMP_TYPES } from "../lib/stamps";
 import StampSeal from "../components/StampSeal";
@@ -171,6 +172,8 @@ export default function Home() {
       </section>
 
       <TripBuilderModal open={tripBuilderOpen} onClose={() => setTripBuilderOpen(false)} />
+
+      <LocalPulse />
 
       {/* Choose Your Zanzibar Story - homepage packaging around the same
           5 categories used by the My Zanzibar Passport stamps (see
