@@ -357,6 +357,27 @@ export default function Home() {
         </div>
       </section>
 
+      {/* Find My Local Host */}
+      <section className="max-w-6xl mx-auto px-4 pb-4">
+        <Link
+          to="/find-host"
+          className="flex flex-col sm:flex-row items-center justify-between gap-4 bg-gradient-to-r from-teal-700 to-teal-600 text-white rounded-2xl p-6 sm:p-8 hover:from-teal-800 hover:to-teal-700 transition"
+        >
+          <div>
+            <p className="text-teal-100 font-semibold text-sm uppercase tracking-wide">
+              New
+            </p>
+            <h2 className="text-xl sm:text-2xl font-bold">Find My Local Host</h2>
+            <p className="text-teal-50 text-sm mt-1">
+              Answer a few quick questions, get matched with a real local, chat on WhatsApp.
+            </p>
+          </div>
+          <span className="flex-shrink-0 bg-white text-teal-700 font-bold px-5 py-2.5 rounded-full">
+            Start →
+          </span>
+        </Link>
+      </section>
+
       {/* Interactive map */}
       <section className="max-w-6xl mx-auto px-4 pb-16">
         <div className="mb-8">
