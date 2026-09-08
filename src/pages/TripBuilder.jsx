@@ -6,7 +6,7 @@ import { AREAS } from "../data/areas";
 import { buildItineraryConfirmLink } from "../lib/whatsapp";
 import { trackEvent } from "../lib/analytics";
 import GenericCard from "../components/GenericCard";
-import { Compass, MapPin, Hotel as HotelIcon, RefreshCw, MessageCircle } from "lucide-react";
+import { Compass, MapPin, Hotel as HotelIcon, RefreshCw, MessageCircle, Sparkles } from "lucide-react";
 import { useT } from "../lib/i18n";
 
 const DAY_OPTIONS = [
@@ -31,6 +31,55 @@ const BUDGET_TIERS = [
   { key: "budget", label: "Budget", tags: ["budget"] },
   { key: "mid-range", label: "Mid-range", tags: [] },
   { key: "luxury", label: "Luxury", tags: ["luxury"] },
+];
+
+// "Zanzibar Mood Planner" - a fast lane into the same rule-based engine
+// below, not a separate feature. Each mood pre-fills interests/traveler
+// type/budget with a sensible combination and jumps straight to results,
+// for someone who wants a plan in one tap rather than answering every
+// question. The full form is still there underneath for anyone who wants
+// to fine-tune instead.
+const MOODS = [
+  {
+    key: "free",
+    label: "I want to feel free",
+    tagline: "Open beaches, no fixed plan, room to wander.",
+    interests: ["beaches", "unique"],
+    travelerTypeKey: "",
+    budgetTierKey: "mid-range",
+  },
+  {
+    key: "romance",
+    label: "I want romance",
+    tagline: "Sunset dinners, private stays, just the two of you.",
+    interests: ["beaches", "food"],
+    travelerTypeKey: "honeymoon",
+    budgetTierKey: "luxury",
+  },
+  {
+    key: "culture",
+    label: "I want culture deep",
+    tagline: "Stone Town history, heritage sites, real local food.",
+    interests: ["culture", "food"],
+    travelerTypeKey: "",
+    budgetTierKey: "",
+  },
+  {
+    key: "rest",
+    label: "I want pure rest",
+    tagline: "Quiet beachfront, slow mornings, nothing on the clock.",
+    interests: ["beaches"],
+    travelerTypeKey: "",
+    budgetTierKey: "",
+  },
+  {
+    key: "adventure",
+    label: "I want adventure without crowds",
+    tagline: "Nature, caves and tours away from the busy spots.",
+    interests: ["nature", "tours"],
+    travelerTypeKey: "solo",
+    budgetTierKey: "",
+  },
 ];
 
 // Maps a friendly interest label to the category_key values already used
@@ -94,6 +143,7 @@ export default function TripBuilder() {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
   const [result, setResult] = useState(null);
+  const [moodKey, setMoodKey] = useState("");
 
   useSEO({
     title: "Build My Zanzibar Trip — Free Itinerary Builder | Zanzibar Paradise Tours",
@@ -106,42 +156,49 @@ export default function TripBuilder() {
     setSelectedInterests((prev) => (prev.includes(key) ? prev.filter((k) => k !== key) : [...prev, key]));
   }
 
-  async function handleGenerate(e) {
-    e.preventDefault();
+  async function handleGenerate(e, overrides = {}) {
+    if (e?.preventDefault) e.preventDefault();
     setLoading(true);
     setError(null);
+    setMoodKey(overrides.moodKey || "");
+
+    // Mood quick-picks call this directly with fresh values instead of
+    // relying on state (which wouldn't have updated yet in the same tick).
+    const interests = overrides.interests || selectedInterests;
+    const effectiveTravelerTypeKey = overrides.travelerTypeKey ?? travelerTypeKey;
+    const effectiveBudgetTierKey = overrides.budgetTierKey ?? budgetTierKey;
+    const effectiveArea = overrides.area ?? area;
 
     const categoryKeys = Array.from(
-      new Set(
-        selectedInterests.flatMap((key) => INTERESTS.find((i) => i.key === key)?.categories || [])
-      )
+      new Set(interests.flatMap((key) => INTERESTS.find((i) => i.key === key)?.categories || []))
     );
 
     try {
       let query = supabase.from("listings").select("*").eq("status", "approved");
-      if (area) query = query.eq("area", area);
+      if (effectiveArea) query = query.eq("area", effectiveArea);
 
       const { data: hotelsData, error: hotelsError } = await query.eq("category_key", "hotels");
       if (hotelsError) throw hotelsError;
 
       let activityQuery = supabase.from("listings").select("*").eq("status", "approved");
-      if (area) activityQuery = activityQuery.eq("area", area);
+      if (effectiveArea) activityQuery = activityQuery.eq("area", effectiveArea);
       if (categoryKeys.length > 0) activityQuery = activityQuery.in("category_key", categoryKeys);
       const { data: activitiesData, error: activitiesError } = await activityQuery.neq("category_key", "hotels");
       if (activitiesError) throw activitiesError;
 
       const combined = [...(hotelsData || []), ...(activitiesData || [])];
-      const travelerType = TRAVELER_TYPES.find((t) => t.key === travelerTypeKey);
-      const budgetTier = BUDGET_TIERS.find((b) => b.key === budgetTierKey);
+      const travelerType = TRAVELER_TYPES.find((t) => t.key === effectiveTravelerTypeKey);
+      const budgetTier = BUDGET_TIERS.find((b) => b.key === effectiveBudgetTierKey);
       const plan = buildItinerary(combined, days, travelerType, budgetTier);
       setResult(plan);
       setStep("results");
       trackEvent("trip_builder_generated", {
         days,
-        area: area || "any",
-        interests: selectedInterests.join(","),
-        traveler_type: travelerTypeKey || "unspecified",
-        budget_tier: budgetTierKey || "unspecified",
+        area: effectiveArea || "any",
+        interests: interests.join(","),
+        traveler_type: effectiveTravelerTypeKey || "unspecified",
+        budget_tier: effectiveBudgetTierKey || "unspecified",
+        mood: overrides.moodKey || "none",
       });
     } catch (err) {
       if (import.meta.env.DEV) console.error("TripBuilder: failed to generate", err);
@@ -149,6 +206,20 @@ export default function TripBuilder() {
     } finally {
       setLoading(false);
     }
+  }
+
+  function handleMoodPick(mood) {
+    setSelectedInterests(mood.interests);
+    setTravelerTypeKey(mood.travelerTypeKey);
+    setBudgetTierKey(mood.budgetTierKey);
+    setMoodKey(mood.key);
+    trackEvent("mood_planner_pick", { mood: mood.key });
+    handleGenerate(null, {
+      interests: mood.interests,
+      travelerTypeKey: mood.travelerTypeKey,
+      budgetTierKey: mood.budgetTierKey,
+      moodKey: mood.key,
+    });
   }
 
   function handleConfirmWithExpert() {
@@ -186,7 +257,36 @@ export default function TripBuilder() {
       </div>
 
       {step === "form" && (
-        <form onSubmit={handleGenerate} className="bg-white border border-slate-200 rounded-2xl p-6 space-y-6">
+        <>
+          <div className="mb-6">
+            <p className="text-sm font-bold text-slate-900 mb-3 inline-flex items-center gap-1.5">
+              <Sparkles className="w-4 h-4 text-teal-700" /> Or just pick a mood — we'll do the rest
+            </p>
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-2.5">
+              {MOODS.map((mood) => (
+                <button
+                  key={mood.key}
+                  type="button"
+                  disabled={loading}
+                  onClick={() => handleMoodPick(mood)}
+                  className="text-left bg-white border border-slate-200 hover:border-teal-500 hover:bg-teal-50/50 transition rounded-xl px-4 py-3 disabled:opacity-60"
+                >
+                  <span className="block text-sm font-bold text-slate-900">{t(mood.label)}</span>
+                  <span className="block text-xs text-slate-500 mt-0.5">{t(mood.tagline)}</span>
+                </button>
+              ))}
+            </div>
+            {loading && moodKey && (
+              <p className="text-xs text-teal-700 mt-2 font-semibold">Building your {MOODS.find((m) => m.key === moodKey)?.label.toLowerCase()} plan...</p>
+            )}
+            <div className="flex items-center gap-3 my-5">
+              <div className="h-px bg-slate-200 flex-1" />
+              <span className="text-xs text-slate-400 font-semibold">OR ANSWER A FEW QUESTIONS</span>
+              <div className="h-px bg-slate-200 flex-1" />
+            </div>
+          </div>
+
+          <form onSubmit={handleGenerate} className="bg-white border border-slate-200 rounded-2xl p-6 space-y-6">
           <div>
             <label className="block text-sm font-semibold text-slate-700 mb-2">How many days?</label>
             <div className="grid grid-cols-3 gap-2">
@@ -331,13 +431,19 @@ export default function TripBuilder() {
           {selectedInterests.length === 0 && (
             <p className="text-xs text-amber-600 text-center">Choose at least one interest to continue.</p>
           )}
-        </form>
+          </form>
+        </>
       )}
 
       {step === "results" && result && (
         <div>
           <div className="flex items-center justify-between mb-6">
             <div>
+              {moodKey && (
+                <p className="text-xs font-bold text-teal-700 inline-flex items-center gap-1 mb-0.5">
+                  <Sparkles className="w-3.5 h-3.5" /> {MOODS.find((m) => m.key === moodKey)?.label}
+                </p>
+              )}
               <p className="text-sm text-slate-500 inline-flex items-center gap-1.5">
                 <MapPin className="w-4 h-4" /> {areaName} · {days <= 3 ? "1-3" : days <= 5 ? "4-6" : "7+"} days
                 {travelerTypeKey && ` · ${TRAVELER_TYPES.find((t) => t.key === travelerTypeKey)?.label}`}
