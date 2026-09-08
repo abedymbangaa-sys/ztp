@@ -1,8 +1,12 @@
+import { useEffect, useState } from "react";
 import { MapContainer, TileLayer, Marker, Popup } from "react-leaflet";
 import { Link } from "react-router-dom";
 import "leaflet/dist/leaflet.css";
 import L from "leaflet";
 import { parseLatLng } from "../lib/geo";
+import { supabase } from "../lib/supabase";
+import { useLanguage } from "../lib/LanguageContext";
+import StoryMapPin from "./StoryMapPin";
 
 // Fix default marker icons (Vite bundling breaks leaflet's default asset paths)
 delete L.Icon.Default.prototype._getIconUrl;
@@ -15,6 +19,31 @@ L.Icon.Default.mergeOptions({
 const ZANZIBAR_CENTER = [-6.1659, 39.2026];
 
 export default function ZanzibarMap({ listings = [], loading = false }) {
+  const { language } = useLanguage();
+  // StoryMapPin only understands 'sw' or 'en' — anything else (it/de) falls back to English
+  const storyLang = language === "sw" ? "sw" : "en";
+
+  const [storyPins, setStoryPins] = useState([]);
+
+  useEffect(() => {
+    let isMounted = true;
+    supabase
+      .from("story_pins")
+      .select("*")
+      .eq("is_published", true)
+      .then(({ data, error }) => {
+        if (!isMounted) return;
+        if (error) {
+          console.error("Failed to load story pins:", error);
+          return;
+        }
+        setStoryPins(data || []);
+      });
+    return () => {
+      isMounted = false;
+    };
+  }, []);
+
   const pins = listings
     .map((item) => ({ ...item, coords: parseLatLng(item.maps_link) }))
     .filter((item) => item.coords);
@@ -39,6 +68,9 @@ export default function ZanzibarMap({ listings = [], loading = false }) {
             </Popup>
           </Marker>
         ))}
+        {storyPins.map((pin) => (
+          <StoryMapPin key={`story-${pin.id}`} pin={pin} lang={storyLang} />
+        ))}
       </MapContainer>
       {/* Distinguishes "still fetching listings" from "finished, and truly
           none of them have a usable map location" - the two were
@@ -52,7 +84,7 @@ export default function ZanzibarMap({ listings = [], loading = false }) {
           </p>
         </div>
       )}
-      {!loading && pins.length === 0 && (
+      {!loading && pins.length === 0 && storyPins.length === 0 && (
         <div className="absolute inset-x-0 bottom-3 flex justify-center pointer-events-none">
           <p className="bg-white/95 text-slate-500 text-sm px-3 py-1.5 rounded-full shadow-sm">
             No listings with a saved map location yet.
