@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { supabase } from "../lib/supabase";
 
 const emptyForm = {
@@ -18,7 +18,7 @@ const inputClass =
   "w-full border border-slate-300 rounded-lg px-4 py-2.5 focus:outline-none focus:ring-2 focus:ring-teal-600 focus:border-transparent";
 const labelClass = "block text-sm font-medium text-slate-600 mb-1";
 
-export default function AdminStoryPinForm({ onSaved }) {
+export default function AdminStoryPinForm() {
   const [form, setForm] = useState(emptyForm);
   const [audioFile, setAudioFile] = useState(null);
   const [videoFile, setVideoFile] = useState(null);
@@ -26,6 +26,30 @@ export default function AdminStoryPinForm({ onSaved }) {
   const [saving, setSaving] = useState(false);
   const [error, setError] = useState("");
   const [success, setSuccess] = useState(false);
+
+  const [pins, setPins] = useState([]);
+  const [loadingPins, setLoadingPins] = useState(true);
+  const [pinError, setPinError] = useState("");
+  const [busyId, setBusyId] = useState(null);
+
+  async function loadPins() {
+    setLoadingPins(true);
+    setPinError("");
+    const { data, error: fetchError } = await supabase
+      .from("story_pins")
+      .select("id, title, area_key, narrator_name, is_published, created_at")
+      .order("created_at", { ascending: false });
+    if (fetchError) {
+      setPinError(fetchError.message);
+    } else {
+      setPins(data || []);
+    }
+    setLoadingPins(false);
+  }
+
+  useEffect(() => {
+    loadPins();
+  }, []);
 
   const handleChange = (e) => {
     setForm({ ...form, [e.target.name]: e.target.value });
@@ -71,7 +95,7 @@ export default function AdminStoryPinForm({ onSaved }) {
       setVideoFile(null);
       setNarratorPhoto(null);
       setSuccess(true);
-      onSaved?.();
+      loadPins();
     } catch (err) {
       setError(err.message);
     } finally {
@@ -79,12 +103,108 @@ export default function AdminStoryPinForm({ onSaved }) {
     }
   };
 
+  async function togglePublish(pin) {
+    setBusyId(pin.id);
+    const { error: updateError } = await supabase
+      .from("story_pins")
+      .update({ is_published: !pin.is_published })
+      .eq("id", pin.id);
+    if (updateError) {
+      setPinError(updateError.message);
+    } else {
+      setPins((prev) =>
+        prev.map((p) => (p.id === pin.id ? { ...p, is_published: !p.is_published } : p))
+      );
+    }
+    setBusyId(null);
+  }
+
+  async function deletePin(pin) {
+    if (!window.confirm(`Futa "${pin.title}"? Hatua hii haiwezi kurudishwa.`)) return;
+    setBusyId(pin.id);
+    const { error: deleteError } = await supabase.from("story_pins").delete().eq("id", pin.id);
+    if (deleteError) {
+      setPinError(deleteError.message);
+    } else {
+      setPins((prev) => prev.filter((p) => p.id !== pin.id));
+    }
+    setBusyId(null);
+  }
+
   return (
     <div>
+      {/* ---- Orodha ya Story Pins zilizopo ---- */}
+      <div className="bg-white border border-slate-200 rounded-2xl p-6 mb-6">
+        <h2 className="font-bold text-lg mb-1">Story Pins Zilizopo</h2>
+        <p className="text-sm text-slate-500 mb-4">
+          Bonyeza "Publish" ili ionekane kwa umma kwenye map — hakuna haja ya kuingia Supabase.
+        </p>
+
+        {pinError && (
+          <div className="bg-red-50 border border-red-200 text-red-700 text-sm rounded-lg px-4 py-2.5 mb-4">
+            {pinError}
+          </div>
+        )}
+
+        {loadingPins ? (
+          <p className="text-sm text-slate-500">Inapakia...</p>
+        ) : pins.length === 0 ? (
+          <p className="text-sm text-slate-500">Hakuna story pin bado. Ongeza moja hapa chini.</p>
+        ) : (
+          <div className="space-y-2">
+            {pins.map((pin) => (
+              <div
+                key={pin.id}
+                className="flex flex-wrap items-center justify-between gap-3 border border-slate-200 rounded-xl px-4 py-3"
+              >
+                <div>
+                  <p className="font-semibold text-slate-800">{pin.title}</p>
+                  <p className="text-xs text-slate-500">
+                    {pin.narrator_name} · {pin.area_key || "hakuna area"}
+                  </p>
+                </div>
+                <div className="flex items-center gap-2">
+                  <span
+                    className={
+                      "text-xs font-semibold px-2.5 py-1 rounded-full " +
+                      (pin.is_published
+                        ? "bg-teal-50 text-teal-700"
+                        : "bg-amber-50 text-amber-700")
+                    }
+                  >
+                    {pin.is_published ? "Live" : "Draft"}
+                  </span>
+                  <button
+                    onClick={() => togglePublish(pin)}
+                    disabled={busyId === pin.id}
+                    className={
+                      "text-xs font-semibold px-3 py-1.5 rounded-full disabled:opacity-50 " +
+                      (pin.is_published
+                        ? "bg-slate-100 text-slate-700 hover:bg-slate-200"
+                        : "bg-teal-700 text-white hover:bg-teal-800")
+                    }
+                  >
+                    {pin.is_published ? "Unpublish" : "Publish"}
+                  </button>
+                  <button
+                    onClick={() => deletePin(pin)}
+                    disabled={busyId === pin.id}
+                    className="text-xs font-semibold px-3 py-1.5 rounded-full bg-red-50 text-red-600 hover:bg-red-100 disabled:opacity-50"
+                  >
+                    Futa
+                  </button>
+                </div>
+              </div>
+            ))}
+          </div>
+        )}
+      </div>
+
+      {/* ---- Fomu ya kuongeza pin mpya ---- */}
       <div className="bg-white border border-slate-200 rounded-2xl p-6 mb-6">
         <h2 className="font-bold text-lg mb-1">Ongeza Story Pin</h2>
         <p className="text-sm text-slate-500 mb-5">
-          Story mpya haitaonekana kwa umma mpaka ui-"publish" kwenye Supabase (is_published).
+          Story mpya itaanza kama "Draft" — itumie orodha juu kui-"Publish" ukiridhika.
         </p>
 
         {error && (
@@ -94,7 +214,7 @@ export default function AdminStoryPinForm({ onSaved }) {
         )}
         {success && (
           <div className="bg-teal-50 border border-teal-200 text-teal-700 text-sm rounded-lg px-4 py-2.5 mb-4">
-            Story pin imehifadhiwa. Nenda Supabase kui-publish.
+            Story pin imehifadhiwa kama Draft — itumie orodha juu kui-publish.
           </div>
         )}
 
