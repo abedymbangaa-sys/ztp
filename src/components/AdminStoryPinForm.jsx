@@ -72,6 +72,22 @@ export default function AdminStoryPinForm() {
     setSaving(true);
     setError("");
     setSuccess(false);
+
+    const latNum = parseFloat(form.lat);
+    const lngNum = parseFloat(form.lng);
+    if (Number.isNaN(latNum) || latNum >= 0 || latNum < -7) {
+      setError(
+        "Latitude si sahihi kwa Zanzibar — lazima iwe namba hasi (mfano: -6.1636). Angalia una '-' mbele."
+      );
+      setSaving(false);
+      return;
+    }
+    if (Number.isNaN(lngNum) || lngNum < 38 || lngNum > 41) {
+      setError("Longitude si sahihi kwa Zanzibar — inatakiwa iwe kati ya 38 na 41 (mfano: 39.1908).");
+      setSaving(false);
+      return;
+    }
+
     try {
       const audio_url = await uploadFile(audioFile, "audio");
       const video_url = await uploadFile(videoFile, "video");
