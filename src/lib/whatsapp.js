@@ -85,3 +85,22 @@ export function buildExpertLink(itemTitle, itemLocation, pageUrl) {
   if (pageUrl) lines.push(`Page: ${pageUrl}`);
   return `https://wa.me/${SITE_CONTACT_NUMBER}?text=${encodeURIComponent(lines.join("\n"))}`;
 }
+
+// "Find My Local Host" - once the quiz on /find-host matches someone with
+// a host, this builds a message straight to that host's own WhatsApp
+// (not the site's shared line) with enough context that the host already
+// knows what the traveler is after, instead of a blank "hi".
+export function buildHostChatLink(host, quizAnswers) {
+  if (!host?.whatsapp_number) return null;
+  const lines = [
+    `Habari ${host.name}! Nimekupata kupitia Zanzibar Paradise Tours - Find My Local Host.`,
+  ];
+  if (quizAnswers?.styleLabel) lines.push(`Ninatafuta: ${quizAnswers.styleLabel}.`);
+  if (quizAnswers?.budgetLabel) lines.push(`Bajeti: ${quizAnswers.budgetLabel}.`);
+  if (quizAnswers?.daysLabel) lines.push(`Muda: ${quizAnswers.daysLabel}.`);
+  if (quizAnswers?.preferenceLabels?.length) {
+    lines.push(`Mambo muhimu kwangu: ${quizAnswers.preferenceLabels.join(", ")}.`);
+  }
+  lines.push(`Je, unaweza kunishauri?`);
+  return `https://wa.me/${host.whatsapp_number}?text=${encodeURIComponent(lines.join("\n"))}`;
+}
