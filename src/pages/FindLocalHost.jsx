@@ -53,6 +53,7 @@ export default function FindLocalHost() {
     title: "Find My Local Host | Zanzibar Paradise Tours",
     description:
       "Answer a few quick questions and get matched with a real local host in Zanzibar who knows exactly what you're after.",
+    canonical: "https://visitzanzibarparadise.com/find-host",
   });
 
   const [step, setStep] = useState(0); // 0 = quiz, 1 = results
