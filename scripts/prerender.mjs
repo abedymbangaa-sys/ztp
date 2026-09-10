@@ -149,7 +149,7 @@ async function main() {
   }
 
   let generated = 0;
-  const sitemapRoutes = ["/", "/things-to-do", "/kwa-watanzania"];
+  const sitemapRoutes = ["/", "/things-to-do", "/kwa-watanzania", "/find-host"];
 
   for (const cat of categories) {
     const catListings = listings.filter((l) => l.category_key === cat.key);
