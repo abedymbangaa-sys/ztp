@@ -69,28 +69,30 @@ export default function LocalPulse() {
 
   return (
     <div className="max-w-6xl mx-auto px-4 -mt-8 relative z-10 mb-4">
-      <div className="bg-white border border-slate-200 rounded-2xl shadow-sm px-5 py-4 flex flex-wrap items-center gap-x-6 gap-y-3">
-        <div className="flex items-center gap-2 text-teal-800 font-bold text-sm shrink-0">
-          <Radio className="w-4 h-4" />
-          Right Now in Zanzibar
+      <div className="bg-white border border-slate-200 rounded-2xl shadow-sm px-5 py-4">
+        <div className="flex items-center justify-between gap-3 flex-wrap">
+          <div className="flex items-center gap-2 text-teal-800 font-bold text-sm shrink-0">
+            <Radio className="w-4 h-4" />
+            Right Now in Zanzibar
+          </div>
+
+          {weather && (
+            <div className="flex items-center gap-1.5 text-sm text-slate-700 shrink-0">
+              <WeatherIcon className="w-4 h-4 text-amber-500" />
+              {weather.temp}°C
+            </div>
+          )}
         </div>
 
-        {weather && (
-          <div className="flex items-center gap-1.5 text-sm text-slate-700 shrink-0">
-            <WeatherIcon className="w-4 h-4 text-amber-500" />
-            {weather.temp}°C
-          </div>
-        )}
-
         {items.length > 0 && (
-          <div className="flex flex-wrap gap-x-5 gap-y-2 text-sm text-slate-600 flex-1 min-w-0">
+          <div className="mt-3 pt-3 border-t border-slate-100 flex flex-col gap-2">
             {items.map((item) => {
               const Icon = CATEGORY_ICON[item.category] || Info;
               return (
-                <span key={item.id} className="inline-flex items-start gap-1.5">
+                <div key={item.id} className="flex items-start gap-1.5 text-sm text-slate-600">
                   <Icon className="w-3.5 h-3.5 mt-0.5 text-teal-600 shrink-0" />
-                  {item.message}
-                </span>
+                  <span className="min-w-0 break-words">{item.message}</span>
+                </div>
               );
             })}
           </div>
