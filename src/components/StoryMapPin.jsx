@@ -1,6 +1,7 @@
 import { useState, useRef } from "react";
 import { Marker, Popup } from "react-leaflet";
 import L from "leaflet";
+import { markStoryHeard } from "../lib/connections";
 
 // Custom pin icon — swap the emoji/colors to match your brand palette
 const storyIcon = new L.DivIcon({
@@ -37,6 +38,7 @@ export default function StoryMapPin({ pin, lang = "sw" }) {
       audioRef.current.pause();
     } else {
       audioRef.current.play();
+      markStoryHeard(pin.id);
     }
     setPlaying(!playing);
   };
@@ -85,12 +87,19 @@ export default function StoryMapPin({ pin, lang = "sw" }) {
               src={pin.video_url}
               controls
               playsInline
+              onPlay={() => markStoryHeard(pin.id)}
               className="w-full rounded mb-3 max-h-40"
             />
           )}
 
           {storyText && (
             <p className="text-sm text-gray-700 mb-3">{storyText}</p>
+          )}
+
+          {audioSrc && (
+            <p className="text-[10px] text-teal-700 mb-2">
+              🎖️ Listening earns your Local Connection Stamp
+            </p>
           )}
 
           {pin.local_secret && (
