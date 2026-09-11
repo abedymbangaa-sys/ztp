@@ -6,6 +6,7 @@ import GenericCard from "../components/GenericCard";
 import { useSEO } from "../lib/useSEO";
 import { Heart, Share2, Copy, Check, MessageCircle, ArrowRight } from "lucide-react";
 import { STAMP_TYPES, getStamps } from "../lib/stamps";
+import { getConnectionCount } from "../lib/connections";
 import StampSeal from "../components/StampSeal";
 
 function CardSkeletonGrid({ count = 6 }) {
@@ -63,8 +64,18 @@ export default function MyZanzibar() {
     });
     return acc;
   }, {});
+  // "Local Connection" isn't earned from saved listings - it comes from
+  // listening to a Story Map pin or messaging a Local Host, tracked in
+  // src/lib/connections.js. Shared Passport views (?ids=) show someone
+  // else's saved places, not this browser's own connections, so it's
+  // only shown on your own Passport.
+  if (!isSharedView) {
+    stampCounts.connection = getConnectionCount();
+  }
 
-  const stampKeysInOrder = Object.keys(STAMP_TYPES);
+  const stampKeysInOrder = Object.keys(STAMP_TYPES).filter(
+    (key) => key !== "connection" || !isSharedView
+  );
   const earnedCount = stampKeysInOrder.filter((key) => stampCounts[key] > 0).length;
   const nextStampKey = stampKeysInOrder.find((key) => !stampCounts[key]);
   const nextStamp = nextStampKey ? { key: nextStampKey, ...STAMP_TYPES[nextStampKey] } : null;
@@ -115,8 +126,8 @@ export default function MyZanzibar() {
             </p>
           )}
 
-          {/* Passport stamp cards - always show all 5, including zero states */}
-          <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-3 mb-8">
+          {/* Passport stamp cards - always show all 6, including zero states */}
+          <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-3 mb-8">
             {stampKeysInOrder.map((key) => {
               const meta = STAMP_TYPES[key];
               const count = stampCounts[key] || 0;
