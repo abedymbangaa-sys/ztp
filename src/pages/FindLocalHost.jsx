@@ -1,7 +1,9 @@
 import { useEffect, useState } from "react";
+import { Link } from "react-router-dom";
 import { supabase } from "../lib/supabase";
 import { useSEO } from "../lib/useSEO";
 import { buildHostChatLink } from "../lib/whatsapp";
+import { markHostContacted } from "../lib/connections";
 import { trackEvent } from "../lib/analytics";
 import { MessageCircle, RefreshCw, Sparkles } from "lucide-react";
 
@@ -245,6 +247,14 @@ export default function FindLocalHost() {
             </button>
           </div>
 
+          <p className="text-xs text-slate-500 mb-4">
+            Chatting with a host earns your{" "}
+            <Link to="/my-zanzibar" className="text-teal-700 font-semibold hover:underline">
+              Local Connection Stamp
+            </Link>{" "}
+            on your Zanzibar Passport.
+          </p>
+
           {loading && <p className="text-slate-500 text-sm">Loading hosts...</p>}
           {loadError && <p className="text-red-600 text-sm">{loadError}</p>}
 
@@ -306,12 +316,13 @@ export default function FindLocalHost() {
                         href={chatLink}
                         target="_blank"
                         rel="noopener noreferrer"
-                        onClick={() =>
+                        onClick={() => {
+                          markHostContacted(host.id);
                           trackEvent("host_whatsapp_click", {
                             host_id: host.id,
                             host_name: host.name,
-                          })
-                        }
+                          });
+                        }}
                         className="inline-flex items-center gap-2 bg-teal-700 hover:bg-teal-800 transition text-white text-sm font-semibold px-4 py-2 rounded-full"
                       >
                         <MessageCircle className="w-4 h-4" /> Chat with {host.name.split(" ")[0]}
