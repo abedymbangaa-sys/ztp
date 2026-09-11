@@ -34,6 +34,11 @@ const ICON_PATHS = {
     </>
   ),
   local: <path d="M12 3l2 6.5L21 12l-7 2.5L12 21l-2-6.5L3 12l7-2.5Z" />,
+  connection: (
+    <>
+      <path d="M4 5h14a2 2 0 0 1 2 2v7a2 2 0 0 1-2 2H11l-4.5 3.5V16H4a2 2 0 0 1-2-2V7a2 2 0 0 1 2-2Z" />
+    </>
+  ),
 };
 
 export default function StampSeal({ stampKey, color, size = 22 }) {
