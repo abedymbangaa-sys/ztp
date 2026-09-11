@@ -43,6 +43,13 @@ export const STAMP_TYPES = {
     zeroCopy: "Discover your first local experience",
     route: "/experiences",
   },
+  connection: {
+    label: "Local Connection Stamp",
+    color: "#B8365F",
+    description: "Local voices you've heard and hosts you've connected with.",
+    zeroCopy: "Listen to a Story Map pin or chat with a Local Host",
+    route: "/find-host",
+  },
 };
 
 // Base stamp(s) a listing earns from its directory category.
