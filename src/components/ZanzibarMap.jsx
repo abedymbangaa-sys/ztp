@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import { MapContainer, TileLayer, Marker, Popup } from "react-leaflet";
+import { MapContainer, TileLayer, Marker, Popup, ZoomControl } from "react-leaflet";
 import { Link } from "react-router-dom";
 import "leaflet/dist/leaflet.css";
 import L from "leaflet";
@@ -50,7 +50,13 @@ export default function ZanzibarMap({ listings = [], loading = false }) {
 
   return (
     <div className="rounded-2xl overflow-hidden border border-slate-200 h-[420px] relative">
-      <MapContainer center={ZANZIBAR_CENTER} zoom={10} style={{ height: "100%", width: "100%" }}>
+      <MapContainer
+        center={ZANZIBAR_CENTER}
+        zoom={10}
+        zoomControl={false}
+        style={{ height: "100%", width: "100%" }}
+      >
+        <ZoomControl position="bottomright" />
         <TileLayer
           attribution='&copy; OpenStreetMap contributors'
           url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
@@ -72,6 +78,12 @@ export default function ZanzibarMap({ listings = [], loading = false }) {
           <StoryMapPin key={`story-${pin.id}`} pin={pin} lang={storyLang} />
         ))}
       </MapContainer>
+
+      {storyPins.length > 0 && (
+        <div className="absolute top-3 right-3 bg-white/95 rounded-full shadow-sm px-3 py-1.5 flex items-center gap-1.5 text-xs font-semibold text-slate-700 pointer-events-none">
+          <span>🎙️</span> Local story
+        </div>
+      )}
       {/* Distinguishes "still fetching listings" from "finished, and truly
           none of them have a usable map location" - the two were
           previously conflated into a single "Loading map markers..."
