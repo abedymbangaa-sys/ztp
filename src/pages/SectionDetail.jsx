@@ -18,6 +18,8 @@ import LocalLens from "../components/LocalLens";
 import SuitabilityCard from "../components/SuitabilityCard";
 import AmenitiesCard from "../components/AmenitiesCard";
 import InquiryModal from "../components/InquiryModal";
+import TravelersChoiceBadge from "../components/TravelersChoiceBadge";
+import { isTravelersChoice } from "../lib/travelersChoice";
 import ClaimListingModal from "../components/ClaimListingModal";
 import VerificationPanel from "../components/VerificationPanel";
 import ListingContactActions from "../components/ListingContactActions";
@@ -154,6 +156,7 @@ export default function SectionDetail() {
               its own row below ~380px wide (e.g. "Jabali Bungalows Lodge"). */}
           <h1 className="text-2xl sm:text-3xl md:text-4xl font-bold text-slate-900 leading-snug sm:leading-tight break-words flex flex-wrap items-center gap-x-2 gap-y-1.5">
             <span>{item.title}</span>
+            {isTravelersChoice(item) && <TravelersChoiceBadge size="lg" />}
             {item.is_verified && (
               <span className="inline-flex items-center gap-1 bg-teal-100 text-teal-800 text-xs font-semibold px-2.5 py-1 rounded-full align-middle">
                 <BadgeCheck className="w-3.5 h-3.5" /> Verified
