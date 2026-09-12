@@ -5,7 +5,7 @@ export default function TravelersChoiceBadge({ size = "sm" }) {
   const isSmall = size === "sm";
   return (
     <span
-      title="Miongoni mwa listings zenye tathmini bora zaidi kutoka kwa wasafiri"
+      title="Among the highest-rated listings, based on traveler reviews"
       className={
         "inline-flex items-center gap-1.5 font-semibold rounded-full shadow-sm " +
         (isSmall
@@ -18,7 +18,7 @@ export default function TravelersChoiceBadge({ size = "sm" }) {
         alt=""
         className={(isSmall ? "w-4 h-4" : "w-5 h-5") + " rounded-full shrink-0"}
       />
-      Chaguo la Wasafiri
+      Travelers' Choice
     </span>
   );
 }
