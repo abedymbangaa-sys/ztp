@@ -31,6 +31,7 @@ export default function Home() {
   const t = useT();
   const { categories } = useCategories();
   const { listings: hotels, loading: hotelsLoading } = useListings("hotels");
+  const { listings: tours, loading: toursLoading } = useListings("tours");
   const { listings: allApproved, loading: listingsLoading } = useListings();
   const { settings, loading: settingsLoading } = useSettings();
   const adPrice = Number(settings.ad_price_usd) || 15;
@@ -43,6 +44,7 @@ export default function Home() {
   // image if set, or fall back to the default only then.
   const heroImageUrl = settingsLoading ? null : settings.hero_image_url || DEFAULT_HERO_IMAGE;
   const topHotels = hotels.slice(0, 6);
+  const dayTripTours = tours.slice(0, 6);
 
   // The hero background rotates through whatever photos the admin has
   // uploaded in Admin Dashboard -> Homepage -> "Hero Rotation". If the admin
@@ -403,6 +405,62 @@ export default function Home() {
           ))}
         </div>
       </section>
+
+      {/* Day Trips from Stone Town - most visitors base themselves in Stone
+          Town or a coastal hotel, so a short list of nearby tours they can
+          do in a single day (no overnight stay needed) helps them plan
+          without leaving the homepage. Pulled straight from the "tours"
+          category so it's never out of sync with what's actually listed. */}
+      {(toursLoading || dayTripTours.length > 0) && (
+        <section className="max-w-6xl mx-auto px-4 py-4 pb-16">
+          <div className="flex items-end justify-between mb-8">
+            <div>
+              <p className="text-teal-700 font-semibold text-sm uppercase tracking-wide">Plan Your Day</p>
+              <h2 className="text-2xl sm:text-3xl font-bold text-slate-900">Day Trips from Stone Town</h2>
+            </div>
+            <Link to="/tours" className="text-teal-700 font-semibold hover:underline hidden md:block">
+              View All →
+            </Link>
+          </div>
+          <div className="flex gap-4 overflow-x-auto pb-2 -mx-4 px-4 snap-x snap-mandatory scrollbar-thin">
+            {toursLoading && dayTripTours.length === 0
+              ? Array.from({ length: 3 }).map((_, i) => (
+                  <div
+                    key={i}
+                    className="shrink-0 w-64 bg-white border border-slate-200 rounded-2xl overflow-hidden animate-pulse"
+                  >
+                    <div className="w-full h-36 bg-slate-200" />
+                    <div className="p-4 space-y-2">
+                      <div className="h-4 bg-slate-200 rounded w-3/4" />
+                      <div className="h-3 bg-slate-200 rounded w-1/2" />
+                    </div>
+                  </div>
+                ))
+              : dayTripTours.map((tourItem) => (
+                  <Link
+                    key={tourItem.id}
+                    to={`/tours/${tourItem.id}`}
+                    className="group shrink-0 w-64 snap-start bg-white rounded-2xl overflow-hidden shadow-sm hover:shadow-lg transition-shadow border border-slate-100"
+                  >
+                    <div className="relative h-36 overflow-hidden">
+                      <img
+                        src={tourItem.image_url}
+                        alt={tourItem.title}
+                        loading="lazy"
+                        className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
+                      />
+                      <span className="absolute top-2 left-2 bg-white/95 text-teal-700 text-[11px] font-semibold px-2.5 py-1 rounded-full shadow-sm">
+                        {tourItem.duration || "Day Trip"}
+                      </span>
+                    </div>
+                    <div className="p-4">
+                      <h3 className="font-semibold text-sm text-slate-900 line-clamp-2">{tourItem.title}</h3>
+                    </div>
+                  </Link>
+                ))}
+          </div>
+        </section>
+      )}
 
       {/* Find My Local Host */}
       <section className="max-w-6xl mx-auto px-4 pb-4">
