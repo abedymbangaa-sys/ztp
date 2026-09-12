@@ -275,6 +275,7 @@ export function useAdvertisements(limit = 12) {
 // change + redeploy every time.
 const SETTINGS_DEFAULTS = {
   ad_price_usd: "15",
+  hero_images: "[]",
 };
 
 export function useSettings() {
