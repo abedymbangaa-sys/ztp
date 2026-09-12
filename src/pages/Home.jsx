@@ -68,11 +68,6 @@ export default function Home() {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [heroImages.length]);
 
-  // Quick filter chips under the hero search bar, so a first-time visitor
-  // can jump straight into a category with one tap instead of typing.
-  const HERO_QUICK_LINKS = ["hotels", "beaches", "tours", "restaurants"];
-  const heroQuickCategories = HERO_QUICK_LINKS.map((key) => categories.find((c) => c.key === key)).filter(Boolean);
-
   // Fixes a real polish issue: on slower connections, a plain <img> paints
   // progressively (visibly blocky/incomplete) while text is already
   // sitting on top of it. Rather than fade the <img> in immediately on
@@ -149,22 +144,8 @@ export default function Home() {
           <SearchAutocomplete
             listings={allApproved}
             placeholder={t("Where do you want to go in Zanzibar?")}
-            className="max-w-xl mx-auto mb-4"
+            className="max-w-xl mx-auto mb-10"
           />
-
-          {heroQuickCategories.length > 0 && (
-            <div className="flex flex-wrap items-center justify-center gap-2 mb-10">
-              {heroQuickCategories.map((c) => (
-                <Link
-                  key={c.key}
-                  to={`/${c.key}`}
-                  className="bg-white/10 hover:bg-white/20 border border-white/30 backdrop-blur-sm text-white text-sm font-medium px-4 py-1.5 rounded-full transition"
-                >
-                  {c.title}
-                </Link>
-              ))}
-            </div>
-          )}
 
           {/* CTA hierarchy: one primary action, one browsing path, one
               direct-help path — instead of 3-4 competing equal buttons,
