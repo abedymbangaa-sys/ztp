@@ -2,6 +2,8 @@ import { Link } from "react-router-dom";
 import { MapPin, BadgeCheck, ArrowRight } from "lucide-react";
 import { useRelatedListings } from "../data/hooks";
 import { useT } from "../lib/i18n";
+import TravelersChoiceBadge from "./TravelersChoiceBadge";
+import { isTravelersChoice } from "../lib/travelersChoice";
 
 // "Explore Nearby" - a horizontally-scrolling strip of other listings in the
 // same category, shown at the bottom of a detail page. Compact cards keep
@@ -40,11 +42,16 @@ export default function RelatedListings({ categoryKey, excludeId, title = "Explo
                 className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
                 loading="lazy"
               />
-              {item.is_verified && (
-                <span className="absolute top-2 left-2 inline-flex items-center gap-1 bg-white/95 text-teal-700 text-[10px] font-semibold px-2 py-0.5 rounded-full shadow-sm">
-                  <BadgeCheck className="w-3 h-3" />
-                  {t("Verified")}
-                </span>
+              {(item.is_verified || isTravelersChoice(item)) && (
+                <div className="absolute top-2 left-2 flex flex-col items-start gap-1">
+                  {isTravelersChoice(item) && <TravelersChoiceBadge size="sm" />}
+                  {item.is_verified && (
+                    <span className="inline-flex items-center gap-1 bg-white/95 text-teal-700 text-[10px] font-semibold px-2 py-0.5 rounded-full shadow-sm">
+                      <BadgeCheck className="w-3 h-3" />
+                      {t("Verified")}
+                    </span>
+                  )}
+                </div>
               )}
             </div>
             <div className="p-3">
