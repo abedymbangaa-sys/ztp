@@ -22,6 +22,13 @@ export default function AdminPhotoSpotForm() {
   const [error, setError] = useState("");
   const [success, setSuccess] = useState(false);
 
+  // null = adding a new spot. Otherwise, the id + existing photo_url of
+  // the spot currently being edited (kept separately from `form` since
+  // photo_url isn't a text field in the form - it only changes if a new
+  // file is chosen).
+  const [editingId, setEditingId] = useState(null);
+  const [editingPhotoUrl, setEditingPhotoUrl] = useState(null);
+
   const [spots, setSpots] = useState([]);
   const [loadingSpots, setLoadingSpots] = useState(true);
   const [spotError, setSpotError] = useState("");
@@ -58,6 +65,44 @@ export default function AdminPhotoSpotForm() {
     return data.publicUrl;
   }
 
+  async function startEdit(spotId) {
+    setError("");
+    setSuccess(false);
+    setSpotError("");
+    const { data, error: fetchError } = await supabase
+      .from("photo_spots")
+      .select("*")
+      .eq("id", spotId)
+      .single();
+    if (fetchError) {
+      setSpotError(fetchError.message);
+      return;
+    }
+    setForm({
+      title: data.title || "",
+      area_key: data.area_key || "",
+      lat: String(data.lat ?? ""),
+      lng: String(data.lng ?? ""),
+      best_time: data.best_time || "",
+      composition_tip: data.composition_tip || "",
+      instagram_tag: data.instagram_tag || "",
+    });
+    setEditingId(data.id);
+    setEditingPhotoUrl(data.photo_url || null);
+    setPhotoFile(null);
+    // Scroll the form into view since the list sits above it.
+    document.getElementById("photo-spot-form")?.scrollIntoView({ behavior: "smooth" });
+  }
+
+  function cancelEdit() {
+    setForm(emptyForm);
+    setPhotoFile(null);
+    setEditingId(null);
+    setEditingPhotoUrl(null);
+    setError("");
+    setSuccess(false);
+  }
+
   const handleSubmit = async (e) => {
     e.preventDefault();
     setSaving(true);
@@ -78,22 +123,38 @@ export default function AdminPhotoSpotForm() {
     }
 
     try {
-      const photo_url = await uploadFile(photoFile, "photo-spots");
+      if (editingId) {
+        // Only replace photo_url if a new file was actually chosen -
+        // otherwise keep whatever was already saved for this spot.
+        const photo_url = photoFile
+          ? await uploadFile(photoFile, "photo-spots")
+          : editingPhotoUrl;
 
-      const { error: insertError } = await supabase.from("photo_spots").insert([
-        {
-          ...form,
-          lat: latNum,
-          lng: lngNum,
-          photo_url,
-          is_published: false,
-        },
-      ]);
-      if (insertError) throw insertError;
+        const { error: updateError } = await supabase
+          .from("photo_spots")
+          .update({ ...form, lat: latNum, lng: lngNum, photo_url })
+          .eq("id", editingId);
+        if (updateError) throw updateError;
 
-      setForm(emptyForm);
-      setPhotoFile(null);
-      setSuccess(true);
+        setSuccess(true);
+        cancelEdit();
+      } else {
+        const photo_url = await uploadFile(photoFile, "photo-spots");
+        const { error: insertError } = await supabase.from("photo_spots").insert([
+          {
+            ...form,
+            lat: latNum,
+            lng: lngNum,
+            photo_url,
+            is_published: false,
+          },
+        ]);
+        if (insertError) throw insertError;
+
+        setForm(emptyForm);
+        setPhotoFile(null);
+        setSuccess(true);
+      }
       loadSpots();
     } catch (err) {
       setError(err.message);
@@ -126,6 +187,7 @@ export default function AdminPhotoSpotForm() {
       setSpotError(deleteError.message);
     } else {
       setSpots((prev) => prev.filter((s) => s.id !== spot.id));
+      if (editingId === spot.id) cancelEdit();
     }
     setBusyId(null);
   }
@@ -136,7 +198,7 @@ export default function AdminPhotoSpotForm() {
       <div className="bg-white border border-slate-200 rounded-2xl p-6 mb-6">
         <h2 className="font-bold text-lg mb-1">Photo Spots Zilizopo</h2>
         <p className="text-sm text-slate-500 mb-4">
-          Bonyeza "Publish" ili spot ionekane kwenye /photo-spots.
+          Bonyeza "Publish" ili spot ionekane kwenye /photo-spots, au "Edit" kubadilisha maelezo/picha.
         </p>
 
         {spotError && (
@@ -154,7 +216,12 @@ export default function AdminPhotoSpotForm() {
             {spots.map((spot) => (
               <div
                 key={spot.id}
-                className="flex flex-wrap items-center justify-between gap-3 border border-slate-200 rounded-xl px-4 py-3"
+                className={
+                  "flex flex-wrap items-center justify-between gap-3 border rounded-xl px-4 py-3 " +
+                  (editingId === spot.id
+                    ? "border-teal-400 bg-teal-50/40"
+                    : "border-slate-200")
+                }
               >
                 <div>
                   <p className="font-semibold text-slate-800">{spot.title}</p>
@@ -169,6 +236,13 @@ export default function AdminPhotoSpotForm() {
                   >
                     {spot.is_published ? "Live" : "Draft"}
                   </span>
+                  <button
+                    onClick={() => startEdit(spot.id)}
+                    disabled={busyId === spot.id}
+                    className="text-xs font-semibold px-3 py-1.5 rounded-full bg-slate-100 text-slate-700 hover:bg-slate-200 disabled:opacity-50"
+                  >
+                    Edit
+                  </button>
                   <button
                     onClick={() => togglePublish(spot)}
                     disabled={busyId === spot.id}
@@ -195,11 +269,26 @@ export default function AdminPhotoSpotForm() {
         )}
       </div>
 
-      {/* ---- Fomu ya kuongeza spot mpya ---- */}
-      <div className="bg-white border border-slate-200 rounded-2xl p-6 mb-6">
-        <h2 className="font-bold text-lg mb-1">Ongeza Photo Spot</h2>
+      {/* ---- Fomu ya kuongeza/edit spot ---- */}
+      <div id="photo-spot-form" className="bg-white border border-slate-200 rounded-2xl p-6 mb-6">
+        <div className="flex items-center justify-between mb-1">
+          <h2 className="font-bold text-lg">
+            {editingId ? "Edit Photo Spot" : "Ongeza Photo Spot"}
+          </h2>
+          {editingId && (
+            <button
+              type="button"
+              onClick={cancelEdit}
+              className="text-xs font-semibold text-slate-500 hover:text-slate-700"
+            >
+              Cancel edit
+            </button>
+          )}
+        </div>
         <p className="text-sm text-slate-500 mb-5">
-          Spot mpya itaanza kama "Draft" - itumie orodha juu ku-"Publish" ukiridhika.
+          {editingId
+            ? "Unabadilisha spot iliyopo. Status (Live/Draft) haitabadilika isipokuwa uibadilishe kwenye orodha juu."
+            : 'Spot mpya itaanza kama "Draft" - itumie orodha juu ku-"Publish" ukiridhika.'}
         </p>
 
         {error && (
@@ -209,7 +298,7 @@ export default function AdminPhotoSpotForm() {
         )}
         {success && (
           <div className="bg-teal-50 border border-teal-200 text-teal-700 text-sm rounded-lg px-4 py-2.5 mb-4">
-            Photo spot imehifadhiwa kama Draft - itumie orodha juu ku-publish.
+            Imehifadhiwa.
           </div>
         )}
 
@@ -240,8 +329,20 @@ export default function AdminPhotoSpotForm() {
 
           <div>
             <label className={labelClass}>Picha ya mfano (inspiration shot)</label>
+            {editingId && editingPhotoUrl && (
+              <img
+                src={editingPhotoUrl}
+                alt="Current"
+                className="w-full max-w-xs rounded-lg mb-2 border border-slate-200"
+              />
+            )}
             <input type="file" accept="image/*" onChange={(e) => setPhotoFile(e.target.files[0])}
               className="w-full text-sm border border-slate-300 rounded-lg px-3 py-2" />
+            {editingId && (
+              <p className="text-xs text-slate-400 mt-1">
+                Acha wazi kama hutaki kubadilisha picha iliyopo.
+              </p>
+            )}
           </div>
 
           <div>
@@ -263,10 +364,21 @@ export default function AdminPhotoSpotForm() {
               placeholder="mfano: #ZanzibarSunset" className={inputClass} />
           </div>
 
-          <button type="submit" disabled={saving}
-            className="bg-teal-700 hover:bg-teal-800 transition text-white font-bold px-6 py-2.5 rounded-full disabled:opacity-50">
-            {saving ? "Inahifadhi..." : "Hifadhi Photo Spot"}
-          </button>
+          <div className="flex gap-3">
+            <button type="submit" disabled={saving}
+              className="bg-teal-700 hover:bg-teal-800 transition text-white font-bold px-6 py-2.5 rounded-full disabled:opacity-50">
+              {saving ? "Inahifadhi..." : editingId ? "Update Photo Spot" : "Hifadhi Photo Spot"}
+            </button>
+            {editingId && (
+              <button
+                type="button"
+                onClick={cancelEdit}
+                className="text-slate-600 font-semibold px-6 py-2.5 rounded-full border border-slate-300 hover:bg-slate-50"
+              >
+                Cancel
+              </button>
+            )}
+          </div>
         </form>
       </div>
     </div>
