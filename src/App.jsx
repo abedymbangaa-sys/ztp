@@ -18,6 +18,7 @@ const SectionDetail = lazy(() => import("./pages/SectionDetail"));
 const AdDetail = lazy(() => import("./pages/AdDetail"));
 const PartnerSignup = lazy(() => import("./pages/PartnerSignup"));
 const PartnerLogin = lazy(() => import("./pages/PartnerLogin"));
+const PartnerResetPassword = lazy(() => import("./pages/PartnerResetPassword"));
 const PartnerDashboard = lazy(() => import("./pages/PartnerDashboard"));
 const AdminLogin = lazy(() => import("./pages/AdminLogin"));
 const AdminDashboard = lazy(() => import("./pages/AdminDashboard"));
@@ -74,6 +75,7 @@ export default function App() {
             <Route path="/" element={<Home />} />
             <Route path="/partner/signup" element={<PartnerSignup />} />
             <Route path="/partner/login" element={<PartnerLogin />} />
+            <Route path="/partner/reset-password" element={<PartnerResetPassword />} />
             <Route path="/partner/dashboard" element={<PartnerDashboard />} />
             <Route path="/admin/login" element={<AdminLogin />} />
             <Route path="/admin/dashboard" element={<AdminDashboard />} />
