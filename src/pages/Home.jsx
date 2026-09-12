@@ -220,7 +220,8 @@ export default function Home() {
           indexable landing page. */}
       <section className="max-w-6xl mx-auto px-4 py-16">
         <div className="mb-8">
-          <h2 className="text-2xl sm:text-3xl font-bold text-slate-900">Explore Zanzibar by Area</h2>
+          <p className="text-teal-700 font-semibold text-sm uppercase tracking-wide">Trending in Zanzibar</p>
+          <h2 className="text-2xl sm:text-3xl font-bold text-slate-900">Must-Dos in Every Corner of the Island</h2>
           <p className="text-slate-500 mt-1">
             Not sure where to stay?{" "}
             <Link to="/where-should-i-stay" className="text-teal-700 font-semibold hover:underline">
@@ -229,20 +230,34 @@ export default function Home() {
             and we'll point you to the right one.
           </p>
         </div>
-        <div className="grid grid-cols-2 sm:grid-cols-3 gap-4">
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-5">
           {AREAS.map((a) => (
             <Link
               key={a.key}
               to={`/area/${a.key}`}
-              className="relative rounded-2xl overflow-hidden h-32 sm:h-40 group"
+              className="group bg-white border border-slate-200 rounded-2xl overflow-hidden hover:shadow-lg hover:border-teal-300 transition"
             >
-              <img
-                src={a.heroImage}
-                alt={a.name}
-                className="absolute inset-0 w-full h-full object-cover group-hover:scale-105 transition duration-300"
-              />
-              <div className="absolute inset-0 bg-gradient-to-t from-black/70 via-black/10 to-transparent" />
-              <span className="absolute bottom-3 left-3 text-white font-bold">{a.name}</span>
+              <div className="relative h-36 sm:h-40 overflow-hidden">
+                <img
+                  src={a.heroImage}
+                  alt={a.name}
+                  className="absolute inset-0 w-full h-full object-cover group-hover:scale-105 transition duration-300"
+                />
+                <div className="absolute inset-0 bg-gradient-to-t from-black/70 via-black/10 to-transparent" />
+                <span className="absolute bottom-3 left-4 text-white font-bold text-lg">{a.name}</span>
+              </div>
+              {a.mustDos?.length > 0 && (
+                <div className="p-4 flex flex-wrap gap-1.5">
+                  {a.mustDos.map((item) => (
+                    <span
+                      key={item}
+                      className="bg-teal-50 text-teal-700 text-xs font-medium px-2.5 py-1 rounded-full"
+                    >
+                      {item}
+                    </span>
+                  ))}
+                </div>
+              )}
             </Link>
           ))}
         </div>
