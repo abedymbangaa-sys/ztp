@@ -168,17 +168,66 @@ export default function ReviewsSection({ listingId }) {
   const avgRating =
     reviews.length > 0 ? (reviews.reduce((sum, r) => sum + r.rating, 0) / reviews.length).toFixed(1) : null;
 
+  // Idadi ya reviews kwa kila nyota (5 -> 1), inayotumika kwenye bar za mgawanyo
+  const distribution = [5, 4, 3, 2, 1].map((star) => ({
+    star,
+    count: reviews.filter((r) => Math.round(r.rating) === star).length,
+  }));
+  const maxCount = Math.max(1, ...distribution.map((d) => d.count));
+
+  function ratingWord(avg) {
+    if (avg >= 4.5) return "Bora Kabisa";
+    if (avg >= 4) return "Nzuri Sana";
+    if (avg >= 3) return "Wastani";
+    if (avg >= 2) return "Hafifu";
+    return "Mbaya";
+  }
+
+  const STAR_LABELS = {
+    5: "Bora Kabisa",
+    4: "Nzuri",
+    3: "Wastani",
+    2: "Hafifu",
+    1: "Mbaya",
+  };
+  const STAR_BAR_COLOR = {
+    5: "bg-teal-600",
+    4: "bg-teal-400",
+    3: "bg-amber-400",
+    2: "bg-orange-400",
+    1: "bg-red-400",
+  };
+
   return (
     <div className="mt-12 border-t border-slate-200 pt-10">
-      <div className="flex items-center gap-3 mb-6">
-        <h2 className="text-xl font-bold text-slate-900">Guest Reviews</h2>
-        {avgRating && (
-          <span className="flex items-center gap-2 bg-amber-50 text-amber-700 text-sm font-semibold px-3 py-1 rounded-full">
-            <StarRating rating={Math.round(avgRating)} size="w-3.5 h-3.5" />
-            {avgRating} ({reviews.length})
-          </span>
-        )}
-      </div>
+      <h2 className="text-xl font-bold text-slate-900 mb-6">Guest Reviews</h2>
+
+      {avgRating && (
+        <div className="bg-white border border-slate-200 rounded-2xl p-6 mb-8 max-w-md">
+          <div className="flex items-baseline gap-4 mb-5">
+            <span className="text-4xl font-extrabold text-teal-700 leading-none">{avgRating}</span>
+            <div>
+              <p className="font-semibold text-slate-900">{ratingWord(avgRating)}</p>
+              <p className="text-xs text-slate-500">kutoka tathmini {reviews.length}</p>
+            </div>
+          </div>
+
+          <div className="space-y-2">
+            {distribution.map(({ star, count }) => (
+              <div key={star} className="grid grid-cols-[90px_1fr_28px] items-center gap-3">
+                <span className="text-xs text-slate-600">{STAR_LABELS[star]}</span>
+                <div className="h-2 bg-slate-100 rounded-full overflow-hidden">
+                  <div
+                    className={`h-full rounded-full ${STAR_BAR_COLOR[star]}`}
+                    style={{ width: `${Math.round((count / maxCount) * 100)}%` }}
+                  />
+                </div>
+                <span className="text-xs text-slate-400 text-right">{count}</span>
+              </div>
+            ))}
+          </div>
+        </div>
+      )}
 
       {loading ? (
         <p className="text-slate-400 text-sm">Loading reviews...</p>
