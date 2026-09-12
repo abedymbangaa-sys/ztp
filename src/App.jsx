@@ -39,6 +39,7 @@ const Guides = lazy(() => import("./pages/Guides"));
 const GuideDetail = lazy(() => import("./pages/GuideDetail"));
 const TripBuilder = lazy(() => import("./pages/TripBuilder"));
 const FindLocalHost = lazy(() => import("./pages/FindLocalHost"));
+const PhotoSpots = lazy(() => import("./pages/PhotoSpots"));
 const Collections = lazy(() => import("./pages/Collections"));
 const CollectionDetail = lazy(() => import("./pages/CollectionDetail"));
 const NearMe = lazy(() => import("./pages/NearMe"));
@@ -112,6 +113,7 @@ export default function App() {
             <Route path="/guides/:slug" element={<GuideDetail />} />
             <Route path="/trip-builder" element={<TripBuilder />} />
             <Route path="/find-host" element={<FindLocalHost />} />
+            <Route path="/photo-spots" element={<PhotoSpots />} />
             <Route path="/:sectionKey" element={<SectionListing />} />
             <Route path="/:sectionKey/:id" element={<SectionDetail />} />
           </Routes>
