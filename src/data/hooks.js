@@ -471,9 +471,35 @@ export function useRelatedListings(categoryKey, excludeId, limit = 4) {
       .neq("id", excludeId)
       .order("created_at", { ascending: false })
       .limit(limit)
-      .then(({ data }) => {
+      .then(async ({ data }) => {
+        const rows = data || [];
+        // Same rating summary as useListings, so "Explore Nearby" cards can
+        // show the Travelers' Choice badge just like the main grid does.
+        if (rows.length > 0) {
+          try {
+            const ids = rows.map((r) => r.id);
+            const { data: reviewRows } = await supabase
+              .from("reviews")
+              .select("listing_id, rating")
+              .eq("status", "approved")
+              .in("listing_id", ids);
+            const statsByListing = {};
+            (reviewRows || []).forEach((r) => {
+              const s = (statsByListing[r.listing_id] ||= { total: 0, count: 0 });
+              s.total += r.rating;
+              s.count += 1;
+            });
+            rows.forEach((row) => {
+              const s = statsByListing[row.id];
+              row.review_avg = s ? Number((s.total / s.count).toFixed(1)) : null;
+              row.review_count = s ? s.count : 0;
+            });
+          } catch (statsErr) {
+            if (import.meta.env.DEV) console.error("useRelatedListings: failed to load review stats", statsErr);
+          }
+        }
         if (mounted) {
-          setRelated(data || []);
+          setRelated(rows);
           setLoading(false);
         }
       });
