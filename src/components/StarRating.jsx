@@ -17,7 +17,7 @@ export default function StarRating({ rating, size = "w-4 h-4", interactive = fal
             disabled={!interactive}
             onClick={() => interactive && onChange(n)}
             className={interactive ? "cursor-pointer" : "cursor-default"}
-            aria-label={`${n} kati ya nyota 5`}
+            aria-label={`${n} out of 5 stars`}
           >
             <span
               className={`${size} rounded-full inline-block border-2 ${
