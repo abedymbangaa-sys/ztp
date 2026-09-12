@@ -483,6 +483,25 @@ export default function Home() {
         </Link>
       </section>
 
+      {/* Photo Spot Guide */}
+      <section className="max-w-6xl mx-auto px-4 pb-4">
+        <Link
+          to="/photo-spots"
+          className="flex flex-col sm:flex-row items-center justify-between gap-4 bg-gradient-to-r from-amber-500 to-orange-500 text-white rounded-2xl p-6 sm:p-8 hover:from-amber-600 hover:to-orange-600 transition"
+        >
+          <div>
+            <p className="text-amber-50 font-semibold text-sm uppercase tracking-wide">New</p>
+            <h2 className="text-xl sm:text-2xl font-bold">Best Instagram Spots in Zanzibar</h2>
+            <p className="text-amber-50 text-sm mt-1">
+              Exact locations, best time of day, and composition tips for the perfect shot.
+            </p>
+          </div>
+          <span className="flex-shrink-0 bg-white text-amber-600 font-bold px-5 py-2.5 rounded-full">
+            View Spots →
+          </span>
+        </Link>
+      </section>
+
       {/* Interactive map */}
       <section className="max-w-6xl mx-auto px-4 pb-16">
         <div className="mb-8">
