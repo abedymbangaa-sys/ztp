@@ -19,6 +19,7 @@ export default function VerificationManager({ open, onClose, listing, onSaved })
   const [publicNote, setPublicNote] = useState("");
   const [photoUrl, setPhotoUrl] = useState("");
   const [saving, setSaving] = useState(false);
+  const [errorMessage, setErrorMessage] = useState("");
 
   useEffect(() => {
     if (!listing) return;
@@ -42,6 +43,7 @@ export default function VerificationManager({ open, onClose, listing, onSaved })
 
   async function handleSave() {
     setSaving(true);
+    setErrorMessage("");
     const anyChecked = Object.values(checks).some(Boolean);
     const coreVerified = CORE_CHECK_KEYS.every((key) => checks[key]);
 
@@ -65,6 +67,7 @@ export default function VerificationManager({ open, onClose, listing, onSaved })
       onClose();
     } else {
       console.error("Could not save verification", error);
+      setErrorMessage(error.message || "Imeshindwa kusave. Jaribu tena.");
     }
   }
 
@@ -157,6 +160,12 @@ export default function VerificationManager({ open, onClose, listing, onSaved })
 
           {listing.last_verified_at && (
             <p className="text-xs text-slate-400">Last saved: {formatVerifiedDate(listing.last_verified_at)}</p>
+          )}
+
+          {errorMessage && (
+            <p className="text-sm text-red-600 bg-red-50 border border-red-200 rounded-lg px-3 py-2">
+              {errorMessage}
+            </p>
           )}
 
           <button
