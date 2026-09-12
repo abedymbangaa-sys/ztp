@@ -12,6 +12,8 @@ import { formatLocation } from "../lib/locations";
 import { useSavedList } from "../lib/SavedListContext";
 import { useCompareList } from "../lib/CompareContext";
 import ImageWithFallback from "./ImageWithFallback";
+import TravelersChoiceBadge from "./TravelersChoiceBadge";
+import { isTravelersChoice } from "../lib/travelersChoice";
 
 export default function GenericCard({ item, sectionKey, distanceKm }) {
   const { language } = useLanguage();
@@ -47,11 +49,16 @@ export default function GenericCard({ item, sectionKey, distanceKm }) {
               className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
               loading="lazy"
             />
-            {item.is_verified && (
-              <span className="absolute top-3 left-3 inline-flex items-center gap-1 bg-white/95 text-teal-700 text-xs font-semibold px-2.5 py-1 rounded-full shadow-sm">
-                <BadgeCheck className="w-3.5 h-3.5" />
-                {t("Verified")}
-              </span>
+            {(item.is_verified || isTravelersChoice(item)) && (
+              <div className="absolute top-3 left-3 flex flex-col items-start gap-1.5">
+                {isTravelersChoice(item) && <TravelersChoiceBadge size="sm" />}
+                {item.is_verified && (
+                  <span className="inline-flex items-center gap-1 bg-white/95 text-teal-700 text-xs font-semibold px-2.5 py-1 rounded-full shadow-sm">
+                    <BadgeCheck className="w-3.5 h-3.5" />
+                    {t("Verified")}
+                  </span>
+                )}
+              </div>
             )}
           </div>
         </Link>
