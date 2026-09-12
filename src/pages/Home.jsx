@@ -44,20 +44,20 @@ export default function Home() {
   const heroImageUrl = settingsLoading ? null : settings.hero_image_url || DEFAULT_HERO_IMAGE;
   const topHotels = hotels.slice(0, 6);
 
-  // The hero background rotates through a small set of real Zanzibar photos
-  // instead of sitting on one static image. The admin's uploaded hero image
-  // (or the default) always plays first, then a few curated shots from
-  // different categories follow - keeps this in sync with the actual site
-  // content instead of needing separate "hero slideshow" management.
-  const heroImages = heroImageUrl
-    ? [
-        heroImageUrl,
-        "/images/tours/dhow-sunset-cruise.jpeg",
-        "/images/heritage/stone-town.jpeg",
-        "/images/beaches/nungwi-beach.jpeg",
-        "/images/attractions/mnemba-atoll-marine-reserve.jpeg",
-      ]
-    : [];
+  // The hero background rotates through whatever photos the admin has
+  // uploaded in Admin Dashboard -> Homepage -> "Hero Rotation". If the admin
+  // hasn't set any rotation photos, we fall back to the single Hero Image
+  // (or the default) with no rotation at all - never hardcoded file paths,
+  // so a bad/mismatched photo is always something the admin can fix
+  // themselves without needing a code change.
+  let adminHeroImages = [];
+  try {
+    const parsed = settings.hero_images ? JSON.parse(settings.hero_images) : [];
+    if (Array.isArray(parsed)) adminHeroImages = parsed.filter(Boolean);
+  } catch {
+    adminHeroImages = [];
+  }
+  const heroImages = adminHeroImages.length > 0 ? adminHeroImages : heroImageUrl ? [heroImageUrl] : [];
   const [heroIndex, setHeroIndex] = useState(0);
   useEffect(() => {
     if (heroImages.length <= 1) return;
@@ -113,7 +113,7 @@ export default function Home() {
     <div>
       {/* Hero */}
       <section className="relative text-white overflow-hidden min-h-[640px] flex items-center bg-gradient-to-br from-teal-900 via-teal-800 to-slate-900">
-        {heroImageUrl &&
+        {!settingsLoading &&
           heroImages.map((src, i) => (
             <img
               key={src}
