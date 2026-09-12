@@ -44,7 +44,15 @@ export default function StoryMapPin({ pin, lang = "sw" }) {
   };
 
   return (
-    <Marker position={[pin.lat, pin.lng]} icon={storyIcon}>
+    <Marker
+      position={[pin.lat, pin.lng]}
+      icon={storyIcon}
+      eventHandlers={{
+        // Reading the story counts as "hearing" it too - the stamp
+        // shouldn't depend on a pin having audio/video uploaded.
+        popupopen: () => markStoryHeard(pin.id),
+      }}
+    >
       <Popup maxWidth={280} minWidth={240}>
         <div className="font-sans">
           <h3 className="font-bold text-teal-800 text-base mb-1">{pin.title}</h3>
@@ -96,11 +104,9 @@ export default function StoryMapPin({ pin, lang = "sw" }) {
             <p className="text-sm text-gray-700 mb-3">{storyText}</p>
           )}
 
-          {audioSrc && (
-            <p className="text-[10px] text-teal-700 mb-2">
-              🎖️ Listening earns your Local Connection Stamp
-            </p>
-          )}
+          <p className="text-[10px] text-teal-700 mb-2">
+            🎖️ You've earned your Local Connection Stamp — check your Passport
+          </p>
 
           {pin.local_secret && (
             <div className="bg-amber-50 border border-amber-200 rounded-md p-2 mb-2">
