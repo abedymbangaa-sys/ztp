@@ -2,7 +2,6 @@ import { useEffect, useState, Suspense, lazy } from "react";
 import { Link, useLocation } from "react-router-dom";
 import { useListings, useCategories, useSettings } from "../data/hooks";
 import GenericCard from "../components/GenericCard";
-import { SectionIcon } from "../lib/icons";
 import StatsCounter from "../components/StatsCounter";
 import WebsiteReviews from "../components/WebsiteReviews";
 import TravelerStories from "../components/TravelerStories";
@@ -22,6 +21,7 @@ import AdvertiseSection from "../components/AdvertiseSection";
 import AdvertiseFormModal from "../components/AdvertiseFormModal";
 import PaymentInstructions from "../components/PaymentInstructions";
 import { COLLECTIONS, filterListingsForCollection } from "../data/collections";
+import { getCategoryImage } from "../lib/categoryImages";
 
 const DEFAULT_HERO_IMAGE =
   "https://images.unsplash.com/photo-1559827260-dc66d52bef19?w=2400&q=85&auto=format&fit=crop";
@@ -347,25 +347,31 @@ export default function Home() {
         </div>
       </section>
 
-      {/* Explore all categories */}
+      {/* Explore by Category - visual grid (photo + label) so browsing by
+          interest is a one-glance, one-tap action, same pattern as the
+          area cards above. */}
       <section className="max-w-6xl mx-auto px-4 py-4 pb-16">
         <div className="mb-8">
           <p className="text-teal-700 font-semibold text-sm uppercase tracking-wide">Explore More</p>
-          <h2 className="text-2xl sm:text-3xl font-bold text-slate-900">Everything About Zanzibar</h2>
+          <h2 className="text-2xl sm:text-3xl font-bold text-slate-900">Explore by Category</h2>
         </div>
-        <div className="grid sm:grid-cols-2 md:grid-cols-3 gap-4">
+        <div className="grid grid-cols-2 md:grid-cols-3 gap-4">
           {categories.map((c) => (
             <Link
               key={c.key}
               to={`/${c.key}`}
-              className="flex items-center gap-4 bg-white border border-slate-200 rounded-2xl p-5 hover:shadow-lg hover:border-teal-300 transition"
+              className="group relative rounded-2xl overflow-hidden h-36 sm:h-44"
             >
-              <span className="flex items-center justify-center w-12 h-12 rounded-xl bg-teal-50 text-teal-700">
-                <SectionIcon sectionKey={c.key} className="w-6 h-6" />
-              </span>
-              <div>
-                <p className="font-bold text-slate-900">{c.title}</p>
-                <p className="text-xs text-slate-500">{c.tag}</p>
+              <img
+                src={getCategoryImage(c.key)}
+                alt={c.title}
+                loading="lazy"
+                className="absolute inset-0 w-full h-full object-cover group-hover:scale-105 transition duration-300"
+              />
+              <div className="absolute inset-0 bg-gradient-to-t from-black/75 via-black/15 to-transparent" />
+              <div className="absolute bottom-0 left-0 right-0 p-4">
+                <p className="text-white font-bold text-lg leading-tight">{c.title}</p>
+                <p className="text-white/80 text-xs">{c.tag}</p>
               </div>
             </Link>
           ))}
@@ -469,3 +475,4 @@ export default function Home() {
     </div>
   );
 }
+
