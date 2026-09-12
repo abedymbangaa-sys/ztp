@@ -53,7 +53,7 @@ export default function StoryMapPin({ pin, lang = "sw" }) {
         popupopen: () => markStoryHeard(pin.id),
       }}
     >
-      <Popup maxWidth={280} minWidth={240}>
+      <Popup maxWidth={280} minWidth={240} maxHeight={320} autoPan={true}>
         <div className="font-sans">
           <h3 className="font-bold text-teal-800 text-base mb-1">{pin.title}</h3>
 
@@ -104,10 +104,6 @@ export default function StoryMapPin({ pin, lang = "sw" }) {
             <p className="text-sm text-gray-700 mb-3">{storyText}</p>
           )}
 
-          <p className="text-[10px] text-teal-700 mb-2">
-            🎖️ You've earned your Local Connection Stamp — check your Passport
-          </p>
-
           {pin.local_secret && (
             <div className="bg-amber-50 border border-amber-200 rounded-md p-2 mb-2">
               <p className="text-xs font-semibold text-amber-800 mb-0.5">
@@ -137,6 +133,10 @@ export default function StoryMapPin({ pin, lang = "sw" }) {
               )}
             </div>
           )}
+
+          <p className="text-[10px] text-teal-700 mt-3 pt-2 border-t border-slate-100">
+            🎖️ You've earned your Local Connection Stamp — check your Passport
+          </p>
         </div>
       </Popup>
     </Marker>
