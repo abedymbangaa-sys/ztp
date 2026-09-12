@@ -44,6 +44,35 @@ export default function Home() {
   const heroImageUrl = settingsLoading ? null : settings.hero_image_url || DEFAULT_HERO_IMAGE;
   const topHotels = hotels.slice(0, 6);
 
+  // The hero background rotates through a small set of real Zanzibar photos
+  // instead of sitting on one static image. The admin's uploaded hero image
+  // (or the default) always plays first, then a few curated shots from
+  // different categories follow - keeps this in sync with the actual site
+  // content instead of needing separate "hero slideshow" management.
+  const heroImages = heroImageUrl
+    ? [
+        heroImageUrl,
+        "/images/tours/dhow-sunset-cruise.jpeg",
+        "/images/heritage/stone-town.jpeg",
+        "/images/beaches/nungwi-beach.jpeg",
+        "/images/attractions/mnemba-atoll-marine-reserve.jpeg",
+      ]
+    : [];
+  const [heroIndex, setHeroIndex] = useState(0);
+  useEffect(() => {
+    if (heroImages.length <= 1) return;
+    const id = setInterval(() => {
+      setHeroIndex((i) => (i + 1) % heroImages.length);
+    }, 6000);
+    return () => clearInterval(id);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [heroImages.length]);
+
+  // Quick filter chips under the hero search bar, so a first-time visitor
+  // can jump straight into a category with one tap instead of typing.
+  const HERO_QUICK_LINKS = ["hotels", "beaches", "tours", "restaurants"];
+  const heroQuickCategories = HERO_QUICK_LINKS.map((key) => categories.find((c) => c.key === key)).filter(Boolean);
+
   // Fixes a real polish issue: on slower connections, a plain <img> paints
   // progressively (visibly blocky/incomplete) while text is already
   // sitting on top of it. Rather than fade the <img> in immediately on
@@ -84,21 +113,23 @@ export default function Home() {
     <div>
       {/* Hero */}
       <section className="relative text-white overflow-hidden min-h-[640px] flex items-center bg-gradient-to-br from-teal-900 via-teal-800 to-slate-900">
-        {heroImageUrl && (
-          <img
-            src={heroImageUrl}
-            alt="Zanzibar coastline"
-            fetchpriority="high"
-            onLoad={() => setHeroLoaded(true)}
-            className={
-              "absolute inset-0 w-full h-full object-cover scale-105 transition-opacity duration-700 ease-out " +
-              (heroLoaded ? "opacity-100" : "opacity-0")
-            }
-            onError={(e) => {
-              e.target.style.display = "none";
-            }}
-          />
-        )}
+        {heroImageUrl &&
+          heroImages.map((src, i) => (
+            <img
+              key={src}
+              src={src}
+              alt="Zanzibar coastline"
+              fetchpriority={i === 0 ? "high" : undefined}
+              onLoad={() => i === 0 && setHeroLoaded(true)}
+              className={
+                "absolute inset-0 w-full h-full object-cover scale-105 transition-opacity duration-[1500ms] ease-in-out " +
+                (heroLoaded && i === heroIndex ? "opacity-100" : "opacity-0")
+              }
+              onError={(e) => {
+                e.target.style.display = "none";
+              }}
+            />
+          ))}
         <div className="absolute inset-0 bg-gradient-to-b from-slate-950/75 via-teal-950/45 to-slate-950/85" />
         <div className="absolute inset-x-0 bottom-0 h-40 bg-gradient-to-t from-slate-950/90 to-transparent" />
 
@@ -118,8 +149,22 @@ export default function Home() {
           <SearchAutocomplete
             listings={allApproved}
             placeholder={t("Where do you want to go in Zanzibar?")}
-            className="max-w-xl mx-auto mb-10"
+            className="max-w-xl mx-auto mb-4"
           />
+
+          {heroQuickCategories.length > 0 && (
+            <div className="flex flex-wrap items-center justify-center gap-2 mb-10">
+              {heroQuickCategories.map((c) => (
+                <Link
+                  key={c.key}
+                  to={`/${c.key}`}
+                  className="bg-white/10 hover:bg-white/20 border border-white/30 backdrop-blur-sm text-white text-sm font-medium px-4 py-1.5 rounded-full transition"
+                >
+                  {c.title}
+                </Link>
+              ))}
+            </div>
+          )}
 
           {/* CTA hierarchy: one primary action, one browsing path, one
               direct-help path — instead of 3-4 competing equal buttons,
@@ -475,4 +520,3 @@ export default function Home() {
     </div>
   );
 }
-
