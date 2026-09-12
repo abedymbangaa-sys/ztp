@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react";
-import { Star } from "lucide-react";
 import { supabase } from "../lib/supabase";
+import StarRating from "./StarRating";
 
 // A small rotating set of pleasant colors so avatars don't all look the same
 const AVATAR_COLORS = [
@@ -57,15 +57,8 @@ export default function WebsiteReviews() {
         <div className="flex items-center gap-3 bg-teal-50 border border-teal-100 rounded-2xl px-5 py-3">
           <span className="text-3xl font-extrabold text-teal-800">{avg}</span>
           <div>
-            <div className="flex gap-0.5">
-              {[1, 2, 3, 4, 5].map((n) => (
-                <Star
-                  key={n}
-                  className={`w-4 h-4 ${n <= Math.round(avg) ? "fill-amber-400 text-amber-400" : "text-slate-300"}`}
-                />
-              ))}
-            </div>
-            <p className="text-xs text-slate-500">{reviews.length} reviews</p>
+            <StarRating rating={parseFloat(avg)} size="w-4 h-4" />
+            <p className="text-xs text-slate-500 mt-1">{reviews.length} reviews</p>
           </div>
         </div>
       </div>
@@ -83,14 +76,7 @@ export default function WebsiteReviews() {
               </div>
               <div>
                 <p className="text-sm font-semibold text-slate-800">{r.name}</p>
-                <div className="flex gap-0.5">
-                  {[1, 2, 3, 4, 5].map((n) => (
-                    <Star
-                      key={n}
-                      className={`w-3.5 h-3.5 ${n <= r.rating ? "fill-amber-400 text-amber-400" : "text-slate-300"}`}
-                    />
-                  ))}
-                </div>
+                <StarRating rating={r.rating} size="w-3.5 h-3.5" />
               </div>
             </div>
             {r.comment && <p className="text-sm text-slate-600">{r.comment}</p>}
