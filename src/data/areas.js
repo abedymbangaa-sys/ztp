@@ -10,6 +10,7 @@ export const AREAS = [
       "Stone Town is Zanzibar's historic heart: narrow alleys, carved wooden doors, the old slave market, spice markets, and rooftop restaurants over the harbour. It's the best base for culture, food and day-trip boats to Prison Island.",
     heroImage: "/images/heritage/stone-town.jpeg",
     whoItSuits: "First-time visitors, culture and history lovers, foodies, short layovers before/after the beach.",
+    mustDos: ["Spice market walking tour", "House of Wonders museum", "Rooftop sunset dinner"],
     dayPlan: [
       "Morning: wander the alleys, visit the old Slave Market and House of Wonders",
       "Midday: spice market + lunch in a local café",
@@ -25,6 +26,7 @@ export const AREAS = [
       "The north coast around Nungwi and Kendwa has the island's calmest, most swimmable beaches at every tide, plus the liveliest sunset bars and dhow trips. It's the most popular first stop for beach holidays.",
     heroImage: "/images/beaches/nungwi-beach.jpeg",
     whoItSuits: "Beach lovers, honeymooners, groups who want swimmable water at any tide, sunset/nightlife seekers.",
+    mustDos: ["Sunset swim at Nungwi", "Dhow cruise at golden hour", "Kendwa beach bar hop"],
     dayPlan: [
       "Morning: swim (always swimmable, unlike the east coast at low tide)",
       "Midday: seafood lunch by the water",
@@ -40,6 +42,7 @@ export const AREAS = [
       "The east coast (Paje, Bwejuu, Jambiani, Michamvi) is quieter and more laid-back than the north, with wide white beaches, seaweed farms, and some of the best kite-surfing conditions in East Africa.",
     heroImage: "/images/beaches/paje-beach-kite-surfing-hub.jpeg",
     whoItSuits: "Kite-surfers, budget/backpacker travellers, couples wanting quiet villages over nightlife.",
+    mustDos: ["Kite-surfing lesson in Paje", "Seaweed farm walk", "Quiet beach-shack dinner"],
     dayPlan: [
       "Morning: check tide times — best swimming is at high tide",
       "Midday: kite-surfing lesson or lounge at a beach bar",
@@ -55,6 +58,7 @@ export const AREAS = [
       "The south of Zanzibar is home to Kizimkazi's dolphin tours, Jozani-Chwaka Bay National Park (home to the red colobus monkey), and a handful of low-key beach lodges away from the crowds.",
     heroImage: "/images/attractions/jozani-chwaka-bay-national-park.jpeg",
     whoItSuits: "Nature lovers, wildlife/dolphin-tour travellers, people wanting fewer crowds.",
+    mustDos: ["Kizimkazi dolphin tour", "Jozani red colobus monkeys", "Low-key lodge dinner"],
     dayPlan: [
       "Morning: dolphin tour at Kizimkazi (go early for calmer water and more sightings)",
       "Midday: lunch near the coast",
@@ -70,6 +74,7 @@ export const AREAS = [
       "Central Zanzibar is spice-farm country - the source of the island's nickname 'Spice Island' - along with forest reserves and cultural stops between Stone Town and the coasts.",
     heroImage: "/images/tours/kidichi-spice-farm-tour.jpeg",
     whoItSuits: "Day-trippers based in Stone Town or the coasts, culture and nature travellers, not an overnight base for most visitors.",
+    mustDos: ["Spice farm tour + tasting", "Forest reserve stop", "Local village visit"],
     dayPlan: [
       "Morning: spice farm tour with tastings",
       "Midday: local lunch on the farm or nearby",
@@ -85,6 +90,7 @@ export const AREAS = [
       "Pemba, north of Zanzibar's main island, is greener, quieter and far less visited - known for pristine diving reefs, clove plantations, and a slower pace than Unguja.",
     heroImage: "/images/nature/mangrove-forests.jpeg",
     whoItSuits: "Divers, travellers wanting an off-the-beaten-path escape, longer stays rather than day trips.",
+    mustDos: ["Dive the untouched reefs", "Clove plantation visit", "Slow, quiet beach time"],
     dayPlan: [
       "Morning: dive or snorkel trip on the reefs",
       "Midday: lunch at your lodge",
