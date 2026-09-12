@@ -168,7 +168,7 @@ export default function ReviewsSection({ listingId }) {
   const avgRating =
     reviews.length > 0 ? (reviews.reduce((sum, r) => sum + r.rating, 0) / reviews.length).toFixed(1) : null;
 
-  // Idadi ya reviews kwa kila nyota (5 -> 1), inayotumika kwenye bar za mgawanyo
+  // Count of reviews per star (5 -> 1), used for the distribution bars
   const distribution = [5, 4, 3, 2, 1].map((star) => ({
     star,
     count: reviews.filter((r) => Math.round(r.rating) === star).length,
@@ -176,19 +176,19 @@ export default function ReviewsSection({ listingId }) {
   const maxCount = Math.max(1, ...distribution.map((d) => d.count));
 
   function ratingWord(avg) {
-    if (avg >= 4.5) return "Bora Kabisa";
-    if (avg >= 4) return "Nzuri Sana";
-    if (avg >= 3) return "Wastani";
-    if (avg >= 2) return "Hafifu";
-    return "Mbaya";
+    if (avg >= 4.5) return "Excellent";
+    if (avg >= 4) return "Very Good";
+    if (avg >= 3) return "Average";
+    if (avg >= 2) return "Poor";
+    return "Terrible";
   }
 
   const STAR_LABELS = {
-    5: "Bora Kabisa",
-    4: "Nzuri",
-    3: "Wastani",
-    2: "Hafifu",
-    1: "Mbaya",
+    5: "Excellent",
+    4: "Good",
+    3: "Average",
+    2: "Poor",
+    1: "Terrible",
   };
   const STAR_BAR_COLOR = {
     5: "bg-teal-600",
@@ -208,7 +208,9 @@ export default function ReviewsSection({ listingId }) {
             <span className="text-4xl font-extrabold text-teal-700 leading-none">{avgRating}</span>
             <div>
               <p className="font-semibold text-slate-900">{ratingWord(avgRating)}</p>
-              <p className="text-xs text-slate-500">kutoka tathmini {reviews.length}</p>
+              <p className="text-xs text-slate-500">
+                from {reviews.length} review{reviews.length === 1 ? "" : "s"}
+              </p>
             </div>
           </div>
 
