@@ -119,6 +119,18 @@ export default function Area() {
       </section>
 
       <div className="max-w-5xl mx-auto px-4 py-10">
+        {config.mustDos?.length > 0 && (
+          <div className="flex flex-wrap gap-2 mb-6">
+            {config.mustDos.map((item) => (
+              <span
+                key={item}
+                className="bg-teal-50 text-teal-700 text-sm font-medium px-3 py-1.5 rounded-full"
+              >
+                {item}
+              </span>
+            ))}
+          </div>
+        )}
         <p className="text-slate-700 max-w-3xl leading-relaxed mb-6">{t(config.description)}</p>
 
         {/* Who it's for + a simple day plan - answers "does this area fit
