@@ -349,7 +349,7 @@ export function useListing(id) {
         .eq("id", id)
         .single()
     )
-      .then(({ data, error }) => {
+      .then(async ({ data, error }) => {
         if (!mounted) return;
         // PGRST116 = "no rows returned" from .single() - that's a genuine
         // "this listing doesn't exist", not a failure, so we treat it the
@@ -361,9 +361,26 @@ export function useListing(id) {
             setError(error);
             setListing(null);
           }
+        } else if (data) {
+          // Same rating/review-count summary as useListings, so the
+          // Travelers' Choice badge and any other trust signal work
+          // identically on the detail page as on the card.
+          try {
+            const { data: reviewRows } = await withTimeout(
+              supabase.from("reviews").select("rating").eq("status", "approved").eq("listing_id", data.id)
+            );
+            const rows = reviewRows || [];
+            const total = rows.reduce((sum, r) => sum + r.rating, 0);
+            data.review_avg = rows.length > 0 ? Number((total / rows.length).toFixed(1)) : null;
+            data.review_count = rows.length;
+          } catch (statsErr) {
+            if (import.meta.env.DEV) console.error("useListing: failed to load review stats", statsErr);
+          }
+          setCacheEntry(cacheKey, data);
+          setListing(data);
         } else {
-          setCacheEntry(cacheKey, data || null);
-          setListing(data || null);
+          setCacheEntry(cacheKey, null);
+          setListing(null);
         }
         setLoading(false);
       })
