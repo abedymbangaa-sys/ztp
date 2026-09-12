@@ -228,6 +228,11 @@ export default function FindLocalHost() {
           >
             Find My Host
           </button>
+          {!loading && hosts.length > 0 && (
+            <p className="text-center text-xs text-slate-400 mt-2">
+              {hosts.length} local host{hosts.length === 1 ? "" : "s"} ready to chat right now
+            </p>
+          )}
         </div>
       )}
 
@@ -260,14 +265,31 @@ export default function FindLocalHost() {
 
           {!loading && matches.length === 0 && (
             <div className="bg-white border border-slate-200 rounded-2xl p-6 text-center">
-              <p className="text-slate-700 font-semibold mb-1">No exact match yet</p>
-              <p className="text-slate-500 text-sm">
-                We're still growing our local host network. Try a different style, or{" "}
-                <a href="https://wa.me/255635442732" className="text-teal-700 font-semibold">
-                  chat with the Zanzibar Expert
-                </a>{" "}
-                instead.
-              </p>
+              {hosts.length === 0 ? (
+                <>
+                  <p className="text-slate-700 font-semibold mb-1">
+                    Our local host network is just getting started
+                  </p>
+                  <p className="text-slate-500 text-sm">
+                    Check back soon, or{" "}
+                    <a href="https://wa.me/255635442732" className="text-teal-700 font-semibold">
+                      chat with the Zanzibar Expert
+                    </a>{" "}
+                    right now instead.
+                  </p>
+                </>
+              ) : (
+                <>
+                  <p className="text-slate-700 font-semibold mb-1">No exact match yet</p>
+                  <p className="text-slate-500 text-sm">
+                    Try a different style, or{" "}
+                    <a href="https://wa.me/255635442732" className="text-teal-700 font-semibold">
+                      chat with the Zanzibar Expert
+                    </a>{" "}
+                    instead.
+                  </p>
+                </>
+              )}
             </div>
           )}
 
