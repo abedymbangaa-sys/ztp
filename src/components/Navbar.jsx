@@ -32,6 +32,9 @@ const MORE_LINKS = [
   { to: "/blog", label: "Blog" },
   { to: "/kwa-watanzania", label: "Kwa Watanzania" },
   { to: "/itinerary", label: "Itinerary" },
+  { to: "/find-host", label: "Find My Local Host" },
+  { to: "/photo-spots", label: "Photo Spot Guide" },
+  { to: "/sustainable", label: "Sustainable Zanzibar" },
   { to: "/#advertise", label: "Advertise" },
 ];
 
@@ -188,3 +191,4 @@ export default function Navbar() {
     </header>
   );
 }
+
