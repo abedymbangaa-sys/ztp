@@ -3,6 +3,7 @@ import { useNavigate } from "react-router-dom";
 import { supabase } from "../lib/supabase";
 import { SinglePhotoUploader, MultiPhotoUploader } from "../components/ImageUploader";
 import { TAG_OPTIONS } from "../lib/tags";
+import { MessageCircle, Phone, MapPin, HelpCircle, TrendingUp } from "lucide-react";
 
 const emptyForm = {
   category_key: "hotels",
@@ -22,11 +23,23 @@ const emptyForm = {
   area: "",
 };
 
+// Same allowlist as src/lib/analytics.js LEAD_EVENT_TYPES - kept as labels
+// here since the dashboard needs a friendly name + icon per type, not
+// just the raw event_type string.
+const LEAD_EVENT_META = {
+  click_send_enquiry: { label: "WhatsApp", icon: MessageCircle },
+  click_call_owner: { label: "Calls", icon: Phone },
+  click_get_directions: { label: "Directions", icon: MapPin },
+  click_ask_zanzibar_expert: { label: "Ask Expert", icon: HelpCircle },
+};
+
 export default function PartnerDashboard() {
   const navigate = useNavigate();
   const [partner, setPartner] = useState(null);
   const [categories, setCategories] = useState([]);
   const [listings, setListings] = useState([]);
+  const [leadEvents, setLeadEvents] = useState([]);
+  const [leadsLoading, setLeadsLoading] = useState(false);
   const [form, setForm] = useState(emptyForm);
   const [editingId, setEditingId] = useState(null);
   const [loading, setLoading] = useState(true);
@@ -58,13 +71,27 @@ export default function PartnerDashboard() {
       .eq("is_active", true);
     setCategories(catData || []);
 
+    let listingRows = [];
     if (partnerData) {
       const { data: listingData } = await supabase
         .from("listings")
         .select("*")
         .eq("partner_id", partnerData.id)
         .order("created_at", { ascending: false });
-      setListings(listingData || []);
+      listingRows = listingData || [];
+      setListings(listingRows);
+    }
+
+    if (listingRows.length > 0) {
+      setLeadsLoading(true);
+      const since = new Date(Date.now() - 30 * 24 * 60 * 60 * 1000).toISOString();
+      const { data: leadRows } = await supabase
+        .from("lead_events")
+        .select("listing_id, event_type")
+        .in("listing_id", listingRows.map((l) => l.id))
+        .gte("created_at", since);
+      setLeadEvents(leadRows || []);
+      setLeadsLoading(false);
     }
 
     setLoading(false);
@@ -154,6 +181,17 @@ export default function PartnerDashboard() {
 
   if (loading) return <div className="max-w-4xl mx-auto px-4 py-24 text-center">Loading...</div>;
 
+  // Per-listing and overall totals for the last 30 days, keyed by the
+  // same event_type strings trackEvent() writes to lead_events.
+  const leadsByListing = {};
+  let totalLeads = 0;
+  leadEvents.forEach((ev) => {
+    if (!leadsByListing[ev.listing_id]) leadsByListing[ev.listing_id] = {};
+    leadsByListing[ev.listing_id][ev.event_type] =
+      (leadsByListing[ev.listing_id][ev.event_type] || 0) + 1;
+    totalLeads += 1;
+  });
+
   return (
     <div className="max-w-4xl mx-auto px-4 py-12">
       <div className="flex items-center justify-between mb-8">
@@ -176,6 +214,64 @@ export default function PartnerDashboard() {
           Log Out
         </button>
       </div>
+
+      {/* Lead Insights - shows the partner real proof their listing is
+          working, using the same lead_events data the Admin Leads tab
+          reads. Only their own listings' events, enforced by the
+          "Partners can read their own lead events" RLS policy. */}
+      {listings.length > 0 && (
+        <div className="mb-10 bg-white border border-slate-200 rounded-2xl p-6">
+          <div className="flex items-center gap-2 mb-1">
+            <TrendingUp className="w-5 h-5 text-teal-700" />
+            <h2 className="font-bold text-lg">Lead Insights (last 30 days)</h2>
+          </div>
+          <p className="text-slate-500 text-sm mb-4">
+            How many travelers reached out through your listings.
+          </p>
+
+          {leadsLoading ? (
+            <p className="text-slate-500 text-sm">Loading...</p>
+          ) : totalLeads === 0 ? (
+            <p className="text-slate-500 text-sm">
+              No enquiries yet in the last 30 days. Add a price range and clear photos - listings
+              with both tend to get more WhatsApp messages.
+            </p>
+          ) : (
+            <>
+              <p className="text-3xl font-black text-slate-900 mb-4">
+                {totalLeads}{" "}
+                <span className="text-sm font-semibold text-slate-500">
+                  total {totalLeads === 1 ? "enquiry" : "enquiries"}
+                </span>
+              </p>
+              <div className="space-y-3">
+                {listings
+                  .filter((l) => leadsByListing[l.id])
+                  .map((l) => (
+                    <div key={l.id} className="border-t border-slate-100 pt-3 first:border-t-0 first:pt-0">
+                      <p className="font-semibold text-slate-800 text-sm mb-1.5">{l.title}</p>
+                      <div className="flex flex-wrap gap-3">
+                        {Object.entries(LEAD_EVENT_META).map(([eventType, meta]) => {
+                          const count = leadsByListing[l.id][eventType];
+                          if (!count) return null;
+                          const Icon = meta.icon;
+                          return (
+                            <span
+                              key={eventType}
+                              className="inline-flex items-center gap-1 text-xs font-semibold text-teal-700 bg-teal-50 px-2.5 py-1 rounded-full"
+                            >
+                              <Icon className="w-3.5 h-3.5" /> {count} {meta.label}
+                            </span>
+                          );
+                        })}
+                      </div>
+                    </div>
+                  ))}
+              </div>
+            </>
+          )}
+        </div>
+      )}
 
       {/* Existing listings */}
       <div className="mb-10">
