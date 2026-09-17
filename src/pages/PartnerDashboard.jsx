@@ -3,7 +3,7 @@ import { useNavigate } from "react-router-dom";
 import { supabase } from "../lib/supabase";
 import { SinglePhotoUploader, MultiPhotoUploader } from "../components/ImageUploader";
 import { TAG_OPTIONS } from "../lib/tags";
-import { MessageCircle, Phone, MapPin, HelpCircle, TrendingUp } from "lucide-react";
+import { MessageCircle, Phone, MapPin, HelpCircle, TrendingUp, Star, Copy, Check } from "lucide-react";
 
 const emptyForm = {
   category_key: "hotels",
@@ -44,6 +44,8 @@ export default function PartnerDashboard() {
   const [editingId, setEditingId] = useState(null);
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
+  const [reviewLinkOpenId, setReviewLinkOpenId] = useState(null);
+  const [copiedLinkId, setCopiedLinkId] = useState(null);
   const [message, setMessage] = useState("");
 
   useEffect(() => {
@@ -280,38 +282,93 @@ export default function PartnerDashboard() {
           <p className="text-slate-500 text-sm">You haven't added any listings yet.</p>
         ) : (
           <div className="space-y-3">
-            {listings.map((l) => (
-              <div key={l.id} className="flex flex-col sm:flex-row sm:items-center justify-between gap-2 bg-white border border-slate-200 rounded-xl p-4">
-                <div>
-                  <p className="font-semibold text-slate-900">{l.title}</p>
-                  <p className="text-xs text-slate-500">{l.category_key} · {l.location}</p>
-                  {!l.price_range && !l.duration && (
-                    <p className="text-xs text-amber-600 font-medium mt-0.5">
-                      Add price &amp; duration so travelers can see it →
-                    </p>
+            {listings.map((l) => {
+              const reviewUrl = `${window.location.origin}/review/${l.id}`;
+              return (
+                <div key={l.id} className="bg-white border border-slate-200 rounded-xl p-4">
+                  <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2">
+                    <div>
+                      <p className="font-semibold text-slate-900">{l.title}</p>
+                      <p className="text-xs text-slate-500">{l.category_key} · {l.location}</p>
+                      {!l.price_range && !l.duration && (
+                        <p className="text-xs text-amber-600 font-medium mt-0.5">
+                          Add price &amp; duration so travelers can see it →
+                        </p>
+                      )}
+                    </div>
+                    <span
+                      className={
+                        "text-xs font-semibold px-3 py-1 rounded-full " +
+                        (l.status === "approved"
+                          ? "bg-green-100 text-green-700"
+                          : l.status === "rejected"
+                          ? "bg-red-100 text-red-700"
+                          : "bg-amber-100 text-amber-700")
+                      }
+                    >
+                      {l.status === "approved" ? "Approved" : l.status === "rejected" ? "Rejected" : "Pending"}
+                    </span>
+                    <div className="flex gap-2">
+                      {l.status === "approved" && (
+                        <button
+                          type="button"
+                          onClick={() => setReviewLinkOpenId(reviewLinkOpenId === l.id ? null : l.id)}
+                          className="inline-flex items-center gap-1 text-xs font-semibold text-amber-700 border border-amber-300 hover:bg-amber-50 px-3 py-1 rounded-full transition"
+                        >
+                          <Star className="w-3.5 h-3.5" />
+                          Get Reviews
+                        </button>
+                      )}
+                      <button
+                        type="button"
+                        onClick={() => startEdit(l)}
+                        className="text-xs font-semibold text-teal-700 border border-teal-600 hover:bg-teal-50 px-3 py-1 rounded-full transition"
+                      >
+                        Edit
+                      </button>
+                    </div>
+                  </div>
+
+                  {reviewLinkOpenId === l.id && (
+                    <div className="mt-4 pt-4 border-t border-slate-100 flex flex-col sm:flex-row gap-4 items-start">
+                      <img
+                        src={`https://api.qrserver.com/v1/create-qr-code/?size=140x140&data=${encodeURIComponent(reviewUrl)}`}
+                        alt="QR code kwa review link"
+                        className="w-28 h-28 rounded-lg border border-slate-200 shrink-0"
+                      />
+                      <div className="flex-1 min-w-0">
+                        <p className="text-sm text-slate-700 mb-2">
+                          Mpe mgeni kiungo hiki (au uonyeshe QR code) baada ya ziara yake ili aache review kwa
+                          dakika moja tu - hata kupitia WhatsApp.
+                        </p>
+                        <div className="flex items-center gap-2 bg-slate-50 border border-slate-200 rounded-lg px-3 py-2">
+                          <span className="text-xs text-slate-600 truncate flex-1">{reviewUrl}</span>
+                          <button
+                            type="button"
+                            onClick={() => {
+                              navigator.clipboard.writeText(reviewUrl);
+                              setCopiedLinkId(l.id);
+                              setTimeout(() => setCopiedLinkId(null), 2000);
+                            }}
+                            className="inline-flex items-center gap-1 text-xs font-semibold text-teal-700 shrink-0"
+                          >
+                            {copiedLinkId === l.id ? (
+                              <>
+                                <Check className="w-3.5 h-3.5" /> Copied
+                              </>
+                            ) : (
+                              <>
+                                <Copy className="w-3.5 h-3.5" /> Copy
+                              </>
+                            )}
+                          </button>
+                        </div>
+                      </div>
+                    </div>
                   )}
                 </div>
-                <span
-                  className={
-                    "text-xs font-semibold px-3 py-1 rounded-full " +
-                    (l.status === "approved"
-                      ? "bg-green-100 text-green-700"
-                      : l.status === "rejected"
-                      ? "bg-red-100 text-red-700"
-                      : "bg-amber-100 text-amber-700")
-                  }
-                >
-                  {l.status === "approved" ? "Approved" : l.status === "rejected" ? "Rejected" : "Pending"}
-                </span>
-                <button
-                  type="button"
-                  onClick={() => startEdit(l)}
-                  className="text-xs font-semibold text-teal-700 border border-teal-600 hover:bg-teal-50 px-3 py-1 rounded-full transition"
-                >
-                  Edit
-                </button>
-              </div>
-            ))}
+              );
+            })}
           </div>
         )}
       </div>
