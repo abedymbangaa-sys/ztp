@@ -4,6 +4,8 @@ import StarRating from "./StarRating";
 import { Camera, Loader2, X, BadgeCheck, ThumbsUp, Flag, Building2 } from "lucide-react";
 import { getVoterToken, hasVoted, markVoted } from "../lib/reviewInteractions";
 
+const TRIP_TYPES = ["Solo", "Couples", "Family", "Friends", "Business"];
+
 const REPORT_REASONS = [
   { key: "spam", label: "Spam or advertising" },
   { key: "fake", label: "Looks fake or not a real visit" },
@@ -78,7 +80,7 @@ function resizeAndCompress(file, maxDimension, quality) {
 export default function ReviewsSection({ listingId }) {
   const [reviews, setReviews] = useState([]);
   const [loading, setLoading] = useState(true);
-  const [form, setForm] = useState({ reviewer_name: "", rating: 5, comment: "" });
+  const [form, setForm] = useState({ reviewer_name: "", rating: 5, title: "", trip_type: "", comment: "" });
   const [photos, setPhotos] = useState([]); // array of { file, preview }
   const [processingPhoto, setProcessingPhoto] = useState(false);
   const [photoError, setPhotoError] = useState("");
@@ -205,6 +207,8 @@ export default function ReviewsSection({ listingId }) {
         listing_id: listingId,
         reviewer_name: form.reviewer_name,
         rating: form.rating,
+        title: form.title.trim() || null,
+        trip_type: form.trip_type || null,
         comment: form.comment,
         photo_urls: uploadedUrls,
         status: "pending",
@@ -212,7 +216,7 @@ export default function ReviewsSection({ listingId }) {
       if (error) throw error;
 
       setSubmitted(true);
-      setForm({ reviewer_name: "", rating: 5, comment: "" });
+      setForm({ reviewer_name: "", rating: 5, title: "", trip_type: "", comment: "" });
       setPhotos([]);
     } catch {
       setPhotoError("Something went wrong submitting your review. Please try again.");
@@ -326,8 +330,13 @@ export default function ReviewsSection({ listingId }) {
             {sortedReviews.map((r) => (
             <div key={r.id} className="bg-white border border-slate-200 rounded-xl p-4">
               <div className="flex items-center justify-between mb-1">
-                <div className="flex items-center gap-2">
+                <div className="flex items-center gap-2 flex-wrap">
                   <p className="font-semibold text-slate-900">{r.reviewer_name}</p>
+                  {r.trip_type && (
+                    <span className="text-[11px] font-medium text-slate-500 bg-slate-100 px-2 py-0.5 rounded-full">
+                      {r.trip_type}
+                    </span>
+                  )}
                   {r.verified_by_admin && (
                     <span
                       title="Confirmed by the Zanzibar Paradise Tours team"
@@ -339,6 +348,7 @@ export default function ReviewsSection({ listingId }) {
                 </div>
                 <StarRating rating={r.rating} />
               </div>
+              {r.title && <p className="font-semibold text-slate-800 text-sm mt-1">{r.title}</p>}
               {r.comment && <p className="text-slate-600 text-sm mt-2">{r.comment}</p>}
               {r.photo_urls?.length > 0 && (
                 <div className="flex gap-2 mt-3">
@@ -502,6 +512,34 @@ export default function ReviewsSection({ listingId }) {
                 onChange={(n) => setForm({ ...form, rating: n })}
               />
             </div>
+            <input
+              placeholder="Give your review a title (optional)"
+              value={form.title}
+              onChange={(e) => setForm({ ...form, title: e.target.value })}
+              className="w-full border border-slate-300 rounded-lg px-4 py-2.5"
+            />
+            <div>
+              <label className="block text-sm font-semibold text-slate-700 mb-1">
+                Trip type <span className="text-slate-400 font-normal">(optional)</span>
+              </label>
+              <div className="flex flex-wrap gap-2">
+                {TRIP_TYPES.map((tt) => (
+                  <button
+                    key={tt}
+                    type="button"
+                    onClick={() => setForm({ ...form, trip_type: form.trip_type === tt ? "" : tt })}
+                    className={
+                      "text-sm px-3 py-1.5 rounded-full border transition " +
+                      (form.trip_type === tt
+                        ? "bg-teal-700 text-white border-teal-700"
+                        : "bg-white text-slate-600 border-slate-300 hover:border-teal-400")
+                    }
+                  >
+                    {tt}
+                  </button>
+                ))}
+              </div>
+            </div>
             <textarea
               rows={3}
               placeholder="Your comment (optional)"
@@ -566,4 +604,5 @@ export default function ReviewsSection({ listingId }) {
     </div>
   );
 }
+
 
