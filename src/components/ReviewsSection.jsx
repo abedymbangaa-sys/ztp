@@ -1,7 +1,16 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useMemo } from "react";
 import { supabase } from "../lib/supabase";
 import StarRating from "./StarRating";
-import { Camera, Loader2, X, BadgeCheck } from "lucide-react";
+import { Camera, Loader2, X, BadgeCheck, ThumbsUp, Flag, Building2 } from "lucide-react";
+import { getVoterToken, hasVoted, markVoted } from "../lib/reviewInteractions";
+
+const REPORT_REASONS = [
+  { key: "spam", label: "Spam or advertising" },
+  { key: "fake", label: "Looks fake or not a real visit" },
+  { key: "offensive", label: "Offensive or inappropriate" },
+  { key: "off_topic", label: "Not about this listing" },
+  { key: "other", label: "Other" },
+];
 
 const MAX_PHOTOS = 3;
 const MAX_SIZE = 10 * 1024 * 1024; // 10MB, checked before compression
@@ -77,6 +86,15 @@ export default function ReviewsSection({ listingId }) {
   const [submitted, setSubmitted] = useState(false);
   const [lightboxUrl, setLightboxUrl] = useState(null);
 
+  const [sortBy, setSortBy] = useState("recent");
+  const [votingId, setVotingId] = useState(null);
+
+  const [reportTarget, setReportTarget] = useState(null); // review being reported, or null
+  const [reportReason, setReportReason] = useState("spam");
+  const [reportNote, setReportNote] = useState("");
+  const [reportSubmitting, setReportSubmitting] = useState(false);
+  const [reportSubmitted, setReportSubmitted] = useState(false);
+
   useEffect(() => {
     loadReviews();
   }, [listingId]);
@@ -91,6 +109,44 @@ export default function ReviewsSection({ listingId }) {
       .order("created_at", { ascending: false });
     setReviews(data || []);
     setLoading(false);
+  }
+
+  async function handleVote(review) {
+    if (hasVoted(review.id) || votingId) return;
+    setVotingId(review.id);
+    const token = getVoterToken();
+    const { data, error } = await supabase.rpc("vote_helpful", {
+      p_review_id: review.id,
+      p_voter_token: token,
+    });
+    if (!error) {
+      markVoted(review.id);
+      setReviews((prev) =>
+        prev.map((r) => (r.id === review.id ? { ...r, helpful_count: data ?? r.helpful_count + 1 } : r))
+      );
+    }
+    setVotingId(null);
+  }
+
+  async function handleReportSubmit(e) {
+    e.preventDefault();
+    setReportSubmitting(true);
+    const { error } = await supabase.from("review_reports").insert({
+      review_id: reportTarget.id,
+      reason: reportReason,
+      note: reportNote.trim() || null,
+    });
+    setReportSubmitting(false);
+    if (!error) {
+      setReportSubmitted(true);
+    }
+  }
+
+  function closeReportModal() {
+    setReportTarget(null);
+    setReportReason("spam");
+    setReportNote("");
+    setReportSubmitted(false);
   }
 
   async function handlePhotoChange(e) {
@@ -165,6 +221,21 @@ export default function ReviewsSection({ listingId }) {
     }
   }
 
+  const sortedReviews = useMemo(() => {
+    const copy = [...reviews];
+    switch (sortBy) {
+      case "helpful":
+        return copy.sort((a, b) => (b.helpful_count || 0) - (a.helpful_count || 0));
+      case "highest":
+        return copy.sort((a, b) => b.rating - a.rating);
+      case "lowest":
+        return copy.sort((a, b) => a.rating - b.rating);
+      case "recent":
+      default:
+        return copy.sort((a, b) => new Date(b.created_at) - new Date(a.created_at));
+    }
+  }, [reviews, sortBy]);
+
   const avgRating =
     reviews.length > 0 ? (reviews.reduce((sum, r) => sum + r.rating, 0) / reviews.length).toFixed(1) : null;
 
@@ -236,8 +307,23 @@ export default function ReviewsSection({ listingId }) {
       ) : reviews.length === 0 ? (
         <p className="text-slate-500 text-sm mb-8">No reviews yet - be the first to leave one!</p>
       ) : (
-        <div className="space-y-4 mb-10">
-          {reviews.map((r) => (
+        <div className="mb-10">
+          {reviews.length > 1 && (
+            <div className="flex justify-end mb-3">
+              <select
+                value={sortBy}
+                onChange={(e) => setSortBy(e.target.value)}
+                className="text-sm border border-slate-300 rounded-lg px-3 py-1.5 text-slate-600"
+              >
+                <option value="recent">Most recent</option>
+                <option value="helpful">Most helpful</option>
+                <option value="highest">Highest rated</option>
+                <option value="lowest">Lowest rated</option>
+              </select>
+            </div>
+          )}
+          <div className="space-y-4">
+            {sortedReviews.map((r) => (
             <div key={r.id} className="bg-white border border-slate-200 rounded-xl p-4">
               <div className="flex items-center justify-between mb-1">
                 <div className="flex items-center gap-2">
@@ -268,8 +354,43 @@ export default function ReviewsSection({ listingId }) {
                   ))}
                 </div>
               )}
+
+              {r.owner_response && (
+                <div className="mt-3 bg-slate-50 border border-slate-200 rounded-lg p-3">
+                  <p className="flex items-center gap-1.5 text-xs font-semibold text-slate-700 mb-1">
+                    <Building2 className="w-3.5 h-3.5" /> Response from management
+                  </p>
+                  <p className="text-sm text-slate-600">{r.owner_response}</p>
+                </div>
+              )}
+
+              <div className="flex items-center gap-4 mt-3 pt-3 border-t border-slate-100">
+                <button
+                  type="button"
+                  onClick={() => handleVote(r)}
+                  disabled={hasVoted(r.id) || votingId === r.id}
+                  className={
+                    "flex items-center gap-1.5 text-xs font-semibold transition " +
+                    (hasVoted(r.id)
+                      ? "text-teal-700 cursor-default"
+                      : "text-slate-500 hover:text-teal-700 disabled:opacity-50")
+                  }
+                >
+                  <ThumbsUp className="w-3.5 h-3.5" />
+                  Helpful{r.helpful_count > 0 ? ` (${r.helpful_count})` : ""}
+                </button>
+                <button
+                  type="button"
+                  onClick={() => setReportTarget(r)}
+                  className="flex items-center gap-1.5 text-xs font-semibold text-slate-400 hover:text-red-600 transition"
+                >
+                  <Flag className="w-3.5 h-3.5" />
+                  Report
+                </button>
+              </div>
             </div>
           ))}
+          </div>
         </div>
       )}
 
@@ -286,6 +407,74 @@ export default function ReviewsSection({ listingId }) {
             <X className="w-7 h-7" />
           </button>
           <img src={lightboxUrl} alt="Review photo" className="max-w-full max-h-full rounded-lg" />
+        </div>
+      )}
+
+      {reportTarget && (
+        <div
+          className="fixed inset-0 z-50 bg-black/50 flex items-center justify-center p-4"
+          onClick={closeReportModal}
+        >
+          <div
+            className="bg-white rounded-2xl p-6 max-w-sm w-full"
+            onClick={(e) => e.stopPropagation()}
+          >
+            {reportSubmitted ? (
+              <>
+                <p className="font-bold text-slate-900 mb-2">Thanks for letting us know</p>
+                <p className="text-sm text-slate-600 mb-4">
+                  Our team will take a look at this review.
+                </p>
+                <button
+                  onClick={closeReportModal}
+                  className="w-full bg-slate-100 hover:bg-slate-200 text-slate-700 font-semibold py-2.5 rounded-full"
+                >
+                  Close
+                </button>
+              </>
+            ) : (
+              <form onSubmit={handleReportSubmit}>
+                <p className="font-bold text-slate-900 mb-3">Report this review</p>
+                <div className="space-y-2 mb-3">
+                  {REPORT_REASONS.map((r) => (
+                    <label key={r.key} className="flex items-center gap-2 text-sm text-slate-700">
+                      <input
+                        type="radio"
+                        name="report_reason"
+                        value={r.key}
+                        checked={reportReason === r.key}
+                        onChange={() => setReportReason(r.key)}
+                      />
+                      {r.label}
+                    </label>
+                  ))}
+                </div>
+                <textarea
+                  rows={2}
+                  placeholder="Additional details (optional)"
+                  value={reportNote}
+                  onChange={(e) => setReportNote(e.target.value)}
+                  className="w-full border border-slate-300 rounded-lg px-3 py-2 text-sm mb-4"
+                />
+                <div className="flex gap-2">
+                  <button
+                    type="submit"
+                    disabled={reportSubmitting}
+                    className="flex-1 bg-red-600 hover:bg-red-700 transition text-white font-semibold py-2.5 rounded-full disabled:opacity-50"
+                  >
+                    {reportSubmitting ? "Sending..." : "Submit Report"}
+                  </button>
+                  <button
+                    type="button"
+                    onClick={closeReportModal}
+                    className="flex-1 bg-slate-100 hover:bg-slate-200 text-slate-700 font-semibold py-2.5 rounded-full"
+                  >
+                    Cancel
+                  </button>
+                </div>
+              </form>
+            )}
+          </div>
         </div>
       )}
 
@@ -358,6 +547,11 @@ export default function ReviewsSection({ listingId }) {
               </div>
               {photoError && <p className="text-xs text-red-600 mt-1">{photoError}</p>}
             </div>
+
+            <p className="text-xs text-slate-400">
+              Please base your review on a real, first-hand visit. Reviews are checked before
+              they're published.
+            </p>
 
             <button
               type="submit"
