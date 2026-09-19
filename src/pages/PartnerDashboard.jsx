@@ -3,7 +3,8 @@ import { useNavigate } from "react-router-dom";
 import { supabase } from "../lib/supabase";
 import { SinglePhotoUploader, MultiPhotoUploader } from "../components/ImageUploader";
 import { TAG_OPTIONS } from "../lib/tags";
-import { MessageCircle, Phone, MapPin, HelpCircle, TrendingUp, Star, Copy, Check } from "lucide-react";
+import { MessageCircle, Phone, MapPin, HelpCircle, TrendingUp, Star, Copy, Check, MessageSquare } from "lucide-react";
+import StarRating from "../components/StarRating";
 
 const emptyForm = {
   category_key: "hotels",
@@ -40,6 +41,12 @@ export default function PartnerDashboard() {
   const [listings, setListings] = useState([]);
   const [leadEvents, setLeadEvents] = useState([]);
   const [leadsLoading, setLeadsLoading] = useState(false);
+  const [reviews, setReviews] = useState([]);
+  const [reviewsLoading, setReviewsLoading] = useState(false);
+  const [respondingId, setRespondingId] = useState(null);
+  const [responseText, setResponseText] = useState("");
+  const [respondSaving, setRespondSaving] = useState(false);
+  const [respondError, setRespondError] = useState("");
   const [form, setForm] = useState(emptyForm);
   const [editingId, setEditingId] = useState(null);
   const [loading, setLoading] = useState(true);
@@ -94,9 +101,46 @@ export default function PartnerDashboard() {
         .gte("created_at", since);
       setLeadEvents(leadRows || []);
       setLeadsLoading(false);
+
+      setReviewsLoading(true);
+      const { data: reviewRows } = await supabase
+        .from("reviews")
+        .select("*")
+        .in("listing_id", listingRows.map((l) => l.id))
+        .eq("status", "approved")
+        .order("created_at", { ascending: false });
+      setReviews(reviewRows || []);
+      setReviewsLoading(false);
     }
 
     setLoading(false);
+  }
+
+  function startRespond(reviewId, existingResponse) {
+    setRespondingId(reviewId);
+    setResponseText(existingResponse || "");
+    setRespondError("");
+  }
+
+  async function submitResponse(reviewId) {
+    setRespondSaving(true);
+    setRespondError("");
+    const { error } = await supabase.rpc("submit_owner_response", {
+      p_review_id: reviewId,
+      p_response: responseText.trim(),
+    });
+    setRespondSaving(false);
+    if (error) {
+      setRespondError(error.message);
+      return;
+    }
+    setReviews((prev) =>
+      prev.map((r) =>
+        r.id === reviewId ? { ...r, owner_response: responseText.trim(), owner_response_at: new Date().toISOString() } : r
+      )
+    );
+    setRespondingId(null);
+    setResponseText("");
   }
 
   async function handleSubmit(e) {
@@ -271,6 +315,96 @@ export default function PartnerDashboard() {
                   ))}
               </div>
             </>
+          )}
+        </div>
+      )}
+
+      {/* Guest Reviews - lets the partner respond to approved reviews on
+          their own listings via submit_owner_response() (a SECURITY
+          DEFINER function), which is what actually stops them from being
+          able to edit the traveler's rating or text - a plain RLS UPDATE
+          grant on reviews couldn't restrict that at the column level. */}
+      {listings.length > 0 && (
+        <div className="mb-10 bg-white border border-slate-200 rounded-2xl p-6">
+          <div className="flex items-center gap-2 mb-1">
+            <MessageSquare className="w-5 h-5 text-teal-700" />
+            <h2 className="font-bold text-lg">Guest Reviews</h2>
+          </div>
+          <p className="text-slate-500 text-sm mb-4">
+            Respond to reviews on your listings. Your reply is public and can't change the
+            guest's rating or text.
+          </p>
+
+          {reviewsLoading ? (
+            <p className="text-slate-500 text-sm">Loading...</p>
+          ) : reviews.length === 0 ? (
+            <p className="text-slate-500 text-sm">No published reviews yet.</p>
+          ) : (
+            <div className="space-y-4">
+              {reviews.map((r) => {
+                const listing = listings.find((l) => l.id === r.listing_id);
+                return (
+                  <div key={r.id} className="border-t border-slate-100 pt-4 first:border-t-0 first:pt-0">
+                    <div className="flex items-center justify-between mb-1">
+                      <p className="text-xs text-slate-400">{listing?.title}</p>
+                      <StarRating rating={r.rating} />
+                    </div>
+                    <p className="font-semibold text-slate-800 text-sm">{r.reviewer_name}</p>
+                    {r.comment && <p className="text-slate-600 text-sm mt-1">{r.comment}</p>}
+
+                    {r.owner_response && respondingId !== r.id && (
+                      <div className="mt-2 bg-slate-50 border border-slate-200 rounded-lg p-3">
+                        <p className="text-xs font-semibold text-slate-700 mb-1">Your response</p>
+                        <p className="text-sm text-slate-600">{r.owner_response}</p>
+                        <button
+                          onClick={() => startRespond(r.id, r.owner_response)}
+                          className="text-xs font-semibold text-teal-700 hover:underline mt-2"
+                        >
+                          Edit response
+                        </button>
+                      </div>
+                    )}
+
+                    {respondingId === r.id ? (
+                      <div className="mt-2">
+                        <textarea
+                          rows={2}
+                          value={responseText}
+                          onChange={(e) => setResponseText(e.target.value)}
+                          placeholder="Thank the guest or address their feedback..."
+                          className="w-full border border-slate-300 rounded-lg px-3 py-2 text-sm"
+                        />
+                        {respondError && <p className="text-xs text-red-600 mt-1">{respondError}</p>}
+                        <div className="flex gap-2 mt-2">
+                          <button
+                            onClick={() => submitResponse(r.id)}
+                            disabled={respondSaving || !responseText.trim()}
+                            className="text-xs font-semibold bg-teal-700 hover:bg-teal-800 text-white px-3 py-1.5 rounded-full disabled:opacity-50"
+                          >
+                            {respondSaving ? "Saving..." : "Post Response"}
+                          </button>
+                          <button
+                            onClick={() => setRespondingId(null)}
+                            className="text-xs font-semibold text-slate-500 px-3 py-1.5"
+                          >
+                            Cancel
+                          </button>
+                        </div>
+                      </div>
+                    ) : (
+                      !r.owner_response && (
+                        <button
+                          onClick={() => startRespond(r.id, null)}
+                          className="text-xs font-semibold text-teal-700 hover:underline mt-2"
+                        >
+                          Respond
+                        </button>
+                      )
+                    )}
+                  </div>
+                );
+              })}
+            </div>
           )}
         </div>
       )}
