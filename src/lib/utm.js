@@ -53,3 +53,27 @@ export function getStoredUTM() {
     return {};
   }
 }
+
+// The other half of the attribution loop: captureUTMOnce()/getStoredUTM()
+// above only work if a link actually HAS utm_* params on it in the first
+// place. This generates ready-made, consistently-tagged links for the
+// channels partners actually share to, so a listing link pasted into an
+// Instagram bio or WhatsApp Status always carries the right tags instead
+// of relying on someone typing "?utm_source=..." by hand every time.
+export function buildShareLinks(listingUrl, listingId) {
+  const campaign = `listing_${listingId}`;
+  const withUtm = (source, medium) => {
+    const url = new URL(listingUrl);
+    url.searchParams.set("utm_source", source);
+    url.searchParams.set("utm_medium", medium);
+    url.searchParams.set("utm_campaign", campaign);
+    return url.toString();
+  };
+
+  return [
+    { label: "Instagram Bio / Story", url: withUtm("instagram", "bio") },
+    { label: "WhatsApp Status / DM", url: withUtm("whatsapp", "status") },
+    { label: "Facebook Page", url: withUtm("facebook", "post") },
+    { label: "TikTok Bio", url: withUtm("tiktok", "bio") },
+  ];
+}
