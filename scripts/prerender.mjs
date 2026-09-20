@@ -173,7 +173,7 @@ async function main() {
   }
 
   let generated = 0;
-  const sitemapRoutes = ["/", "/things-to-do", "/kwa-watanzania", "/find-host"];
+  const sitemapRoutes = ["/", "/things-to-do", "/kwa-watanzania", "/find-host", "/photo-spots", "/sustainable"];
 
   for (const cat of categories) {
     const catListings = listings.filter((l) => l.category_key === cat.key);
