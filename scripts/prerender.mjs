@@ -148,6 +148,30 @@ async function main() {
     console.warn("[prerender] Could not load listings, skipping listing pages:", err.message);
   }
 
+  // Rating stats per listing, from approved reviews - used to add
+  // aggregateRating (and a couple of sample reviews) to each listing's
+  // Schema.org markup, which is what lets Google show star ratings
+  // directly in search results instead of a plain text link.
+  const reviewStatsByListing = {};
+  const sampleReviewsByListing = {};
+  try {
+    const { data: reviewRows, error } = await supabase
+      .from("reviews")
+      .select("listing_id, rating, title, comment, reviewer_name, created_at")
+      .eq("status", "approved")
+      .order("created_at", { ascending: false });
+    if (error) throw new Error(error.message);
+    (reviewRows || []).forEach((r) => {
+      const s = (reviewStatsByListing[r.listing_id] ||= { total: 0, count: 0 });
+      s.total += r.rating;
+      s.count += 1;
+      const samples = (sampleReviewsByListing[r.listing_id] ||= []);
+      if (samples.length < 3) samples.push(r);
+    });
+  } catch (err) {
+    console.warn("[prerender] Could not load review stats, skipping aggregateRating:", err.message);
+  }
+
   let generated = 0;
   const sitemapRoutes = ["/", "/things-to-do", "/kwa-watanzania", "/find-host"];
 
@@ -180,6 +204,8 @@ async function main() {
         const pageUrl = `${SITE_URL}/${cat.key}/${l.id}`;
         const schemaType =
           cat.key === "hotels" ? "LodgingBusiness" : cat.key === "restaurants" ? "Restaurant" : "TouristAttraction";
+        const stats = reviewStatsByListing[l.id];
+        const samples = sampleReviewsByListing[l.id] || [];
         writeStaticPage(template, `/${cat.key}/${l.id}`, {
           title: `${l.title} | ${cat.title || cat.key} | Zanzibar Paradise Tours`,
           description: (l.description || "").slice(0, 155),
@@ -196,6 +222,26 @@ async function main() {
             image: absoluteUrl(l.image_url),
             url: pageUrl,
             address: l.location || undefined,
+            // Google only renders star-rating rich snippets when both
+            // aggregateRating and at least one real review are present -
+            // a bare rating number alone is usually not enough.
+            aggregateRating: stats
+              ? {
+                  "@type": "AggregateRating",
+                  ratingValue: Number((stats.total / stats.count).toFixed(1)),
+                  reviewCount: stats.count,
+                }
+              : undefined,
+            review:
+              samples.length > 0
+                ? samples.map((r) => ({
+                    "@type": "Review",
+                    reviewRating: { "@type": "Rating", ratingValue: r.rating },
+                    author: { "@type": "Person", name: r.reviewer_name || "Guest" },
+                    reviewBody: (r.title ? `${r.title}. ` : "") + (r.comment || ""),
+                    datePublished: r.created_at ? r.created_at.slice(0, 10) : undefined,
+                  }))
+                : undefined,
           },
           preload: {
             type: "listing",
