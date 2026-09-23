@@ -6,7 +6,7 @@ import { AREAS } from "../data/areas";
 import { buildItineraryConfirmLink } from "../lib/whatsapp";
 import { trackEvent } from "../lib/analytics";
 import GenericCard from "../components/GenericCard";
-import { Compass, MapPin, Hotel as HotelIcon, RefreshCw, MessageCircle, Sparkles } from "lucide-react";
+import { Compass, MapPin, Hotel as HotelIcon, RefreshCw, MessageCircle, Sparkles, ChevronUp, ChevronDown, X } from "lucide-react";
 import { useT } from "../lib/i18n";
 
 const DAY_OPTIONS = [
@@ -130,6 +130,28 @@ function buildItinerary(listings, days, travelerType, budgetTier) {
   return { hotels: hotels.slice(0, 3), dayPlans: dayPlans.filter((d) => d.length > 0) };
 }
 
+// A short "why this" line per item - built only from the same
+// interests/traveler-type/budget signals already used to pick it, never
+// invented. Keeps it to at most two reasons so it reads as a tag, not a
+// paragraph.
+function explainPick(item, { interests, travelerType, budgetTier }) {
+  const reasons = [];
+  const matchedInterest = INTERESTS.find(
+    (i) => interests.includes(i.key) && i.categories.includes(item.category_key)
+  );
+  if (matchedInterest) reasons.push(matchedInterest.label);
+  if (travelerType?.goodFor?.some((k) => (item.good_for || []).includes(k))) {
+    reasons.push(`Good for ${travelerType.label.toLowerCase()}`);
+  }
+  if (budgetTier?.tags?.some((t) => (item.tags || []).includes(t))) {
+    reasons.push(budgetTier.label);
+  }
+  if (reasons.length === 0 && item.category_key === "hotels") {
+    reasons.push("Matches your stay");
+  }
+  return reasons.slice(0, 2).join(" · ");
+}
+
 export default function TripBuilder() {
   const t = useT();
   const [step, setStep] = useState("form"); // "form" | "results"
@@ -144,6 +166,11 @@ export default function TripBuilder() {
   const [error, setError] = useState(null);
   const [result, setResult] = useState(null);
   const [moodKey, setMoodKey] = useState("");
+  // A separate, mutable copy of result.dayPlans - the person can reorder
+  // or remove items from here without touching `result` itself, which
+  // stays as the original generated plan.
+  const [dayPlans, setDayPlans] = useState([]);
+  const [lastSignals, setLastSignals] = useState({ interests: [], travelerType: null, budgetTier: null });
 
   useSEO({
     title: "Build My Zanzibar Trip — Free Itinerary Builder | Zanzibar Paradise Tours",
@@ -191,6 +218,8 @@ export default function TripBuilder() {
       const budgetTier = BUDGET_TIERS.find((b) => b.key === effectiveBudgetTierKey);
       const plan = buildItinerary(combined, days, travelerType, budgetTier);
       setResult(plan);
+      setDayPlans(plan.dayPlans.map((day) => [...day]));
+      setLastSignals({ interests, travelerType, budgetTier });
       setStep("results");
       trackEvent("trip_builder_generated", {
         days,
@@ -222,11 +251,30 @@ export default function TripBuilder() {
     });
   }
 
+  function moveItem(dayIndex, itemIndex, direction) {
+    setDayPlans((prev) => {
+      const next = prev.map((day) => [...day]);
+      const day = next[dayIndex];
+      const swapWith = itemIndex + direction;
+      if (swapWith < 0 || swapWith >= day.length) return prev;
+      [day[itemIndex], day[swapWith]] = [day[swapWith], day[itemIndex]];
+      return next;
+    });
+  }
+
+  function removeItem(dayIndex, itemIndex) {
+    setDayPlans((prev) => {
+      const next = prev.map((day) => [...day]);
+      next[dayIndex].splice(itemIndex, 1);
+      return next;
+    });
+  }
+
   function handleConfirmWithExpert() {
     if (!result) return;
     const allListingTitles = [
       ...result.hotels.map((h) => h.title),
-      ...result.dayPlans.flat().map((a) => a.title),
+      ...dayPlans.flat().map((a) => a.title),
     ];
     trackEvent("trip_builder_confirm_expert", {});
     const link = buildItineraryConfirmLink({
@@ -242,6 +290,7 @@ export default function TripBuilder() {
 
   const areaName = area ? AREAS.find((a) => a.key === area)?.name : "Anywhere in Zanzibar";
   const hasEnoughActivities = result && result.dayPlans.length > 0;
+  const totalRemainingActivities = dayPlans.reduce((sum, day) => sum + day.length, 0);
 
   return (
     <div className="max-w-3xl mx-auto px-4 py-10">
@@ -464,9 +513,19 @@ export default function TripBuilder() {
                 <HotelIcon className="w-5 h-5 text-teal-700" /> Where to Stay
               </h2>
               <div className="grid sm:grid-cols-2 gap-4">
-                {result.hotels.map((h) => (
-                  <GenericCard key={h.id} item={h} sectionKey="hotels" />
-                ))}
+                {result.hotels.map((h) => {
+                  const reason = explainPick(h, lastSignals);
+                  return (
+                    <div key={h.id}>
+                      {reason && (
+                        <p className="text-xs font-semibold text-teal-700 bg-teal-50 inline-block px-2.5 py-1 rounded-full mb-1.5">
+                          {reason}
+                        </p>
+                      )}
+                      <GenericCard item={h} sectionKey="hotels" />
+                    </div>
+                  );
+                })}
               </div>
             </div>
           )}
@@ -481,17 +540,65 @@ export default function TripBuilder() {
                 they know options that may not be listed yet.
               </p>
             </div>
+          ) : totalRemainingActivities === 0 ? (
+            <div className="bg-slate-50 border border-slate-200 rounded-2xl p-6 text-center mb-10">
+              <p className="text-slate-700 font-medium">You've removed everything from the plan.</p>
+              <p className="text-sm text-slate-500 mt-1">
+                Hit <RefreshCw className="w-3.5 h-3.5 inline" /> Edit above to start over, or confirm with the
+                expert below using just your hotel picks.
+              </p>
+            </div>
           ) : (
-            result.dayPlans.map((day, i) => (
-              <div key={i} className="mb-10">
-                <h2 className="text-lg font-bold text-slate-900 mb-3">Day {i + 1}</h2>
-                <div className="grid sm:grid-cols-2 gap-4">
-                  {day.map((item) => (
-                    <GenericCard key={item.id} item={item} sectionKey={item.category_key} />
-                  ))}
+            dayPlans.map((day, dayIndex) =>
+              day.length === 0 ? null : (
+                <div key={dayIndex} className="mb-10">
+                  <h2 className="text-lg font-bold text-slate-900 mb-3">Day {dayIndex + 1}</h2>
+                  <div className="grid sm:grid-cols-2 gap-4">
+                    {day.map((item, itemIndex) => {
+                      const reason = explainPick(item, lastSignals);
+                      return (
+                        <div key={item.id} className="relative">
+                          {reason && (
+                            <p className="text-xs font-semibold text-teal-700 bg-teal-50 inline-block px-2.5 py-1 rounded-full mb-1.5">
+                              {reason}
+                            </p>
+                          )}
+                          <GenericCard item={item} sectionKey={item.category_key} />
+                          <div className="flex items-center gap-1 mt-1.5">
+                            <button
+                              type="button"
+                              onClick={() => moveItem(dayIndex, itemIndex, -1)}
+                              disabled={itemIndex === 0}
+                              title="Move earlier"
+                              className="p-1.5 rounded-full border border-slate-200 text-slate-500 hover:border-teal-400 hover:text-teal-700 disabled:opacity-30"
+                            >
+                              <ChevronUp className="w-3.5 h-3.5" />
+                            </button>
+                            <button
+                              type="button"
+                              onClick={() => moveItem(dayIndex, itemIndex, 1)}
+                              disabled={itemIndex === day.length - 1}
+                              title="Move later"
+                              className="p-1.5 rounded-full border border-slate-200 text-slate-500 hover:border-teal-400 hover:text-teal-700 disabled:opacity-30"
+                            >
+                              <ChevronDown className="w-3.5 h-3.5" />
+                            </button>
+                            <button
+                              type="button"
+                              onClick={() => removeItem(dayIndex, itemIndex)}
+                              title="Remove from itinerary"
+                              className="p-1.5 rounded-full border border-slate-200 text-slate-500 hover:border-red-400 hover:text-red-600 ml-auto"
+                            >
+                              <X className="w-3.5 h-3.5" />
+                            </button>
+                          </div>
+                        </div>
+                      );
+                    })}
+                  </div>
                 </div>
-              </div>
-            ))
+              )
+            )
           )}
 
           <div className="bg-teal-50 border border-teal-200 rounded-2xl p-6 text-center">
@@ -515,3 +622,4 @@ export default function TripBuilder() {
     </div>
   );
 }
+
