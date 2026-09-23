@@ -313,9 +313,12 @@ export default function Home() {
           </Link>
         </div>
         <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-6">
-          {COLLECTIONS.slice(0, 3).map((c) => {
-            const count = filterListingsForCollection(allApproved, c.match).length;
-            return (
+          {COLLECTIONS.map((c) => ({ ...c, count: filterListingsForCollection(allApproved, c.match).length }))
+            .filter((c) => c.count > 0)
+            .slice(0, 3)
+            .map((c) => {
+              const count = c.count;
+              return (
               <Link
                 key={c.key}
                 to={`/collections/${c.key}`}
