@@ -29,6 +29,7 @@ export default function Collections() {
       <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-6">
         {COLLECTIONS.map((c) => {
           const count = filterListingsForCollection(listings, c.match).length;
+          if (count === 0) return null; // don't show a card that leads to an empty page
           return (
             <Link
               key={c.key}
