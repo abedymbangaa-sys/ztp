@@ -29,7 +29,10 @@ export default function Collections() {
       <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-6">
         {COLLECTIONS.map((c) => {
           const count = filterListingsForCollection(listings, c.match).length;
-          if (count === 0) return null; // don't show a card that leads to an empty page
+          // Don't advertise a collection with nothing in it yet - the
+          // route still works if someone has an old link, but there's no
+          // reason to invite a click into an empty page from here.
+          if (count === 0) return null;
           return (
             <Link
               key={c.key}
