@@ -41,7 +41,9 @@ export default function CollectionDetail() {
   }
 
   const matched = filterListingsForCollection(listings, config.match);
-  const otherCollections = COLLECTIONS.filter((c) => c.key !== collectionKey);
+  const otherCollections = COLLECTIONS.filter(
+    (c) => c.key !== collectionKey && filterListingsForCollection(listings, c.match).length > 0
+  );
 
   return (
     <div className="max-w-6xl mx-auto px-4 py-12">
