@@ -4,6 +4,8 @@ import { supabase } from "../lib/supabase";
 import { useSEO } from "../lib/useSEO";
 import { trackEvent } from "../lib/analytics";
 import { readPreload } from "../data/hooks";
+import { AREAS } from "../data/areas";
+import GenericCard from "../components/GenericCard";
 import { AlertTriangle, RefreshCw, MapPin, Hotel, Compass, BookOpenText } from "lucide-react";
 
 const SITE_URL = "https://visitzanzibarparadise.com";
@@ -14,6 +16,7 @@ export default function BlogPost() {
   const [post, setPost] = useState(preloaded || null);
   // "loading" | "ready" | "not_found" | "error"
   const [status, setStatus] = useState(preloaded ? "ready" : "loading");
+  const [areaListings, setAreaListings] = useState([]);
 
   const load = useCallback(() => {
     // Same slug this page was prerendered for - show that content
@@ -52,6 +55,32 @@ export default function BlogPost() {
   useEffect(() => {
     load();
   }, [load]);
+
+  // Pull a few real listings from the area this post is about, so readers
+  // researching (say) Stone Town history can click straight into a Stone
+  // Town hotel or tour instead of hitting a dead end at the end of the
+  // article. This is what was missing before - blog content had zero
+  // links into the directory itself.
+  useEffect(() => {
+    if (!post?.related_area) {
+      setAreaListings([]);
+      return;
+    }
+    let mounted = true;
+    supabase
+      .from("listings")
+      .select("*")
+      .eq("status", "approved")
+      .eq("area", post.related_area)
+      .order("created_at", { ascending: false })
+      .limit(4)
+      .then(({ data }) => {
+        if (mounted) setAreaListings(data || []);
+      });
+    return () => {
+      mounted = false;
+    };
+  }, [post?.related_area]);
 
   const canonical = `${SITE_URL}/blog/${slug}`;
   const description = post?.excerpt || (post?.content || "").slice(0, 155);
@@ -177,6 +206,20 @@ export default function BlogPost() {
         {restOfContent && (
           <div className="prose max-w-none text-slate-700 text-lg leading-relaxed whitespace-pre-wrap">
             {restOfContent}
+          </div>
+        )}
+
+        {areaListings.length > 0 && (
+          <div className="mt-12 pt-8 border-t border-slate-100">
+            <p className="text-sm font-semibold text-slate-500 uppercase tracking-wide mb-1">
+              {AREAS.find((a) => a.key === post.related_area)?.name || post.related_area}
+            </p>
+            <h2 className="text-xl font-bold text-slate-900 mb-5">Where to Stay & What to Do</h2>
+            <div className="grid sm:grid-cols-2 gap-4">
+              {areaListings.map((l) => (
+                <GenericCard key={l.id} item={l} sectionKey={l.category_key} />
+              ))}
+            </div>
           </div>
         )}
 
