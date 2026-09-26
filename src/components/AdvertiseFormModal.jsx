@@ -1,5 +1,6 @@
 import { useState } from "react";
 import { supabase } from "../lib/supabase";
+import { sendNotificationEmail } from "../lib/email";
 import { SinglePhotoUploader, MultiPhotoUploader } from "./ImageUploader";
 
 const CATEGORY_OPTIONS = [
@@ -51,6 +52,20 @@ export default function AdvertiseFormModal({ open, onClose, onSubmitted }) {
     if (insertError) {
       setError("Something went wrong: " + insertError.message);
       return;
+    }
+
+    // This form is someone actively trying to pay - the highest-priority
+    // notification on the whole site. Never let a failure here block their
+    // submission from going through.
+    try {
+      await sendNotificationEmail({
+        toEmail: "info@visitzanzibarparadise.com",
+        toName: "ZTP Team",
+        subject: `New Advertise Spotlight Request: "${form.business_name}"`,
+        message: `Someone wants to pay for the Advertise Spotlight!\n\nBusiness: ${form.business_name}\nCategory: ${form.category}\nWhatsApp: ${form.whatsapp_number}\nMaps link: ${form.maps_link || "N/A"}\n\nDescription:\n${form.description}\n\nApprove/follow up in Admin Dashboard -> Advertisements.`,
+      });
+    } catch (err) {
+      console.error("Could not send admin notification email", err);
     }
 
     onSubmitted(data);
