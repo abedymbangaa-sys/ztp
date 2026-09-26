@@ -556,7 +556,7 @@ async function main() {
     const sitemapXml = `<?xml version="1.0" encoding="UTF-8"?>\n<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">\n${urlEntries}\n</urlset>\n`;
     fs.writeFileSync(path.join(DIST_DIR, "sitemap.xml"), sitemapXml, "utf8");
 
-    const robotsTxt = `User-agent: *\nAllow: /\n\nSitemap: ${SITE_URL}/sitemap.xml\n`;
+    const robotsTxt = `User-agent: *\nAllow: /\nDisallow: /admin\nDisallow: /partner/dashboard\nDisallow: /partner/login\nDisallow: /partner/reset-password\n\nSitemap: ${SITE_URL}/sitemap.xml\n`;
     fs.writeFileSync(path.join(DIST_DIR, "robots.txt"), robotsTxt, "utf8");
 
     console.log(`[prerender] Wrote sitemap.xml with ${sitemapRoutes.length} URLs.`);
