@@ -124,6 +124,21 @@ export default function SectionDetail() {
       }
     }
 
+    // Also notify the ZTP team directly on every single inquiry, regardless
+    // of whether the listing has a registered partner - otherwise a lead
+    // could only ever be seen by opening Admin Dashboard, and there was no
+    // way to know one had come in at all.
+    try {
+      await sendNotificationEmail({
+        toEmail: "info@visitzanzibarparadise.com",
+        toName: "ZTP Team",
+        subject: `New Inquiry: "${item.title}"`,
+        message: `New inquiry on visitzanzibarparadise.com.\n\nListing: ${item.title} (${item.category_key})\nOwner on file: ${item.partners?.business_name || "No registered partner - admin-managed listing"}\n\nFrom: ${details.name || "N/A"}\nTravelers: ${details.travelers || "N/A"}\nBudget: ${details.budget || "N/A"}\nDates: ${details.dates || "N/A"}\nCurrent area: ${details.area || "N/A"}\nNotes: ${details.notes || "N/A"}\n\nCheck Admin Dashboard -> Inquiries for full details.`,
+      });
+    } catch (err) {
+      console.error("Could not send admin notification email", err);
+    }
+
     const targetNumber = hasOwnNumber ? ownerNumber : SITE_CONTACT_NUMBER;
     const link = buildRichInquiryLink(targetNumber, item.title, item.location, details, !hasOwnNumber);
     if (link) window.open(link, "_blank");
