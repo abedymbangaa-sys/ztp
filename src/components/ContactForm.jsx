@@ -1,6 +1,7 @@
 import { useState } from "react";
 import { supabase } from "../lib/supabase";
 import { getStoredUTM } from "../lib/utm";
+import { sendNotificationEmail } from "../lib/email";
 import { Loader2, CheckCircle2 } from "lucide-react";
 
 // General-purpose contact form (not tied to a specific hotel/listing).
@@ -32,6 +33,20 @@ export default function ContactForm() {
     if (error) {
       setStatus("error");
     } else {
+      // This form promises "we'll get back to you by email soon", but
+      // nothing was actually notifying anyone that a message had come in -
+      // it just sat in the inquiries table until someone happened to check
+      // Admin Dashboard. Never block the success message if this fails.
+      try {
+        await sendNotificationEmail({
+          toEmail: "info@visitzanzibarparadise.com",
+          toName: "ZTP Team",
+          subject: `New Contact Form Message from ${form.name.trim()}`,
+          message: `New message via the general contact form on visitzanzibarparadise.com.\n\nFrom: ${form.name.trim()} (${form.email.trim()})\n\nMessage:\n${form.message.trim()}\n\nReply directly to their email above.`,
+        });
+      } catch (err) {
+        console.error("Could not send admin notification email", err);
+      }
       setStatus("sent");
       setForm({ name: "", email: "", message: "" });
     }
