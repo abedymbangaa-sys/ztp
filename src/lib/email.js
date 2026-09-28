@@ -5,7 +5,7 @@ import emailjs from "@emailjs/browser";
 // 2. TEMPLATE_ID  - template ya ujumbe (ina {{to_name}}, {{message}}, n.k)
 // 3. PUBLIC_KEY   - key ya akaunti yako (Account -> API Keys)
 const SERVICE_ID = "service_gixuuwl";
-const TEMPLATE_ID = "template_die5sbt";
+const TEMPLATE_ID = "template_nhezsig";
 const PUBLIC_KEY = "VUeOBAU6sQajONrXz";
 
 const isConfigured = () =>
