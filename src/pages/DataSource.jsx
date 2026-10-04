@@ -71,6 +71,44 @@ export default function DataSource() {
           and <Link to="/terms" className="text-teal-700 font-semibold hover:underline">Terms of Service</Link> for
           more details.
         </p>
+
+        <h2 className="text-xl font-bold text-slate-900 pt-8">Image Credits</h2>
+        <p>
+          A small number of photos on this site are reused under Creative Commons licenses, which
+          require us to credit the original photographer. Those photos and their credits are listed
+          below; all other photos were taken by Zanzibar Paradise Tours, our partners, or are used
+          with the listed business's permission.
+        </p>
+        <ul className="list-disc pl-6 space-y-2 text-sm">
+          <li>
+            <strong>Chumbe Island Coral Park</strong> &mdash; Photo by Zenith4237, own work,{" "}
+            <a href="https://creativecommons.org/licenses/by-sa/4.0/" target="_blank" rel="noreferrer" className="text-teal-700 hover:underline">
+              CC BY-SA 4.0
+            </a>
+            , via Wikimedia Commons.
+          </li>
+          <li>
+            <strong>Mnemba Atoll Marine Reserve</strong> &mdash; Photo by Brendan Herbert / I've Got It On Film!,{" "}
+            <a href="https://creativecommons.org/licenses/by/2.0/" target="_blank" rel="noreferrer" className="text-teal-700 hover:underline">
+              CC BY 2.0
+            </a>
+            , via Wikimedia Commons.
+          </li>
+          <li>
+            <strong>Ngezi Forest Reserve</strong> &mdash; Photo by Marcel Oosterwijk,{" "}
+            <a href="https://creativecommons.org/licenses/by-sa/2.0/" target="_blank" rel="noreferrer" className="text-teal-700 hover:underline">
+              CC BY-SA 2.0
+            </a>
+            , via Wikimedia Commons.
+          </li>
+          <li>
+            <strong>Menai Bay Conservation Area</strong> &mdash; Photo by Leonel Roget / iNaturalist,{" "}
+            <a href="https://creativecommons.org/licenses/by/4.0/" target="_blank" rel="noreferrer" className="text-teal-700 hover:underline">
+              CC BY 4.0
+            </a>
+            , via Wikimedia Commons.
+          </li>
+        </ul>
       </div>
     </div>
   );
