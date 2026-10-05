@@ -3,7 +3,7 @@ import { X, Star } from "lucide-react";
 import { supabase } from "../lib/supabase";
 
 const SESSION_KEY = "zpt_site_review_prompted";
-const FALLBACK_MS = 45000; // safety net: shows even if no other signal fires
+const FALLBACK_MS = 60000; // safety net: shows even if no other signal fires
 const SCROLL_DEPTH_TRIGGER = 0.7; // 70% down the page counts as "engaged" on mobile
 
 export default function SiteReviewPrompt() {
