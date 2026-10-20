@@ -3,6 +3,7 @@ import { Link, useParams } from "react-router-dom";
 import { supabase } from "../lib/supabase";
 import ReviewsSection from "../components/ReviewsSection";
 import { ArrowLeft, Loader2 } from "lucide-react";
+import { listingPath } from "../lib/slug";
 
 // Standalone page for a single listing's reviews, meant to be shared
 // directly with a guest (via WhatsApp link or a printed QR code at the
@@ -56,7 +57,7 @@ export default function ReviewQuick() {
   return (
     <div className="max-w-2xl mx-auto px-4 py-8">
       <Link
-        to={`/${listing.category_key}/${listing.id}`}
+        to={listingPath(listing)}
         className="inline-flex items-center gap-1 text-sm text-slate-500 hover:text-teal-700 mb-6"
       >
         <ArrowLeft className="w-4 h-4" />
