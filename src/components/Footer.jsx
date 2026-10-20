@@ -1,6 +1,7 @@
 import { Link } from "react-router-dom";
 import { LogoMark } from "./Logo";
 import { useT } from "../lib/i18n";
+import { SITE_CONTACT_NUMBER } from "../lib/whatsapp";
 
 export default function Footer() {
   const t = useT();
@@ -13,6 +14,16 @@ export default function Footer() {
         </div>
         <div className="flex flex-wrap items-center justify-center gap-4 mt-3 mb-3">
           <Link to="/about" className="hover:text-white transition">{t("About Us")}</Link>
+          <Link to="/faq" className="hover:text-white transition">FAQ</Link>
+          <Link to="/how-we-verify" className="hover:text-white transition">How We Verify</Link>
+          <a
+            href={`https://wa.me/${SITE_CONTACT_NUMBER}`}
+            target="_blank"
+            rel="noreferrer"
+            className="hover:text-white transition"
+          >
+            WhatsApp us
+          </a>
           <Link to="/data-source" className="hover:text-white transition">{t("Data Source & Removal Notice")}</Link>
           <Link to="/privacy" className="hover:text-white transition">{t("Privacy Policy")}</Link>
           <Link to="/terms" className="hover:text-white transition">{t("Terms of Service")}</Link>
