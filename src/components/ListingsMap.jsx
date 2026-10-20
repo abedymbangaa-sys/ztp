@@ -1,6 +1,7 @@
 import { useEffect, useRef } from "react";
 import { Link } from "react-router-dom";
 import { extractLatLng } from "../lib/mapUtils";
+import { listingPath } from "../lib/slug";
 
 // Renders an interactive Leaflet map with a pin for every listing that has
 // real coordinates in its maps_link. Leaflet itself is loaded globally via
@@ -45,7 +46,7 @@ export default function ListingsMap({ listings, sectionKey }) {
       // mix hotels, tours, restaurants etc in one map) and only fall back to
       // the page-level sectionKey for single-category listing pages.
       const linkCategory = item.category_key || sectionKey;
-      popupDiv.innerHTML = `<strong>${item.title}</strong><br/><a href="/${linkCategory}/${item.id}" style="color:#0f766e;">View details &rarr;</a>`;
+      popupDiv.innerHTML = `<strong>${item.title}</strong><br/><a href="${listingPath(item, linkCategory)}" style="color:#0f766e;">View details &rarr;</a>`;
       marker.bindPopup(popupDiv);
     });
 
