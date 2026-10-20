@@ -10,6 +10,7 @@ import { buildWhatsAppLink } from "../lib/whatsapp";
 import { SectionIcon } from "../lib/icons";
 import ImageWithFallback from "../components/ImageWithFallback";
 import { BadgeCheck, MessageCircle, X } from "lucide-react";
+import { listingPath } from "../lib/slug";
 
 // Priority 3 - "Compare Before You Choose". Reads the section + ids straight
 // from the URL (?section=hotels&ids=1,2,3) so the compare bar link, a saved
@@ -191,7 +192,7 @@ export default function Compare() {
                   </div>
                 </div>
                 <div className="p-4">
-                  <Link to={`/${sectionKey}/${item.id}`} className="font-bold text-slate-900 hover:text-teal-700 leading-snug block">
+                  <Link to={listingPath(item, sectionKey)} className="font-bold text-slate-900 hover:text-teal-700 leading-snug block">
                     {item.title}
                   </Link>
                   {item.is_verified && (
@@ -234,7 +235,7 @@ export default function Compare() {
                         <div className="h-32 rounded-xl overflow-hidden mb-2">
                           <ImageWithFallback src={item.image_url} alt={item.title} className="w-full h-full object-cover" />
                         </div>
-                        <Link to={`/${sectionKey}/${item.id}`} className="font-bold text-slate-900 hover:text-teal-700 leading-snug block">
+                        <Link to={listingPath(item, sectionKey)} className="font-bold text-slate-900 hover:text-teal-700 leading-snug block">
                           {item.title}
                         </Link>
                         {item.is_verified && (
