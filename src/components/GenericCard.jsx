@@ -14,6 +14,7 @@ import { useCompareList } from "../lib/CompareContext";
 import ImageWithFallback from "./ImageWithFallback";
 import TravelersChoiceBadge from "./TravelersChoiceBadge";
 import { isTravelersChoice } from "../lib/travelersChoice";
+import { listingPath } from "../lib/slug";
 
 export default function GenericCard({ item, sectionKey, distanceKm }) {
   const { language } = useLanguage();
@@ -41,7 +42,7 @@ export default function GenericCard({ item, sectionKey, distanceKm }) {
     // changed.
     <div className="group bg-white rounded-2xl overflow-hidden shadow-sm hover:shadow-xl transition-shadow border border-slate-100">
       <div className="relative">
-        <Link to={`/${sectionKey}/${item.id}`} className="block">
+        <Link to={listingPath(item, sectionKey)} className="block">
           <div className="relative h-48 overflow-hidden">
             <ImageWithFallback
               src={item.image_url}
@@ -130,7 +131,7 @@ export default function GenericCard({ item, sectionKey, distanceKm }) {
           </div>
         )}
       </div>
-      <Link to={`/${sectionKey}/${item.id}`} className="block">
+      <Link to={listingPath(item, sectionKey)} className="block">
         <div className="p-5 pb-3">
           {item.location && (
             <div className="flex items-center gap-1 text-xs text-slate-500 mb-1">
@@ -227,7 +228,7 @@ export default function GenericCard({ item, sectionKey, distanceKm }) {
           </a>
         )}
         <Link
-          to={`/${sectionKey}/${item.id}`}
+          to={listingPath(item, sectionKey)}
           className="inline-flex items-center gap-1.5 bg-teal-700 group-hover:bg-teal-800 transition text-white text-xs font-semibold px-3.5 py-1.5 rounded-full ml-auto"
         >
           {t("View Details")} →
