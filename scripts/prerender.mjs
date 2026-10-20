@@ -557,7 +557,13 @@ async function main() {
         </section>
         <nav aria-label="Categories" class="max-w-6xl mx-auto px-4 py-8"><ul class="flex flex-wrap gap-3 list-none p-0 m-0">${categoryLinks}</ul></nav>
         <nav aria-label="Areas of Zanzibar" class="max-w-6xl mx-auto px-4 py-4"><ul class="flex flex-wrap gap-3 list-none p-0 m-0">${areaLinks}</ul></nav>
-        <section aria-label="Featured listings" class="max-w-6xl mx-auto px-4 py-4 pb-16"><ul class="flex flex-wrap gap-3 list-none p-0 m-0">${listingLinks}</ul></section>
+        <section aria-label="Featured listings" class="max-w-6xl mx-auto px-4 py-4"><ul class="flex flex-wrap gap-3 list-none p-0 m-0">${listingLinks}</ul></section>
+        <section aria-label="About Zanzibar Paradise Tours" class="max-w-3xl mx-auto px-4 py-8 pb-16 text-slate-700 leading-relaxed">
+          <h2 class="text-2xl font-bold text-slate-900 mb-3">Plan your Zanzibar trip with real local information</h2>
+          <p class="mb-3">Zanzibar Paradise Tours is a directory of hotels, tours, restaurants, beaches, caves, nature spots and heritage sites across Zanzibar &mdash; from Stone Town and the north coast beaches of Nungwi and Kendwa to Paje, Jambiani and Pemba.</p>
+          <p class="mb-3">We are not a booking agent and we do not charge booking fees or commissions. Every listing is reviewed before it goes live, and you contact hotels and tour operators directly on WhatsApp to ask questions and arrange your trip on your own terms.</p>
+          <p class="mb-3">New to the island? Start with our <a href="/itinerary/5-days-in-zanzibar" class="text-teal-700 font-semibold">free 5-day Zanzibar itinerary</a>, read the <a href="/guides" class="text-teal-700 font-semibold">practical travel guides</a> (airport, ferry, money, best time to visit), or see <a href="/how-we-verify" class="text-teal-700 font-semibold">how we verify listings</a>, <a href="/faq" class="text-teal-700 font-semibold">common questions</a> and <a href="/about" class="text-teal-700 font-semibold">who we are</a>.</p>
+        </section>
       </div>
     `;
 
