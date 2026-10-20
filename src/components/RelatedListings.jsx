@@ -4,6 +4,7 @@ import { useRelatedListings } from "../data/hooks";
 import { useT } from "../lib/i18n";
 import TravelersChoiceBadge from "./TravelersChoiceBadge";
 import { isTravelersChoice } from "../lib/travelersChoice";
+import { listingPath } from "../lib/slug";
 
 // "Explore Nearby" - a horizontally-scrolling strip of other listings in the
 // same category, shown at the bottom of a detail page. Compact cards keep
@@ -32,7 +33,7 @@ export default function RelatedListings({ categoryKey, excludeId, title = "Explo
         {related.map((item) => (
           <Link
             key={item.id}
-            to={`/${categoryKey}/${item.id}`}
+            to={listingPath(item, categoryKey)}
             className="group shrink-0 w-56 snap-start bg-white rounded-xl overflow-hidden shadow-sm hover:shadow-lg transition-shadow border border-slate-100"
           >
             <div className="relative h-36 overflow-hidden">
