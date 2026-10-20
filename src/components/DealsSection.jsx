@@ -1,6 +1,7 @@
 import { Link } from "react-router-dom";
 import { useDeals } from "../data/hooks";
 import { Tag } from "lucide-react";
+import { listingPath } from "../lib/slug";
 
 // "Special Deals" strip for the homepage. Shows nothing at all if no
 // listing is currently marked is_deal = true, so it never displays an
@@ -20,7 +21,7 @@ export default function DealsSection() {
           {deals.map((item) => (
             <Link
               key={item.id}
-              to={`/${item.category_key}/${item.id}`}
+              to={listingPath(item)}
               className="relative flex-shrink-0 w-72 sm:w-auto bg-white rounded-2xl border border-slate-200 overflow-hidden hover:shadow-lg transition"
             >
               <div className="relative h-44">
