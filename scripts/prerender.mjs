@@ -27,6 +27,7 @@ import fs from "node:fs";
 import path from "node:path";
 import { slugify } from "../src/lib/slug.js";
 import { AREAS } from "../src/data/areas.js";
+import { DAY_PLANS } from "../src/data/itineraryPlans.js";
 
 const DIST_DIR = path.resolve("dist");
 const TEMPLATE_PATH = path.join(DIST_DIR, "index.html");
@@ -55,6 +56,29 @@ function absoluteUrl(maybeRelative) {
   if (!maybeRelative) return DEFAULT_SHARE_IMAGE;
   if (maybeRelative.startsWith("http")) return maybeRelative;
   return `${SITE_URL}${maybeRelative}`;
+}
+
+// Static, crawler-readable version of an itinerary page: title, summary,
+// description AND the full day-by-day plan (same data ItineraryDetail.jsx
+// renders). Without the days, Google fetched an almost empty page and
+// flagged /itinerary/5-days-in-zanzibar as a Soft 404.
+function buildItineraryBodyHtml(guide, slug) {
+  const days = DAY_PLANS[slug] || [];
+  const dayHtml = days
+    .map(
+      (d) =>
+        `<li><h2>Day ${d.day} — ${escapeHtml(d.title)}</h2><p>${escapeHtml(d.area)}</p><p>${escapeHtml(
+          d.activities
+        )}</p><p>${d.links.map((l) => `<a href="${escapeHtml(l.to)}">${escapeHtml(l.label)}</a>`).join(" · ")}</p></li>`
+    )
+    .join("");
+  return (
+    `<h1>${escapeHtml(guide.title)}</h1>` +
+    (guide.days_summary ? `<p>${escapeHtml(guide.days_summary)}</p>` : "") +
+    `<p>${escapeHtml(guide.description || "")}</p>` +
+    (dayHtml ? `<ol>${dayHtml}</ol>` : "") +
+    `<p><a href="/hotels">Find a Hotel</a> · <a href="/things-to-do">Browse Things to Do</a> · <a href="/itinerary">All itinerary guides</a></p>`
+  );
 }
 
 function writeStaticPage(template, routePath, { title, description, bodyHtml, image, url, structuredData, preload }) {
@@ -451,9 +475,7 @@ async function main() {
           description: g.description || "A free, practical day-by-day Zanzibar itinerary.",
           image: g.cover_image,
           url: pageUrl,
-          bodyHtml: `<h1>${escapeHtml(g.title)}</h1>${g.days_summary ? `<p>${escapeHtml(g.days_summary)}</p>` : ""}<p>${escapeHtml(
-            g.description || ""
-          )}</p>`,
+          bodyHtml: buildItineraryBodyHtml(g, slug),
           structuredData: {
             "@context": "https://schema.org",
             "@type": "TouristTrip",
@@ -461,6 +483,9 @@ async function main() {
             description: g.description || "",
             url: pageUrl,
           },
+          // Read by ItineraryDetail.jsx via readPreload("itinerary") so the
+          // page never blanks out to a loading placeholder after hydration.
+          preload: { type: "itinerary", slug, data: g },
         });
         generated++;
         sitemapRoutes.push(`/itinerary/${slug}`);
