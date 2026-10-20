@@ -6,6 +6,7 @@ import { TAG_OPTIONS } from "../lib/tags";
 import { MessageCircle, Phone, MapPin, HelpCircle, TrendingUp, Star, Copy, Check, MessageSquare, Share2 } from "lucide-react";
 import StarRating from "../components/StarRating";
 import { buildShareLinks } from "../lib/utm";
+import { listingPath } from "../lib/slug";
 
 const emptyForm = {
   category_key: "hotels",
@@ -483,7 +484,7 @@ export default function PartnerDashboard() {
                         wageni wengi wanatoka.
                       </p>
                       <div className="space-y-2">
-                        {buildShareLinks(`${window.location.origin}/${l.category_key}/${l.id}`, l.id).map(
+                        {buildShareLinks(`${window.location.origin}${listingPath(l)}`, l.id).map(
                           (link) => (
                             <div
                               key={link.label}
