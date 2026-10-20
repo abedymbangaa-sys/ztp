@@ -25,7 +25,7 @@
 import { createClient } from "@supabase/supabase-js";
 import fs from "node:fs";
 import path from "node:path";
-import { slugify } from "../src/lib/slug.js";
+import { slugify, listingPath } from "../src/lib/slug.js";
 import { AREAS } from "../src/data/areas.js";
 import { DAY_PLANS } from "../src/data/itineraryPlans.js";
 
@@ -204,7 +204,7 @@ async function main() {
     const listItems = catListings
       .map(
         (l) =>
-          `<li><a href="/${escapeHtml(cat.key)}/${escapeHtml(l.id)}">${escapeHtml(l.title)}${
+          `<li><a href="${escapeHtml(listingPath(l, cat.key))}">${escapeHtml(l.title)}${
             l.location ? ` — ${escapeHtml(l.location)}` : ""
           }</a></li>`
       )
@@ -225,12 +225,18 @@ async function main() {
 
     for (const l of catListings) {
       try {
-        const pageUrl = `${SITE_URL}/${cat.key}/${l.id}`;
+        // Primary URL is the readable "/hotels/canary-nungwi-hotel-spa-<uuid>".
+        // The old bare "/hotels/<uuid>" page is ALSO written (below) so
+        // already-indexed/shared links keep serving real content, but its
+        // canonical tag points at the readable URL so Google treats them as
+        // one page.
+        const newPath = listingPath(l, cat.key);
+        const pageUrl = `${SITE_URL}${newPath}`;
         const schemaType =
           cat.key === "hotels" ? "LodgingBusiness" : cat.key === "restaurants" ? "Restaurant" : "TouristAttraction";
         const stats = reviewStatsByListing[l.id];
         const samples = sampleReviewsByListing[l.id] || [];
-        writeStaticPage(template, `/${cat.key}/${l.id}`, {
+        const listingPage = {
           title: `${l.title} | ${cat.title || cat.key} | Zanzibar Paradise Tours`,
           description: (l.description || "").slice(0, 155),
           image: l.image_url,
@@ -273,12 +279,17 @@ async function main() {
             data: l,
             related: catListings.filter((x) => x.id !== l.id).slice(0, 8),
           },
-        });
+        };
+        writeStaticPage(template, newPath, listingPage);
         generated++;
+        // Legacy bare-uuid page (same content, canonical -> readable URL).
+        if (newPath !== `/${cat.key}/${l.id}`) {
+          writeStaticPage(template, `/${cat.key}/${l.id}`, listingPage);
+        }
       } catch (err) {
         console.warn(`[prerender] Failed to write listing page /${cat.key}/${l.id}:`, err.message);
       }
-      sitemapRoutes.push(`/${cat.key}/${l.id}`);
+      sitemapRoutes.push(listingPath(l, cat.key));
     }
   }
 
@@ -287,7 +298,7 @@ async function main() {
     try {
       const areaListings = listings.filter((l) => l.area === area.key);
       const listItems = areaListings
-        .map((l) => `<li><a href="/${escapeHtml(l.category_key)}/${escapeHtml(l.id)}">${escapeHtml(l.title)}</a></li>`)
+        .map((l) => `<li><a href="${escapeHtml(listingPath(l))}">${escapeHtml(l.title)}</a></li>`)
         .join("");
       const pageUrl = `${SITE_URL}/area/${area.key}`;
       writeStaticPage(template, `/area/${area.key}`, {
@@ -372,7 +383,7 @@ async function main() {
     const listItems = activityListings
       .map(
         (l) =>
-          `<li><a href="/${escapeHtml(l.category_key)}/${escapeHtml(l.id)}">${escapeHtml(l.title)}${
+          `<li><a href="${escapeHtml(listingPath(l))}">${escapeHtml(l.title)}${
             l.location ? ` — ${escapeHtml(l.location)}` : ""
           }</a></li>`
       )
@@ -514,7 +525,7 @@ async function main() {
       .map((c) => `<li><a href="/${escapeHtml(c.key)}" class="${PILL_CLASS}">${escapeHtml(c.title)}</a></li>`)
       .join("");
     const listingLinks = topListings
-      .map((l) => `<li><a href="/${escapeHtml(l.category_key)}/${escapeHtml(l.id)}" class="${PILL_CLASS}">${escapeHtml(l.title)}</a></li>`)
+      .map((l) => `<li><a href="${escapeHtml(listingPath(l))}" class="${PILL_CLASS}">${escapeHtml(l.title)}</a></li>`)
       .join("");
     const areaLinks = AREAS.map((a) => `<li><a href="/area/${a.key}" class="${PILL_CLASS}">${escapeHtml(a.name)}</a></li>`).join("");
 
