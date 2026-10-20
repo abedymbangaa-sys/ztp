@@ -5,100 +5,58 @@ import { slugify } from "../lib/slug";
 import { useSEO } from "../lib/useSEO";
 import { trackEvent } from "../lib/analytics";
 import { buildExpertLink } from "../lib/whatsapp";
+import { readPreload } from "../data/hooks";
+import { DAY_PLANS } from "../data/itineraryPlans";
 import { AlertTriangle, RefreshCw, Download, MessageCircle, ArrowRight } from "lucide-react";
 
 const FIXED_PDF_FILENAME = "zanzibar-5-day-itinerary.pdf";
 const SITE_URL = "https://visitzanzibarparadise.com";
 
-// Day-by-day content for known itinerary guides, keyed by slug. There is
-// no day-by-day column in itinerary_guides yet, so this is the source of
-// truth for the online view for now. Guides that don't have an entry here
-// still get a working page - just without the table (see fallback below).
-const DAY_PLANS = {
-  "5-days-in-zanzibar": [
-    {
-      day: 1,
-      title: "Stone Town",
-      area: "Stone Town",
-      activities: "Guided walk through Stone Town's historic streets, old doors and waterfront, then Forodhani Night Market at sunset for Zanzibar pizza, urojo, mishkaki and fresh seafood",
-      links: [
-        { label: "Heritage sites", to: "/heritage" },
-        { label: "Tours", to: "/tours" },
-      ],
-    },
-    {
-      day: 2,
-      title: "Safari Blue",
-      area: "Menai Bay, South Coast",
-      activities: "Full-day traditional dhow trip around Menai Bay - visit a sandbank, snorkel in clear water and enjoy a fresh seafood lunch",
-      links: [
-        { label: "Tours", to: "/tours" },
-        { label: "South Coast", to: "/area/south" },
-      ],
-    },
-    {
-      day: 3,
-      title: "Jozani Forest",
-      area: "Jozani Forest & Spice Farm",
-      activities: "Guided walk through Jozani Forest to see the red colobus monkey, then continue to a spice farm to learn about Zanzibar's famous cloves, cinnamon and tropical fruits",
-      links: [
-        { label: "Nature", to: "/nature" },
-        { label: "Tours", to: "/tours" },
-      ],
-    },
-    {
-      day: 4,
-      title: "Nungwi & Kendwa",
-      area: "North Coast",
-      activities: "A day on the north coast - clear water, beach time, a turtle aquarium visit and a sunset dhow cruise",
-      links: [
-        { label: "Hotels", to: "/hotels" },
-        { label: "Beaches", to: "/beaches" },
-      ],
-    },
-    {
-      day: 5,
-      title: "Paje & Departure",
-      area: "Paje, East Coast",
-      activities: "A slow morning on Paje Beach with a lagoon activity if the tide allows, then departure with enough time for your airport or ferry transfer",
-      links: [
-        { label: "Beaches", to: "/beaches" },
-        { label: "Things to Do", to: "/things-to-do" },
-      ],
-    },
-  ],
-};
-
 export default function ItineraryDetail() {
   const { slug } = useParams();
-  const [guide, setGuide] = useState(null);
-  // "loading" | "ready" | "not_found" | "error"
-  const [status, setStatus] = useState("loading");
 
-  const load = useCallback(() => {
-    setStatus("loading");
-    supabase
-      .from("itinerary_guides")
-      .select("*")
-      .eq("status", "published")
-      .then(({ data, error }) => {
-        if (error) {
-          setStatus("error");
-          return;
-        }
-        const match = (data || []).find((g) => slugify(g.title) === slug);
-        if (!match) {
-          setStatus("not_found");
-          return;
-        }
-        setGuide(match);
-        setStatus("ready");
-      })
-      .catch(() => setStatus("error"));
-  }, [slug]);
+  // scripts/prerender.mjs embeds this exact guide in the page's static HTML
+  // (window.__ZTP_PRELOAD__). Starting from it means the real content stays
+  // on screen the moment React mounts, instead of being replaced by a
+  // "Preparing your free itinerary..." placeholder while the same data is
+  // re-fetched. That blank gap is what Google was reading as a Soft 404.
+  const preloaded = readPreload("itinerary", (p) => p.slug === slug);
+  const [guide, setGuide] = useState(preloaded || null);
+  // "loading" | "ready" | "not_found" | "error"
+  const [status, setStatus] = useState(preloaded ? "ready" : "loading");
+
+  // `silent` = we already have this guide on screen, so refresh it in the
+  // background without flashing a loading state (or an error) over it.
+  const load = useCallback(
+    (silent = false) => {
+      if (!silent) setStatus("loading");
+      supabase
+        .from("itinerary_guides")
+        .select("*")
+        .eq("status", "published")
+        .then(({ data, error }) => {
+          if (error) {
+            if (!silent) setStatus("error");
+            return;
+          }
+          const match = (data || []).find((g) => slugify(g.title) === slug);
+          if (!match) {
+            setStatus("not_found");
+            return;
+          }
+          setGuide(match);
+          setStatus("ready");
+        })
+        .catch(() => {
+          if (!silent) setStatus("error");
+        });
+    },
+    [slug]
+  );
 
   useEffect(() => {
-    load();
+    load(Boolean(guide && slugify(guide.title) === slug));
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [load]);
 
   useEffect(() => {
@@ -134,7 +92,7 @@ export default function ItineraryDetail() {
         <AlertTriangle className="w-6 h-6 text-amber-600 mx-auto mb-3" />
         <p className="text-slate-700 mb-4">We couldn't load this itinerary right now.</p>
         <button
-          onClick={load}
+          onClick={() => load()}
           className="inline-flex items-center gap-1.5 text-sm font-semibold text-teal-700 hover:underline"
         >
           <RefreshCw className="w-3.5 h-3.5" />
@@ -161,7 +119,11 @@ export default function ItineraryDetail() {
   const expertLink = buildExpertLink(guide.title, "Zanzibar", canonical);
 
   return (
-    <div className="max-w-4xl mx-auto px-4 py-12">
+    // w-full + min-w-0 matter here: App.jsx wraps pages in a flex column, and
+    // a flex item with `mx-auto` shrinks to its content's minimum width. The
+    // old day table (min-w-[560px]) therefore stretched this whole page
+    // wider than a phone screen, cutting off the photo and text.
+    <div className="w-full min-w-0 max-w-4xl mx-auto px-4 py-12">
       {guide.cover_image && (
         <div className="h-56 md:h-72 w-full overflow-hidden rounded-2xl mb-6">
           <img
@@ -180,9 +142,9 @@ export default function ItineraryDetail() {
         ← Back to Itinerary Guides
       </Link>
 
-      <h1 className="text-2xl sm:text-3xl font-bold text-slate-900 mt-3 mb-2">{guide.title}</h1>
-      {guide.days_summary && <p className="text-slate-500 text-sm mb-4">{guide.days_summary}</p>}
-      {guide.description && <p className="text-slate-700 leading-relaxed mb-6">{guide.description}</p>}
+      <h1 className="text-2xl sm:text-3xl font-bold text-slate-900 mt-3 mb-2 break-words">{guide.title}</h1>
+      {guide.days_summary && <p className="text-slate-500 text-sm mb-4 break-words">{guide.days_summary}</p>}
+      {guide.description && <p className="text-slate-700 leading-relaxed mb-6 break-words">{guide.description}</p>}
 
       {guide.pdf_url && (
         <a
@@ -206,42 +168,31 @@ export default function ItineraryDetail() {
 
       {days ? (
         <>
-          <div className="overflow-x-auto -mx-4 px-4 mb-4">
-            <table className="w-full text-sm border-collapse min-w-[560px]">
-              <thead>
-                <tr className="text-left text-slate-500 border-b border-slate-200">
-                  <th className="py-2 pr-4 font-semibold">Day</th>
-                  <th className="py-2 pr-4 font-semibold">Area</th>
-                  <th className="py-2 pr-4 font-semibold">Suggested activities</th>
-                  <th className="py-2 font-semibold">Useful links</th>
-                </tr>
-              </thead>
-              <tbody>
-                {days.map((d) => (
-                  <tr key={d.day} className="border-b border-slate-100 align-top">
-                    <td className="py-3 pr-4 font-semibold text-slate-900 whitespace-nowrap">
-                      Day {d.day} — {d.title}
-                    </td>
-                    <td className="py-3 pr-4 text-slate-600 whitespace-nowrap">{d.area}</td>
-                    <td className="py-3 pr-4 text-slate-600">{d.activities}</td>
-                    <td className="py-3">
-                      <div className="flex flex-col gap-1">
-                        {d.links.map((l) => (
-                          <Link
-                            key={l.to}
-                            to={l.to}
-                            className="inline-flex items-center gap-1 text-teal-700 font-semibold hover:underline text-xs"
-                          >
-                            {l.label} <ArrowRight className="w-3 h-3" />
-                          </Link>
-                        ))}
-                      </div>
-                    </td>
-                  </tr>
-                ))}
-              </tbody>
-            </table>
-          </div>
+          {/* One card per day instead of a wide table: reads well on a phone
+              (most visitors), and is plain stacked text for crawlers. */}
+          <ol className="list-none p-0 m-0 space-y-4 mb-4">
+            {days.map((d) => (
+              <li key={d.day} className="bg-white border border-slate-200 rounded-2xl p-5">
+                <div className="flex flex-wrap items-baseline gap-x-3 gap-y-1 mb-1">
+                  <span className="text-xs font-bold uppercase tracking-wide text-teal-700">Day {d.day}</span>
+                  <h2 className="text-lg font-bold text-slate-900 break-words">{d.title}</h2>
+                </div>
+                <p className="text-xs font-semibold text-slate-500 mb-3 break-words">{d.area}</p>
+                <p className="text-slate-700 leading-relaxed mb-3 break-words">{d.activities}</p>
+                <div className="flex flex-wrap gap-x-4 gap-y-1">
+                  {d.links.map((l) => (
+                    <Link
+                      key={l.to}
+                      to={l.to}
+                      className="inline-flex items-center gap-1 text-teal-700 font-semibold hover:underline text-sm"
+                    >
+                      {l.label} <ArrowRight className="w-3 h-3" />
+                    </Link>
+                  ))}
+                </div>
+              </li>
+            ))}
+          </ol>
           <p className="text-xs text-slate-400 mb-10">
             This is a suggested itinerary, not a factual booking promise. Times, prices and
             availability may change. Confirm directly with the business before booking.
