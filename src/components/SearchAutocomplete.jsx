@@ -1,6 +1,7 @@
 import { useState } from "react";
 import { useNavigate, Link } from "react-router-dom";
 import { useT } from "../lib/i18n";
+import { listingPath } from "../lib/slug";
 
 // Reusable search box that shows a dropdown of matching listings as the
 // person types (title or location match), while still supporting a normal
@@ -58,7 +59,7 @@ export default function SearchAutocomplete({ listings = [], placeholder = "Searc
           {suggestions.map((item) => (
             <Link
               key={item.id}
-              to={`/${item.category_key}/${item.id}`}
+              to={listingPath(item)}
               onMouseDown={(e) => e.preventDefault()}
               className="flex items-center gap-3 px-4 py-3 hover:bg-slate-50 transition border-b border-slate-50 last:border-0"
             >
