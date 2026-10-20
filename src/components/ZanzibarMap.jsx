@@ -9,6 +9,7 @@ import { useLanguage } from "../lib/LanguageContext";
 import { useCategories } from "../data/hooks";
 import { AREAS } from "../data/areas";
 import StoryMapPin from "./StoryMapPin";
+import { listingPath } from "../lib/slug";
 
 // Fix default marker icons (Vite bundling breaks leaflet's default asset paths)
 delete L.Icon.Default.prototype._getIconUrl;
@@ -187,7 +188,7 @@ export default function ZanzibarMap({ listings = [], loading = false }) {
                   <div className="text-sm">
                     <p className="font-bold">{item.title}</p>
                     <p className="text-slate-500">{item.location}</p>
-                    <Link to={`/${item.category_key}/${item.id}`} className="text-teal-700 font-semibold">
+                    <Link to={listingPath(item)} className="text-teal-700 font-semibold">
                       View More →
                     </Link>
                   </div>
