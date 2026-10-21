@@ -17,6 +17,14 @@ const SUPABASE_ANON_KEY = "sb_publishable_HEy4rqVBXuH_qRBHEwYSdg_wW-677OT";
 // instead of a single fixed name.
 const FIXED_PDF_FILENAME = "zanzibar-5-day-itinerary.pdf";
 
+// Hosts a guide's pdf_url may point to (our Supabase Storage + Google Drive).
+const ALLOWED_PDF_HOSTS = [
+  "phctpwswosfwjmxhidyq.supabase.co",
+  "drive.google.com",
+  "drive.usercontent.google.com",
+  "docs.google.com",
+];
+
 function toDirectDownloadUrl(rawUrl) {
   // Normalizes a Google Drive "share" link into its direct-download form.
   // A Drive *preview* page is never a valid final download link - see
@@ -65,6 +73,23 @@ export default async function handler(req, res) {
     }
 
     const sourceUrl = toDirectDownloadUrl(guide.pdf_url);
+
+    // Only fetch from hosts we expect. Without this, anyone who could edit
+    // itinerary_guides.pdf_url could make our domain download and serve any
+    // URL (including internal/private ones).
+    let sourceHost = "";
+    try {
+      const parsed = new URL(sourceUrl);
+      if (parsed.protocol !== "https:") throw new Error("not https");
+      sourceHost = parsed.hostname;
+    } catch {
+      res.status(400).json({ error: "Invalid PDF source." });
+      return;
+    }
+    if (!ALLOWED_PDF_HOSTS.some((h) => sourceHost === h || sourceHost.endsWith("." + h))) {
+      res.status(400).json({ error: "PDF source is not allowed." });
+      return;
+    }
     const pdfRes = await fetch(sourceUrl);
 
     if (!pdfRes.ok) {
