@@ -46,7 +46,18 @@ export default function ListingsMap({ listings, sectionKey }) {
       // mix hotels, tours, restaurants etc in one map) and only fall back to
       // the page-level sectionKey for single-category listing pages.
       const linkCategory = item.category_key || sectionKey;
-      popupDiv.innerHTML = `<strong>${item.title}</strong><br/><a href="${listingPath(item, linkCategory)}" style="color:#0f766e;">View details &rarr;</a>`;
+      // Built with DOM nodes + textContent (NOT innerHTML): listing titles are
+      // typed in by business owners, so inserting them as HTML would let a
+      // title like <img onerror=...> run script in every visitor's browser.
+      const titleEl = document.createElement("strong");
+      titleEl.textContent = item.title || "";
+      const linkEl = document.createElement("a");
+      linkEl.href = listingPath(item, linkCategory);
+      linkEl.style.color = "#0f766e";
+      linkEl.textContent = "View details \u2192";
+      popupDiv.appendChild(titleEl);
+      popupDiv.appendChild(document.createElement("br"));
+      popupDiv.appendChild(linkEl);
       marker.bindPopup(popupDiv);
     });
 
