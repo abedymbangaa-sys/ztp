@@ -1,4 +1,6 @@
 import ContactForm from "../components/ContactForm";
+import { SITE_CONTACT_NUMBER } from "../lib/whatsapp";
+import { MessageCircle } from "lucide-react";
 
 export default function About() {
   return (
@@ -31,10 +33,35 @@ export default function About() {
           accuracy and honesty over volume — we would rather list fewer places well than list everything
           without care.
         </p>
-        <h2 className="text-xl font-bold text-slate-900 pt-4">Built By</h2>
-        <p>
-          Zanzibar Paradise Tours is built and maintained by Wachu Digital Growth.
-        </p>
+        <h2 className="text-xl font-bold text-slate-900 pt-4">Who Is Behind This Site</h2>
+        <div className="flex flex-col sm:flex-row gap-5 items-start bg-slate-50 border border-slate-200 rounded-2xl p-5">
+          <img
+            src="/images/about/abedy.jpg"
+            alt="Abedy, founder of Zanzibar Paradise Tours"
+            width="640"
+            height="640"
+            loading="lazy"
+            className="w-28 h-28 rounded-2xl object-cover shrink-0"
+          />
+          <div className="min-w-0">
+            <p className="font-bold text-slate-900">Abedy</p>
+            <p className="text-sm text-slate-500 mb-2">Founder, Zanzibar Paradise Tours · Dodoma, Tanzania</p>
+            <p className="mb-3">
+              I run Wachu Digital Growth, a Tanzanian digital agency that helps tourism businesses get found
+              online. Zanzibar Paradise Tours is built and maintained by me. If you message us on WhatsApp,
+              you are talking to a real person, and I will point you to the right hotel or tour to ask.
+            </p>
+            <a
+              href={`https://wa.me/${SITE_CONTACT_NUMBER}`}
+              target="_blank"
+              rel="noreferrer"
+              className="inline-flex items-center gap-2 bg-teal-700 hover:bg-teal-800 transition text-white font-bold px-4 py-2 rounded-full text-sm"
+            >
+              <MessageCircle className="w-4 h-4" />
+              Message Abedy on WhatsApp
+            </a>
+          </div>
+        </div>
         <h2 className="text-xl font-bold text-slate-900 pt-4">Get In Touch</h2>
         <p>
           Have a question, want to list your business, or spot something that needs fixing? Reach out to us
