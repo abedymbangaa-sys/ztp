@@ -2,6 +2,8 @@ import { useEffect, useState, Suspense, lazy } from "react";
 import { Link, useLocation } from "react-router-dom";
 import { useListings, useCategories, useSettings } from "../data/hooks";
 import GenericCard from "../components/GenericCard";
+import { getRecentlyViewed } from "../lib/recentlyViewed";
+import { supabase } from "../lib/supabase";
 import StatsCounter from "../components/StatsCounter";
 import WebsiteReviews from "../components/WebsiteReviews";
 import TravelerStories from "../components/TravelerStories";
@@ -45,6 +47,37 @@ export default function Home() {
   const heroImageUrl = settingsLoading ? null : settings.hero_image_url || DEFAULT_HERO_IMAGE;
   const topHotels = hotels.slice(0, 6);
   const dayTripTours = tours.slice(0, 6);
+
+  // "Recently Viewed" - pulled from this visitor's own device (no login),
+  // so someone who was browsing listings yesterday can pick up where they
+  // left off instead of having to search again or losing the listing.
+  const [recentListings, setRecentListings] = useState([]);
+  useEffect(() => {
+    const saved = getRecentlyViewed();
+    if (saved.length === 0) {
+      setRecentListings([]);
+      return;
+    }
+    let mounted = true;
+    supabase
+      .from("listings")
+      .select("*")
+      .in(
+        "id",
+        saved.map((s) => s.id)
+      )
+      .eq("status", "approved")
+      .then(({ data }) => {
+        if (!mounted || !data) return;
+        // Keep the visitor's own most-recent-first order, not whatever
+        // order the database happened to return rows in.
+        const byId = Object.fromEntries(data.map((row) => [row.id, row]));
+        setRecentListings(saved.map((s) => byId[s.id]).filter(Boolean));
+      });
+    return () => {
+      mounted = false;
+    };
+  }, []);
 
   // The hero background rotates through whatever photos the admin has
   // uploaded in Admin Dashboard -> Homepage -> "Hero Rotation". If the admin
@@ -200,6 +233,19 @@ export default function Home() {
       </section>
 
       <TripBuilderModal open={tripBuilderOpen} onClose={() => setTripBuilderOpen(false)} />
+
+      {recentListings.length > 0 && (
+        <section className="max-w-6xl mx-auto px-4 pt-8">
+          <h2 className="text-lg font-bold text-slate-900 mb-4">Pick Up Where You Left Off</h2>
+          <div className="flex gap-4 overflow-x-auto pb-2 -mx-4 px-4 snap-x snap-mandatory scrollbar-thin">
+            {recentListings.map((l) => (
+              <div key={l.id} className="shrink-0 w-56 snap-start">
+                <GenericCard item={l} sectionKey={l.category_key} />
+              </div>
+            ))}
+          </div>
+        </section>
+      )}
 
       <LocalPulse />
 
