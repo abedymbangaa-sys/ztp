@@ -36,7 +36,7 @@ export default function About() {
         <h2 className="text-xl font-bold text-slate-900 pt-4">Who Is Behind This Site</h2>
         <div className="flex flex-col sm:flex-row gap-5 items-start bg-slate-50 border border-slate-200 rounded-2xl p-5">
           <img
-            src="/images/about/abedy.jpg"
+            src="/images/abedy.jpg"
             alt="Abedy, founder of Zanzibar Paradise Tours"
             width="640"
             height="640"
