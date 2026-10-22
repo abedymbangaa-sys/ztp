@@ -1,5 +1,5 @@
 import { useState, useEffect } from "react";
-import { useParams, Link } from "react-router-dom";
+import { useParams, Link, useNavigate } from "react-router-dom";
 import { useListing, useCategories } from "../data/hooks";
 import { buildRichInquiryLink, SITE_CONTACT_NUMBER } from "../lib/whatsapp";
 import { normalizePhone } from "../lib/phone";
@@ -28,19 +28,36 @@ import { useLanguage } from "../lib/LanguageContext";
 import { MessageCircle as WA, Compass } from "lucide-react";
 import { buildExpertLink } from "../lib/whatsapp";
 import { trackEvent } from "../lib/analytics";
+import { extractListingId, listingPath } from "../lib/slug";
 import { recordView } from "../lib/recentlyViewed";
 
 export default function SectionDetail() {
-  const { sectionKey, id } = useParams();
+  // The URL segment is either the new "canary-nungwi-hotel-spa-<uuid>" or the
+  // old bare "<uuid>"; useListing and everything below work off the real id.
+  const { sectionKey, id: urlSegment } = useParams();
+  const id = extractListingId(urlSegment);
+  const navigate = useNavigate();
   const { categories } = useCategories();
   const { listing: item, loading, error, retry } = useListing(id);
   const config = categories.find((c) => c.key === sectionKey);
+  const [inquiryOpen, setInquiryOpen] = useState(false);
+  const [claimOpen, setClaimOpen] = useState(false);
 
+  // Old bare-uuid links (shared on WhatsApp, indexed by Google) are sent to
+  // the readable URL once the listing is known, so every visitor and every
+  // share from now on uses the keyword-rich address.
+  useEffect(() => {
+    if (!item) return;
+    const wanted = listingPath(item, sectionKey);
+    if (window.location.pathname !== wanted) {
+      navigate(wanted + window.location.search + window.location.hash, { replace: true });
+    }
+  }, [item, sectionKey, navigate]);
+
+  // Remember this listing on the visitor's own device for "Recently Viewed".
   useEffect(() => {
     if (item?.id) recordView(item.id, item.category_key || sectionKey);
   }, [item?.id, item?.category_key, sectionKey]);
-  const [inquiryOpen, setInquiryOpen] = useState(false);
-  const [claimOpen, setClaimOpen] = useState(false);
   const [claimDefaultType, setClaimDefaultType] = useState("claim");
   const { language } = useLanguage();
   const t = useT();
