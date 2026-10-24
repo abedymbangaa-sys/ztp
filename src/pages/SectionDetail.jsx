@@ -25,8 +25,6 @@ import VerificationPanel from "../components/VerificationPanel";
 import ListingContactActions from "../components/ListingContactActions";
 import { useT } from "../lib/i18n";
 import { useLanguage } from "../lib/LanguageContext";
-import { MessageCircle as WA, Compass } from "lucide-react";
-import { buildExpertLink } from "../lib/whatsapp";
 import { trackEvent } from "../lib/analytics";
 import { extractListingId, listingPath } from "../lib/slug";
 import { recordView } from "../lib/recentlyViewed";
@@ -171,14 +169,7 @@ export default function SectionDetail() {
     <div>
       <PhotoGallery coverImage={item.image_url} galleryImages={item.gallery_images} listingName={item.title} />
 
-      {/* Sticky bottom action bar - mobile only. Quick access to the two
-          highest-intent actions without scrolling back up. Hidden on
-          desktop (lg:hidden) since the sidebar card already covers this. */}
-      <div className="lg:hidden fixed bottom-0 left-0 right-0 z-40 bg-white border-t border-slate-200 px-3 py-2.5 pb-[calc(0.625rem+env(safe-area-inset-bottom))] shadow-[0_-4px_12px_rgba(0,0,0,0.06)]">
-        <ListingContactActionsCompactBar item={item} onSendEnquiry={() => setInquiryOpen(true)} />
-      </div>
-
-      <div className="max-w-6xl mx-auto px-4 py-10 pb-28 lg:pb-10">
+      <div className="max-w-6xl mx-auto px-4 py-10">
         <Link to={`/${sectionKey}`} className="text-sm text-teal-700 font-semibold hover:underline">
           ← {t("Back to")} {config?.title || sectionKey}
         </Link>
@@ -333,49 +324,6 @@ export default function SectionDetail() {
   );
 }
 
-// Compact version of the two highest-intent actions (WhatsApp Owner + Ask
-// Zanzibar Expert) for the mobile sticky bottom bar. A 2x2 grid of all 4
-// buttons would be too tall for a bottom bar, so this renders just the
-// two primary CTAs directly, sharing the same helpers/tracking events as
-// ListingContactActions above.
-function ListingContactActionsCompactBar({ item, onSendEnquiry }) {
-  const currentUrl = typeof window !== "undefined" ? window.location.href : "";
-  const expertUrl = buildExpertLink(item.title, item.location, currentUrl);
-
-  const eventData = {
-    listing_id: item.id,
-    listing_name: item.title,
-    listing_category: item.category_key,
-    listing_location: item.location,
-  };
-
-  return (
-    <div className="grid grid-cols-2 gap-2">
-      <button
-        type="button"
-        onClick={() => {
-          trackEvent("click_send_enquiry", eventData);
-          onSendEnquiry?.();
-        }}
-        aria-label={`Send enquiry about ${item.title}`}
-        className="flex items-center justify-center gap-1 text-xs font-semibold px-3 py-2.5 rounded-full min-h-[44px] bg-green-600 hover:bg-green-700 text-white"
-      >
-        <WA className="w-3.5 h-3.5 shrink-0" /> Send Enquiry
-      </button>
-      <a
-        href={expertUrl}
-        target="_blank"
-        rel="noopener noreferrer"
-        aria-label={`Ask Zanzibar Expert about ${item.title}`}
-        className="flex items-center justify-center gap-1 text-xs font-semibold px-3 py-2.5 rounded-full min-h-[44px] bg-amber-500 hover:bg-amber-600 text-white"
-        onClick={() => trackEvent("click_ask_zanzibar_expert", eventData)}
-      >
-        <Compass className="w-3.5 h-3.5 shrink-0" /> Ask Expert
-      </a>
-    </div>
-  );
-}
-
 // Skeleton shown while the listing is loading, matching the real page's
 // layout (gallery, title/location, 4-button action area, description) so
 // there's no layout shift and no bare "Loading..." text flash.
@@ -392,8 +340,6 @@ function SectionDetailSkeleton() {
         <div className="mb-8 bg-slate-50 border border-slate-100 rounded-2xl p-5">
           <div className="h-4 w-3/4 bg-slate-200 rounded mb-4" />
           <div className="grid grid-cols-2 gap-2">
-            <div className="h-11 bg-slate-200 rounded-full" />
-            <div className="h-11 bg-slate-200 rounded-full" />
             <div className="h-11 bg-slate-200 rounded-full" />
             <div className="h-11 bg-slate-200 rounded-full" />
           </div>
