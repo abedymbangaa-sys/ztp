@@ -2,6 +2,9 @@ import { useEffect, useState, Suspense, lazy } from "react";
 import { Link, useLocation } from "react-router-dom";
 import { useListings, useCategories, useSettings } from "../data/hooks";
 import GenericCard from "../components/GenericCard";
+import ImageWithFallback from "../components/ImageWithFallback";
+import { listingPath } from "../lib/slug";
+import { formatLocation } from "../lib/locations";
 import { getRecentlyViewed } from "../lib/recentlyViewed";
 import { supabase } from "../lib/supabase";
 import StatsCounter from "../components/StatsCounter";
@@ -78,6 +81,16 @@ export default function Home() {
       mounted = false;
     };
   }, []);
+
+  // Lets a visitor wipe their own history (it only lives on their device).
+  function clearRecent() {
+    try {
+      localStorage.removeItem("ztp_recently_viewed");
+    } catch {
+      // private browsing etc. - nothing to clear
+    }
+    setRecentListings([]);
+  }
 
   // The hero background rotates through whatever photos the admin has
   // uploaded in Admin Dashboard -> Homepage -> "Hero Rotation". If the admin
@@ -236,12 +249,19 @@ export default function Home() {
 
       {recentListings.length > 0 && (
         <section className="max-w-6xl mx-auto px-4 pt-8">
-          <h2 className="text-lg font-bold text-slate-900 mb-4">Pick Up Where You Left Off</h2>
-          <div className="flex gap-4 overflow-x-auto pb-2 -mx-4 px-4 snap-x snap-mandatory scrollbar-thin">
+          <div className="flex items-baseline justify-between mb-3">
+            <h2 className="text-lg font-bold text-slate-900">Pick Up Where You Left Off</h2>
+            <button
+              type="button"
+              onClick={clearRecent}
+              className="text-xs font-semibold text-slate-400 hover:text-slate-600 underline"
+            >
+              Clear
+            </button>
+          </div>
+          <div className="flex gap-3 overflow-x-auto pb-2 -mx-4 px-4 snap-x snap-mandatory scrollbar-thin">
             {recentListings.map((l) => (
-              <div key={l.id} className="shrink-0 w-56 snap-start">
-                <GenericCard item={l} sectionKey={l.category_key} />
-              </div>
+              <RecentCard key={l.id} item={l} />
             ))}
           </div>
         </section>
@@ -625,5 +645,44 @@ export default function Home() {
         />
       )}
     </div>
+  );
+}
+
+// Small, uniform card for the "Pick Up Where You Left Off" strip. The full
+// GenericCard is built for wide listing grids; squeezed into a narrow
+// scroller it wrapped its buttons and ended up with a different height for
+// every card. This one is fixed-size: photo, 2-line name, one-line place,
+// and the whole card is a single link to the listing.
+function RecentCard({ item }) {
+  const place = formatLocation(item.location || "");
+  return (
+    <Link
+      to={listingPath(item, item.category_key)}
+      className="group shrink-0 snap-start w-40 sm:w-48 bg-white rounded-xl overflow-hidden border border-slate-100 shadow-sm hover:shadow-md transition-shadow"
+    >
+      <div className="relative h-28 sm:h-32 overflow-hidden bg-slate-100">
+        <ImageWithFallback
+          src={item.image_url}
+          alt={item.title}
+          loading="lazy"
+          className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
+        />
+        {item.is_verified && (
+          <span className="absolute top-2 left-2 inline-flex items-center gap-1 bg-white/95 text-teal-700 text-[10px] font-semibold px-2 py-0.5 rounded-full shadow-sm">
+            <BadgeCheck className="w-3 h-3" />
+            Verified
+          </span>
+        )}
+      </div>
+      <div className="p-3">
+        <p className="text-sm font-bold text-slate-900 leading-snug line-clamp-2 min-h-[2.5rem]">{item.title}</p>
+        {place && (
+          <p className="mt-1 flex items-center gap-1 text-xs text-slate-500">
+            <MapPin className="w-3 h-3 shrink-0" />
+            <span className="truncate">{place}</span>
+          </p>
+        )}
+      </div>
+    </Link>
   );
 }
