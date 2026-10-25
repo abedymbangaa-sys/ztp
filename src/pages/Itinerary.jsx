@@ -3,8 +3,8 @@ import { Link } from "react-router-dom";
 import { supabase } from "../lib/supabase";
 import { trackEvent } from "../lib/analytics";
 import { slugify } from "../lib/slug";
-import { BookOpenText, Download, Eye, AlertTriangle, RefreshCw, MessageCircle } from "lucide-react";
-import { buildExpertLink } from "../lib/whatsapp";
+import { BookOpenText, Download, Eye, AlertTriangle, RefreshCw, Sparkles } from "lucide-react";
+import CustomItineraryModal from "../components/CustomItineraryModal";
 
 const FIXED_PDF_FILENAME = "zanzibar-5-day-itinerary.pdf";
 
@@ -12,6 +12,12 @@ export default function Itinerary() {
   const [guides, setGuides] = useState([]);
   // "loading" | "ready" | "error"
   const [status, setStatus] = useState("loading");
+  const [requestOpen, setRequestOpen] = useState(false);
+
+  const openRequest = (guideId) => {
+    trackEvent("click_itinerary_cta", { itinerary_id: guideId || null, cta_name: "request_custom_itinerary" });
+    setRequestOpen(true);
+  };
 
   const loadGuides = useCallback(() => {
     setStatus("loading");
@@ -76,32 +82,37 @@ export default function Itinerary() {
           <h2 className="font-bold text-slate-900 text-lg mb-1">Coming Soon</h2>
           <p className="text-slate-600 mb-5 max-w-md mx-auto">
             Our first free itinerary guides are being written and will appear here shortly. In the
-            meantime, a Zanzibar Expert can put together a personalized day-by-day plan for you on WhatsApp.
+            meantime, send us a request and we will put together a personalized day-by-day plan for you.
           </p>
-          <a
-            href={buildExpertLink("a Zanzibar itinerary", "Zanzibar", window.location.href)}
-            target="_blank"
-            rel="noreferrer"
+          <button
+            type="button"
+            onClick={() => openRequest(null)}
             className="inline-flex items-center gap-1.5 bg-teal-700 hover:bg-teal-800 transition text-white font-semibold px-5 py-2.5 rounded-full text-sm"
           >
-            <MessageCircle className="w-4 h-4" />
-            Ask a Zanzibar Expert
-          </a>
+            <Sparkles className="w-4 h-4" />
+            Request my itinerary
+          </button>
         </div>
       )}
 
       {status === "ready" && guides.length > 0 && (
         <div className="grid sm:grid-cols-2 gap-6">
           {guides.map((g) => (
-            <ItineraryCard key={g.id} guide={g} />
+            <ItineraryCard key={g.id} guide={g} onRequest={() => openRequest(g.id)} />
           ))}
         </div>
       )}
+
+      <CustomItineraryModal
+        open={requestOpen}
+        onClose={() => setRequestOpen(false)}
+        sourcePage={typeof window !== "undefined" ? window.location.href : ""}
+      />
     </div>
   );
 }
 
-function ItineraryCard({ guide: g }) {
+function ItineraryCard({ guide: g, onRequest }) {
   const hasPdf = Boolean(g.pdf_url);
   const slug = slugify(g.title);
   const downloadHref = `/api/download-itinerary?id=${encodeURIComponent(g.id)}`;
@@ -156,8 +167,8 @@ function ItineraryCard({ guide: g }) {
           ) : (
             <div className="bg-slate-50 border border-slate-200 rounded-xl p-3">
               <p className="text-xs text-slate-500">
-                The free PDF is temporarily unavailable. View the itinerary online or ask a
-                Zanzibar Expert.
+                The free PDF is temporarily unavailable. View the itinerary online or request
+                a custom itinerary.
               </p>
             </div>
           )}
@@ -171,19 +182,15 @@ function ItineraryCard({ guide: g }) {
               <Eye className="w-4 h-4" />
               View Online
             </Link>
-            <a
-              href={buildExpertLink(g.title, "Zanzibar", window.location.href)}
-              target="_blank"
-              rel="noreferrer"
-              onClick={() =>
-                trackEvent("click_itinerary_cta", { itinerary_id: g.id, cta_name: "ask_expert" })
-              }
+            <button
+              type="button"
+              onClick={onRequest}
+              aria-label="Request a custom itinerary"
               className="flex-1 inline-flex items-center justify-center gap-1.5 border-2 border-slate-200 text-slate-600 hover:border-teal-300 hover:text-teal-700 transition font-semibold px-3 py-2 rounded-full text-sm whitespace-nowrap"
-              aria-label="Ask a Zanzibar Expert on WhatsApp"
             >
-              <MessageCircle className="w-4 h-4 shrink-0" />
-              Ask a Zanzibar Expert
-            </a>
+              <Sparkles className="w-4 h-4 shrink-0" />
+              Request Itinerary
+            </button>
           </div>
         </div>
       </div>
