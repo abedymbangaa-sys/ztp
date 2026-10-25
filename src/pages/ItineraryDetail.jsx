@@ -7,7 +7,8 @@ import { trackEvent } from "../lib/analytics";
 import { buildExpertLink } from "../lib/whatsapp";
 import { readPreload } from "../data/hooks";
 import { DAY_PLANS } from "../data/itineraryPlans";
-import { AlertTriangle, RefreshCw, Download, MessageCircle, ArrowRight } from "lucide-react";
+import CustomItineraryModal from "../components/CustomItineraryModal";
+import { AlertTriangle, RefreshCw, Download, MessageCircle, ArrowRight, Sparkles } from "lucide-react";
 
 const FIXED_PDF_FILENAME = "zanzibar-5-day-itinerary.pdf";
 const SITE_URL = "https://visitzanzibarparadise.com";
@@ -24,6 +25,7 @@ export default function ItineraryDetail() {
   const [guide, setGuide] = useState(preloaded || null);
   // "loading" | "ready" | "not_found" | "error"
   const [status, setStatus] = useState(preloaded ? "ready" : "loading");
+  const [requestOpen, setRequestOpen] = useState(false);
 
   // `silent` = we already have this guide on screen, so refresh it in the
   // background without flashing a loading state (or an error) over it.
@@ -205,21 +207,43 @@ export default function ItineraryDetail() {
         </p>
       )}
 
-      <div className="bg-teal-50 border border-teal-100 rounded-2xl p-6 flex flex-wrap items-center justify-between gap-4">
-        <p className="text-slate-700 font-medium">Need help planning this trip? Ask a Zanzibar Expert on WhatsApp.</p>
-        <a
-          href={expertLink}
-          target="_blank"
-          rel="noreferrer"
-          onClick={() =>
-            trackEvent("click_itinerary_cta", { itinerary_id: guide.id, cta_name: "ask_expert" })
-          }
-          className="inline-flex items-center gap-2 bg-teal-700 hover:bg-teal-800 transition text-white font-bold px-5 py-2.5 rounded-full whitespace-nowrap"
-        >
-          <MessageCircle className="w-4 h-4" />
-          Ask a Zanzibar Expert
-        </a>
+      <div className="bg-teal-50 border border-teal-100 rounded-2xl p-6">
+        <p className="font-bold text-slate-900 mb-1">Want an itinerary made for you?</p>
+        <p className="text-slate-700 text-sm mb-4">
+          Tell us your dates, who is travelling and what you enjoy. We will send you a suggested plan, free.
+        </p>
+        <div className="flex flex-wrap items-center gap-x-5 gap-y-3">
+          <button
+            type="button"
+            onClick={() => {
+              trackEvent("click_itinerary_cta", { itinerary_id: guide.id, cta_name: "request_custom_itinerary" });
+              setRequestOpen(true);
+            }}
+            className="inline-flex items-center gap-2 bg-teal-700 hover:bg-teal-800 transition text-white font-bold px-5 py-2.5 rounded-full whitespace-nowrap"
+          >
+            <Sparkles className="w-4 h-4" />
+            Request my itinerary
+          </button>
+          <a
+            href={expertLink}
+            target="_blank"
+            rel="noreferrer"
+            onClick={() =>
+              trackEvent("click_itinerary_cta", { itinerary_id: guide.id, cta_name: "ask_expert" })
+            }
+            className="inline-flex items-center gap-1.5 text-sm font-semibold text-teal-700 hover:underline"
+          >
+            <MessageCircle className="w-4 h-4" />
+            or ask us on WhatsApp
+          </a>
+        </div>
       </div>
+
+      <CustomItineraryModal
+        open={requestOpen}
+        onClose={() => setRequestOpen(false)}
+        sourcePage={canonical}
+      />
 
       <div className="flex flex-wrap gap-4 mt-6 text-sm">
         <Link
