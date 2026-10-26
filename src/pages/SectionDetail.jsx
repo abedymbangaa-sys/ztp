@@ -44,18 +44,25 @@ export default function SectionDetail() {
   // Old bare-uuid links (shared on WhatsApp, indexed by Google) are sent to
   // the readable URL once the listing is known, so every visitor and every
   // share from now on uses the keyword-rich address.
+  //
+  // Only act when the loaded listing is the one the URL is actually about.
+  // When a visitor moves from one listing to another (e.g. "Explore Nearby"),
+  // this same component stays mounted and `item` still holds the PREVIOUS
+  // listing for a moment. Without this check the redirect saw "URL says
+  // Shukran Palace, item is Kijani Beach" and bounced the visitor back to the
+  // old listing.
   useEffect(() => {
-    if (!item) return;
+    if (!item || item.id !== id) return;
     const wanted = listingPath(item, sectionKey);
     if (window.location.pathname !== wanted) {
       navigate(wanted + window.location.search + window.location.hash, { replace: true });
     }
-  }, [item, sectionKey, navigate]);
+  }, [item, id, sectionKey, navigate]);
 
   // Remember this listing on the visitor's own device for "Recently Viewed".
   useEffect(() => {
-    if (item?.id) recordView(item.id, item.category_key || sectionKey);
-  }, [item?.id, item?.category_key, sectionKey]);
+    if (item?.id && item.id === id) recordView(item.id, item.category_key || sectionKey);
+  }, [item?.id, item?.category_key, id, sectionKey]);
   const [claimDefaultType, setClaimDefaultType] = useState("claim");
   const { language } = useLanguage();
   const t = useT();
