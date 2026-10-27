@@ -85,7 +85,7 @@ export default function Navbar() {
   return (
     <header className="sticky top-0 z-50 bg-white/95 backdrop-blur border-b border-slate-200">
       <div className="max-w-6xl mx-auto px-4 py-3 flex items-center justify-between gap-4">
-        <Link to="/" className="flex items-center gap-2 shrink-0" onClick={() => setOpen(false)}>
+        <Link to="/" translate="no" className="flex items-center gap-2 shrink-0" onClick={() => setOpen(false)}>
           <Logo />
         </Link>
 
@@ -118,10 +118,11 @@ export default function Navbar() {
             value={language}
             onChange={(e) => setLanguage(e.target.value)}
             aria-label="Select language"
+            translate="no"
             className="hidden sm:block text-xs font-semibold text-slate-600 border border-slate-200 rounded-full px-2.5 py-1.5 bg-white hover:border-teal-400 focus:outline-none focus:ring-1 focus:ring-teal-500"
           >
             {SUPPORTED_LANGUAGES.map((l) => (
-              <option key={l.code} value={l.code}>
+              <option key={l.code} value={l.code} translate="no">
                 {l.label}
               </option>
             ))}
@@ -156,7 +157,7 @@ export default function Navbar() {
       {/* Mobile menu panel */}
       {open && (
         <nav className="md:hidden border-t border-slate-200 bg-white px-4 py-4 flex flex-col gap-1 text-slate-700 font-medium">
-          <div className="flex items-center gap-2 py-2.5 border-b border-slate-100">
+          <div className="flex flex-wrap items-center gap-2 py-2.5 border-b border-slate-100" translate="no">
             <span className="text-sm text-slate-500">{t("Language:")}</span>
             {SUPPORTED_LANGUAGES.map((l) => (
               <button
@@ -169,7 +170,7 @@ export default function Navbar() {
                     : "text-slate-600 border-slate-300")
                 }
               >
-                {l.label}
+                {l.name}
               </button>
             ))}
           </div>
