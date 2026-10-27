@@ -15,3 +15,8 @@ html, body {
      visitor even if it's technically not pure #ffffff. */
   background-color: #134e4a;
 }
+
+/* Hide Google Translate's own banner/tooltip so only our language picker shows */
+.goog-te-banner-frame, .goog-te-balloon-frame, #goog-gt-tt, .goog-tooltip, .skiptranslate > iframe { display: none !important; }
+.goog-text-highlight { background: none !important; box-shadow: none !important; }
+body { top: 0 !important; }
