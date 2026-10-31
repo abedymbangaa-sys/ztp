@@ -1,149 +1,181 @@
 import { useEffect, useState } from "react";
+import { useLocation } from "react-router-dom";
 import { X, Star } from "lucide-react";
 import { supabase } from "../lib/supabase";
 
-const SESSION_KEY = "zpt_site_review_prompted";
-const FALLBACK_MS = 60000; // safety net: shows even if no other signal fires
-const SCROLL_DEPTH_TRIGGER = 0.7; // 70% down the page counts as "engaged" on mobile
+// Small, non-blocking "rate our website" card. It slides in 10 seconds after
+// a visitor lands on a public page, asks one thing (tap a star), and only then
+// shows an optional name/comment box. Reviews are saved as "pending" and
+// appear on the site after the admin approves them.
+
+const SHOW_AFTER_MS = 10000;
+const DISMISS_COOLDOWN_MS = 3 * 24 * 60 * 60 * 1000; // after closing, wait 3 days
+const DONE_KEY = "zpt_site_review_done"; // already reviewed -> never ask again
+const DISMISSED_KEY = "zpt_site_review_dismissed_at";
+const SESSION_KEY = "zpt_site_review_shown"; // once per visit
+
+const HIDDEN_ON = ["/admin", "/partner", "/review", "/privacy", "/terms"];
+
+function safeGet(store, key) {
+  try {
+    return store.getItem(key);
+  } catch {
+    return null;
+  }
+}
+function safeSet(store, key, value) {
+  try {
+    store.setItem(key, value);
+  } catch {
+    // storage unavailable (private mode) - the prompt just may show again later
+  }
+}
+
+function alreadyHandled() {
+  if (safeGet(localStorage, DONE_KEY)) return true;
+  if (safeGet(sessionStorage, SESSION_KEY)) return true;
+  const dismissedAt = Number(safeGet(localStorage, DISMISSED_KEY) || 0);
+  return dismissedAt && Date.now() - dismissedAt < DISMISS_COOLDOWN_MS;
+}
 
 export default function SiteReviewPrompt() {
+  const { pathname } = useLocation();
+  const blocked = HIDDEN_ON.some((p) => pathname === p || pathname.startsWith(p + "/"));
+
   const [visible, setVisible] = useState(false);
-  const [expanded, setExpanded] = useState(false); // opens the small form after they tap a star
   const [rating, setRating] = useState(0);
+  const [hover, setHover] = useState(0);
   const [name, setName] = useState("");
   const [comment, setComment] = useState("");
-  const [submitted, setSubmitted] = useState(false);
+  const [website, setWebsite] = useState(""); // honeypot: real people leave it empty
   const [submitting, setSubmitting] = useState(false);
+  const [submitted, setSubmitted] = useState(false);
+  const [error, setError] = useState("");
 
+  // Start the 10s countdown once; if the visitor wanders to an excluded page
+  // (e.g. admin) the card simply doesn't show there.
   useEffect(() => {
-    // Don't show again this session if already prompted, dismissed, or submitted
-    if (sessionStorage.getItem(SESSION_KEY)) return;
-
-    function trigger() {
-      if (sessionStorage.getItem(SESSION_KEY)) return;
+    if (alreadyHandled()) return;
+    const timer = setTimeout(() => {
+      if (alreadyHandled()) return;
+      safeSet(sessionStorage, SESSION_KEY, "1");
       setVisible(true);
-    }
-
-    // 1) Desktop: mouse leaves toward the top of the window (classic exit-intent)
-    function handleMouseOut(e) {
-      if (e.clientY <= 0) trigger();
-    }
-
-    // 2) Mobile/tablet (and desktop too): reaching most of the way down the
-    // page is a strong "engaged, about to be done" signal. True exit-intent
-    // isn't reliably detectable on mobile, so this is the practical stand-in.
-    function handleScroll() {
-      const scrollTop = window.scrollY;
-      const docHeight = document.documentElement.scrollHeight - window.innerHeight;
-      if (docHeight > 0 && scrollTop / docHeight >= SCROLL_DEPTH_TRIGGER) {
-        trigger();
-      }
-    }
-
-    // 3) Fallback for anyone who leaves another way (closing the tab, short page, etc.)
-    const fallbackTimer = setTimeout(trigger, FALLBACK_MS);
-
-    document.addEventListener("mouseout", handleMouseOut);
-    window.addEventListener("scroll", handleScroll, { passive: true });
-
-    return () => {
-      document.removeEventListener("mouseout", handleMouseOut);
-      window.removeEventListener("scroll", handleScroll);
-      clearTimeout(fallbackTimer);
-    };
+    }, SHOW_AFTER_MS);
+    return () => clearTimeout(timer);
   }, []);
 
   function dismiss() {
     setVisible(false);
-    sessionStorage.setItem(SESSION_KEY, "1");
+    if (!submitted) safeSet(localStorage, DISMISSED_KEY, String(Date.now()));
   }
 
-  function pickStar(value) {
-    setRating(value);
-    setExpanded(true);
-  }
-
-  async function submitReview() {
-    if (!rating) return;
+  async function submit() {
+    if (!rating || submitting) return;
+    if (website) {
+      // bot filled the hidden field: pretend success, save nothing
+      setSubmitted(true);
+      return;
+    }
     setSubmitting(true);
-    const { error } = await supabase.from("site_reviews").insert({
+    setError("");
+    const { error: err } = await supabase.from("site_reviews").insert({
       name: name.trim() || "Anonymous",
       rating,
       comment: comment.trim() || null,
+      status: "pending",
     });
     setSubmitting(false);
-    if (!error) {
-      setSubmitted(true);
-      sessionStorage.setItem(SESSION_KEY, "1");
-      setTimeout(() => setVisible(false), 2500);
+    if (err) {
+      setError("Sorry, we couldn't send that. Please try again.");
+      return;
     }
+    safeSet(localStorage, DONE_KEY, "1");
+    setSubmitted(true);
+    setTimeout(() => setVisible(false), 3500);
   }
 
-  if (!visible) return null;
+  if (!visible || blocked) return null;
+
+  const shown = hover || rating;
 
   return (
     <div
-      className="fixed bottom-5 right-5 z-50 w-[300px] max-w-[calc(100vw-2.5rem)] bg-white rounded-2xl shadow-2xl border border-slate-200 p-4 animate-in fade-in slide-in-from-bottom-4"
+      className="fixed z-40 bottom-20 sm:bottom-5 right-3 sm:right-5 w-[300px] max-w-[calc(100vw-1.5rem)] bg-white rounded-2xl shadow-2xl border border-slate-200 p-4"
       role="dialog"
-      aria-label="Website review prompt"
+      aria-label="Rate our website"
     >
       <button
         onClick={dismiss}
-        className="absolute top-2 right-2 text-slate-400 hover:text-slate-600"
+        className="absolute top-2 right-2 p-1 text-slate-400 hover:text-slate-600"
         aria-label="Close"
       >
         <X className="w-4 h-4" />
       </button>
 
       {submitted ? (
-        <p className="text-sm font-semibold text-teal-700 py-3 text-center">
-          Thanks for your feedback!
+        <p className="text-sm font-semibold text-teal-700 py-3 text-center pr-3">
+          Thank you! Your review will appear once it has been approved.
         </p>
-      ) : !expanded ? (
+      ) : (
         <>
-          <p className="font-bold text-slate-900 text-sm mb-1">Enjoying the site so far?</p>
-          <p className="text-xs text-slate-500 mb-3">Tap a star to leave a quick review of our site.</p>
-          <div className="flex gap-1">
+          <p className="font-bold text-slate-900 text-sm mb-0.5 pr-6">How are we doing so far?</p>
+          <p className="text-xs text-slate-500 mb-2.5">Tap a star to rate Zanzibar Paradise Tours.</p>
+          <div className="flex gap-1" onMouseLeave={() => setHover(0)}>
             {[1, 2, 3, 4, 5].map((n) => (
-              <button key={n} onClick={() => pickStar(n)} aria-label={`${n} star`}>
-                <Star className="w-6 h-6 text-amber-400 hover:fill-amber-400 transition" />
+              <button
+                key={n}
+                type="button"
+                onClick={() => setRating(n)}
+                onMouseEnter={() => setHover(n)}
+                aria-label={`${n} star${n > 1 ? "s" : ""}`}
+                className="p-0.5"
+              >
+                <Star
+                  className={`w-7 h-7 transition ${n <= shown ? "fill-amber-400 text-amber-400" : "text-slate-300"}`}
+                />
               </button>
             ))}
           </div>
-        </>
-      ) : (
-        <>
-          <p className="font-bold text-slate-900 text-sm mb-2">Thanks! Add a quick note?</p>
-          <div className="flex gap-1 mb-2">
-            {[1, 2, 3, 4, 5].map((n) => (
-              <Star
-                key={n}
-                onClick={() => setRating(n)}
-                className={`w-5 h-5 cursor-pointer ${n <= rating ? "fill-amber-400 text-amber-400" : "text-slate-300"}`}
+
+          {rating > 0 && (
+            <div className="mt-3">
+              <input
+                type="text"
+                placeholder="Your name (optional)"
+                value={name}
+                maxLength={60}
+                onChange={(e) => setName(e.target.value)}
+                className="w-full text-sm border border-slate-200 rounded-lg px-3 py-2 mb-2"
               />
-            ))}
-          </div>
-          <input
-            type="text"
-            placeholder="Your name (optional)"
-            value={name}
-            onChange={(e) => setName(e.target.value)}
-            className="w-full text-sm border border-slate-200 rounded-lg px-3 py-2 mb-2"
-          />
-          <textarea
-            placeholder="Your comment (optional)"
-            value={comment}
-            onChange={(e) => setComment(e.target.value)}
-            rows={2}
-            className="w-full text-sm border border-slate-200 rounded-lg px-3 py-2 mb-3 resize-none"
-          />
-          <button
-            onClick={submitReview}
-            disabled={submitting}
-            className="w-full bg-teal-700 text-white text-sm font-bold py-2 rounded-full hover:bg-teal-800 transition disabled:opacity-60"
-          >
-            {submitting ? "Sending..." : "Submit Review"}
-          </button>
+              <textarea
+                placeholder="Say a few words (optional)"
+                value={comment}
+                maxLength={500}
+                onChange={(e) => setComment(e.target.value)}
+                rows={2}
+                className="w-full text-sm border border-slate-200 rounded-lg px-3 py-2 mb-2 resize-none"
+              />
+              {/* honeypot - hidden from people */}
+              <input
+                type="text"
+                tabIndex={-1}
+                autoComplete="off"
+                aria-hidden="true"
+                value={website}
+                onChange={(e) => setWebsite(e.target.value)}
+                className="absolute left-[-9999px] w-px h-px opacity-0"
+              />
+              {error && <p className="text-xs text-red-600 mb-2">{error}</p>}
+              <button
+                type="button"
+                onClick={submit}
+                disabled={submitting}
+                className="w-full bg-teal-700 text-white text-sm font-bold py-2 rounded-full hover:bg-teal-800 transition disabled:opacity-60"
+              >
+                {submitting ? "Sending..." : "Send review"}
+              </button>
+            </div>
+          )}
         </>
       )}
     </div>
