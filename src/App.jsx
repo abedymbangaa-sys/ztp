@@ -5,6 +5,7 @@ import { SavedListProvider } from "./lib/SavedListContext";
 import { CompareProvider } from "./lib/CompareContext";
 import Navbar from "./components/Navbar";
 import Footer from "./components/Footer";
+import SiteReviewPrompt from "./components/SiteReviewPrompt";
 import ScrollToTop from "./components/ScrollToTop";
 import Home from "./pages/Home";
 // Code-splitting: these pages are visited by a small minority of users
@@ -122,6 +123,7 @@ export default function App() {
           </Routes>
         </Suspense>
         <Footer />
+        <SiteReviewPrompt />
         </div>
         </CompareProvider>
         </SavedListProvider>
