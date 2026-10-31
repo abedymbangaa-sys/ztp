@@ -267,7 +267,12 @@ export default function Home() {
         </section>
       )}
 
-      <LocalPulse />
+      {/* LocalPulse pulls itself up (-mt-8) to overlap the hero. When the
+          "Pick Up" strip sits between them that would cover its cards, so
+          give it matching room in that case. */}
+      <div className={recentListings.length > 0 ? "pt-10" : ""}>
+        <LocalPulse />
+      </div>
 
       {/* Choose Your Zanzibar Story - homepage packaging around the same
           5 categories used by the My Zanzibar Passport stamps (see
