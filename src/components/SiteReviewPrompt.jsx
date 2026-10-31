@@ -5,10 +5,13 @@ import { supabase } from "../lib/supabase";
 
 // Small, non-blocking "rate our website" card. It slides in 10 seconds after
 // a visitor lands on a public page, asks one thing (tap a star), and only then
-// shows an optional name/comment box. Reviews are saved as "pending" and
+// shows an optional name/comment box. A thin bar along the bottom shrinks over
+// 15 seconds and the card then disappears on its own - unless the visitor has
+// already tapped a star, in which case it stays until they finish or close it. Reviews are saved as "pending" and
 // appear on the site after the admin approves them.
 
 const SHOW_AFTER_MS = 10000;
+const AUTO_HIDE_MS = 15000; // card leaves by itself if the visitor does nothing
 const DISMISS_COOLDOWN_MS = 3 * 24 * 60 * 60 * 1000; // after closing, wait 3 days
 const DONE_KEY = "zpt_site_review_done"; // already reviewed -> never ask again
 const DISMISSED_KEY = "zpt_site_review_dismissed_at";
@@ -51,6 +54,13 @@ export default function SiteReviewPrompt() {
   const [submitting, setSubmitting] = useState(false);
   const [submitted, setSubmitted] = useState(false);
   const [error, setError] = useState("");
+
+  // Self-closing countdown: runs only while the visitor hasn't interacted.
+  useEffect(() => {
+    if (!visible || rating > 0 || submitted) return;
+    const timer = setTimeout(() => setVisible(false), AUTO_HIDE_MS);
+    return () => clearTimeout(timer);
+  }, [visible, rating, submitted]);
 
   // Start the 10s countdown once; if the visitor wanders to an excluded page
   // (e.g. admin) the card simply doesn't show there.
@@ -100,7 +110,7 @@ export default function SiteReviewPrompt() {
 
   return (
     <div
-      className="fixed z-40 bottom-20 sm:bottom-5 right-3 sm:right-5 w-[300px] max-w-[calc(100vw-1.5rem)] bg-white rounded-2xl shadow-2xl border border-slate-200 p-4"
+      className="fixed z-40 bottom-20 sm:bottom-5 right-3 sm:right-5 w-[300px] max-w-[calc(100vw-1.5rem)] bg-white rounded-2xl shadow-2xl border border-slate-200 p-4 overflow-hidden"
       role="dialog"
       aria-label="Rate our website"
     >
@@ -178,6 +188,17 @@ export default function SiteReviewPrompt() {
           )}
         </>
       )}
+
+      {/* shrinking time bar (only while waiting for a first tap) */}
+      {!submitted && rating === 0 && (
+        <div className="absolute left-0 bottom-0 h-1 w-full bg-slate-100" aria-hidden="true">
+          <div
+            className="h-full bg-amber-400 origin-left"
+            style={{ animation: `zptShrink ${AUTO_HIDE_MS}ms linear forwards` }}
+          />
+        </div>
+      )}
+      <style>{`@keyframes zptShrink { from { transform: scaleX(1); } to { transform: scaleX(0); } }`}</style>
     </div>
   );
 }
