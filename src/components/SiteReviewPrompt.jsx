@@ -34,6 +34,18 @@ function safeSet(store, key, value) {
   }
 }
 
+// Testing helper: open any page with ?reviewtest=1 to forget the "already
+// shown / closed / reviewed" memory in this browser, so the card appears again.
+try {
+  if (new URLSearchParams(window.location.search).has("reviewtest")) {
+    localStorage.removeItem(DONE_KEY);
+    localStorage.removeItem(DISMISSED_KEY);
+    sessionStorage.removeItem(SESSION_KEY);
+  }
+} catch {
+  // ignore
+}
+
 function alreadyHandled() {
   if (safeGet(localStorage, DONE_KEY)) return true;
   if (safeGet(sessionStorage, SESSION_KEY)) return true;
