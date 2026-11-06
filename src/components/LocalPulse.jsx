@@ -1,6 +1,9 @@
 import { useEffect, useState } from "react";
 import { supabase } from "../lib/supabase";
-import { Sun, CloudSun, CloudRain, Cloud, Radio, UtensilsCrossed, Sunset, Users, Info } from "lucide-react";
+import { Link } from "react-router-dom";
+import EventCard from "./EventCard";
+import { todayZanzibar, compareEvents, isPastEvent } from "../lib/leoEvents";
+import { CalendarDays, Sun, CloudSun, CloudRain, Cloud, Radio, UtensilsCrossed, Sunset, Users, Info } from "lucide-react";
 
 const ZANZIBAR_LAT = -6.1659;
 const ZANZIBAR_LON = 39.2026;
@@ -28,6 +31,7 @@ function weatherIcon(code) {
 export default function LocalPulse() {
   const [weather, setWeather] = useState(null);
   const [items, setItems] = useState([]);
+  const [events, setEvents] = useState([]);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
@@ -43,6 +47,19 @@ export default function LocalPulse() {
         setWeather({ temp: Math.round(data.current.temperature_2m), code: data.current.weather_code });
       })
       .catch(() => {});
+
+    const today = todayZanzibar();
+    supabase
+      .from("leo_events")
+      .select("*")
+      .eq("is_published", true)
+      .or(`end_date.gte.${today},and(end_date.is.null,event_date.gte.${today})`)
+      .order("event_date", { ascending: true })
+      .limit(20)
+      .then(({ data, error }) => {
+        if (cancelled || error) return;
+        setEvents((data || []).filter((e) => !isPastEvent(e, today)).sort(compareEvents).slice(0, 3));
+      });
 
     supabase
       .from("local_pulse")
@@ -63,7 +80,7 @@ export default function LocalPulse() {
   }, []);
 
   if (loading) return null;
-  if (!weather && items.length === 0) return null; // nothing real to show
+  if (!weather && items.length === 0 && events.length === 0) return null; // nothing real to show
 
   const WeatherIcon = weather ? weatherIcon(weather.code) : Sun;
 
@@ -95,6 +112,24 @@ export default function LocalPulse() {
                 </div>
               );
             })}
+          </div>
+        )}
+
+        {events.length > 0 && (
+          <div className="mt-4 pt-3 border-t border-slate-100">
+            <div className="flex items-center justify-between gap-3 mb-2">
+              <p className="flex items-center gap-1.5 text-sm font-bold text-slate-800">
+                <CalendarDays className="w-4 h-4 text-teal-700" /> Upcoming events
+              </p>
+              <Link to="/zanzibar-leo" className="text-xs font-semibold text-teal-700 hover:underline">
+                All events &amp; filters
+              </Link>
+            </div>
+            <div className="space-y-2">
+              {events.map((ev) => (
+                <EventCard key={ev.id} ev={ev} compact />
+              ))}
+            </div>
           </div>
         )}
       </div>
