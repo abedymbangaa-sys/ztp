@@ -1,3 +1,4 @@
+import { Link } from "react-router-dom";
 import { CalendarDays, Clock, MapPin, Ticket, BadgeCheck, Info, ExternalLink, Banknote, ShieldCheck } from "lucide-react";
 import { AREAS } from "../data/areas";
 import { trackEvent } from "../lib/analytics";
@@ -15,6 +16,43 @@ export default function EventCard({ ev, compact = false, past = false }) {
   const dateLabel =
     formatEventDate(ev.event_date) +
     (ev.end_date && ev.end_date !== ev.event_date ? ` – ${formatEventDate(ev.end_date)}` : "");
+
+  // Compact = slim one-row teaser for the homepage strip. Full details
+  // (prices, notice, source, organizer) live on /zanzibar-leo.
+  if (compact) {
+    const d = new Date(ev.event_date + "T00:00:00Z");
+    const day = d.toLocaleDateString("en-GB", { day: "numeric", timeZone: "UTC" });
+    const mon = d.toLocaleDateString("en-GB", { month: "short", timeZone: "UTC" });
+    const shortTime = formatEventTime(ev.start_time).replace(" (Zanzibar time)", "");
+    const place = (ev.venue || "").split(",")[0];
+    return (
+      <div className="flex items-center gap-3">
+        <Link to="/zanzibar-leo" className="flex items-center gap-3 min-w-0 flex-1">
+          <div className="w-11 shrink-0 text-center bg-teal-50 text-teal-800 rounded-lg py-1">
+            <p className="text-base font-bold leading-none">{day}</p>
+            <p className="text-[10px] font-semibold uppercase mt-0.5">{mon}</p>
+          </div>
+          <div className="min-w-0">
+            <p className="text-sm font-semibold text-slate-800 leading-snug line-clamp-2">{ev.title}</p>
+            <p className="text-xs text-slate-500 truncate">
+              {[shortTime, place].filter(Boolean).join(" · ")}
+            </p>
+          </div>
+        </Link>
+        {ev.ticket_url && (
+          <a
+            href={ev.ticket_url}
+            target="_blank"
+            rel="noopener noreferrer nofollow"
+            onClick={() => trackEvent?.("leo_view_tickets", { title: ev.title })}
+            className="shrink-0 inline-flex items-center gap-1 text-xs font-bold text-teal-700 border border-teal-200 hover:bg-teal-50 rounded-full px-3 py-1.5"
+          >
+            <Ticket className="w-3.5 h-3.5" /> Tickets
+          </a>
+        )}
+      </div>
+    );
+  }
 
   return (
     <div className={"bg-white border border-slate-200 rounded-xl p-4 " + (past ? "opacity-75" : "")}>
