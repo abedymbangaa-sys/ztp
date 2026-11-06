@@ -32,6 +32,7 @@ const MORE_LINKS = [
   { to: "/blog", label: "Blog" },
   { to: "/kwa-watanzania", label: "Kwa Watanzania" },
   { to: "/itinerary", label: "Itinerary" },
+  { to: "/zanzibar-leo", label: "Zanzibar Leo" },
   { to: "/find-host", label: "Find My Local Host" },
   { to: "/photo-spots", label: "Photo Spot Guide" },
   { to: "/sustainable", label: "Sustainable Zanzibar" },
