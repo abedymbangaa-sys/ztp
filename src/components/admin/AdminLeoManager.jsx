@@ -17,6 +17,14 @@ const emptyForm = {
   organizer_name: "",
   organizer_url: "",
   verification: "unverified",
+  event_type: "",
+  start_time: "",
+  venue: "",
+  price_info: "",
+  ticket_url: "",
+  source_url: "",
+  source_checked: false,
+  notice: "",
 };
 
 export default function AdminLeoManager() {
@@ -46,13 +54,24 @@ export default function AdminLeoManager() {
     load();
   }, []);
 
-  const change = (ev) => setForm({ ...form, [ev.target.name]: ev.target.value });
+  const change = (ev) =>
+    setForm({ ...form, [ev.target.name]: ev.target.type === "checkbox" ? ev.target.checked : ev.target.value });
 
   async function handleSubmit(ev) {
     ev.preventDefault();
     setError("");
-    if (form.organizer_url && !/^https?:\/\//i.test(form.organizer_url)) {
-      return setError("Organizer link must start with http:// or https://");
+    for (const [label, val] of [
+      ["Organizer link", form.organizer_url],
+      ["Ticket link", form.ticket_url],
+      ["Source link", form.source_url],
+    ]) {
+      if (val && !/^https?:\/\//i.test(val)) return setError(`${label} must start with http:// or https://`);
+    }
+    if (form.source_checked && !form.source_url) {
+      return setError("Add the source link before ticking 'I checked this source'.");
+    }
+    if (events.some((x) => x.title.trim().toLowerCase() === form.title.trim().toLowerCase() && x.event_date === form.event_date)) {
+      return setError("This event (same title and date) already exists.");
     }
     if (form.end_date && form.end_date < form.event_date) {
       return setError("End date cannot be before the start date.");
@@ -69,6 +88,15 @@ export default function AdminLeoManager() {
         organizer_name: form.organizer_name.trim() || null,
         organizer_url: form.organizer_url.trim() || null,
         verification: form.verification,
+        event_type: form.event_type.trim().toLowerCase() || null,
+        start_time: form.start_time || null,
+        venue: form.venue.trim() || null,
+        price_info: form.price_info.trim() || null,
+        ticket_url: form.ticket_url.trim() || null,
+        source_url: form.source_url.trim() || null,
+        source_checked: form.source_checked,
+        source_checked_at: form.source_checked ? new Date().toISOString() : null,
+        notice: form.notice.trim() || null,
         is_published: false,
       },
     ]);
@@ -174,6 +202,40 @@ export default function AdminLeoManager() {
               <input name="organizer_url" value={form.organizer_url} onChange={change} placeholder="https://..." className={inputClass} />
             </div>
           </div>
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+            <div>
+              <label className={labelClass}>Event type (e.g. sports, music, food)</label>
+              <input name="event_type" value={form.event_type} onChange={change} className={inputClass} />
+            </div>
+            <div>
+              <label className={labelClass}>Start time (Zanzibar time, optional)</label>
+              <input type="time" name="start_time" value={form.start_time} onChange={change} className={inputClass} />
+            </div>
+            <div className="sm:col-span-2">
+              <label className={labelClass}>Venue</label>
+              <input name="venue" value={form.venue} onChange={change} placeholder="e.g. Amaan Stadium, Zanzibar City" className={inputClass} />
+            </div>
+            <div className="sm:col-span-2">
+              <label className={labelClass}>Prices (as listed by the source)</label>
+              <input name="price_info" value={form.price_info} onChange={change} placeholder="Adult TZS 20,000 · Child TZS 10,000" className={inputClass} />
+            </div>
+            <div>
+              <label className={labelClass}>Ticket link</label>
+              <input name="ticket_url" value={form.ticket_url} onChange={change} placeholder="https://..." className={inputClass} />
+            </div>
+            <div>
+              <label className={labelClass}>Source link</label>
+              <input name="source_url" value={form.source_url} onChange={change} placeholder="https://..." className={inputClass} />
+            </div>
+          </div>
+          <div>
+            <label className={labelClass}>Notice shown on the card (optional)</label>
+            <input name="notice" value={form.notice} onChange={change} placeholder="Times and prices may change. Confirm with the organizer." className={inputClass} />
+          </div>
+          <label className="flex items-start gap-2 text-sm text-slate-600">
+            <input type="checkbox" name="source_checked" checked={form.source_checked} onChange={change} className="mt-1" />
+            <span>I opened the source link and the details above match it (shows "Details checked against the source").</span>
+          </label>
           <div>
             <label className={labelClass}>Verification</label>
             <select name="verification" value={form.verification} onChange={change} className={inputClass}>
@@ -208,6 +270,8 @@ export default function AdminLeoManager() {
                     {ev.event_date}
                     {ev.end_date ? ` → ${ev.end_date}` : ""} · {areaLabel(ev.area_key)}
                     {ev.interest ? ` · ${ev.interest}` : ""}
+                    {ev.start_time ? ` · ${ev.start_time.slice(0, 5)}` : ""}
+                    {ev.source_checked ? " · source checked" : ""}
                   </p>
                 </div>
                 <div className="flex flex-wrap items-center gap-2">
