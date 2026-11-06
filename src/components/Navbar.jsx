@@ -160,20 +160,19 @@ export default function Navbar() {
         <nav className="md:hidden border-t border-slate-200 bg-white px-4 py-4 flex flex-col gap-1 text-slate-700 font-medium">
           <div className="flex flex-wrap items-center gap-2 py-2.5 border-b border-slate-100" translate="no">
             <span className="text-sm text-slate-500">{t("Language:")}</span>
-            {SUPPORTED_LANGUAGES.map((l) => (
-              <button
-                key={l.code}
-                onClick={() => setLanguage(l.code)}
-                className={
-                  "text-xs font-semibold px-2.5 py-1 rounded-full border " +
-                  (language === l.code
-                    ? "bg-teal-700 text-white border-teal-700"
-                    : "text-slate-600 border-slate-300")
-                }
-              >
-                {l.name}
-              </button>
-            ))}
+            <select
+              value={language}
+              onChange={(e) => setLanguage(e.target.value)}
+              aria-label="Select language"
+              translate="no"
+              className="flex-1 min-w-0 text-sm font-semibold text-slate-700 border border-slate-300 rounded-full px-4 py-2 bg-white focus:outline-none focus:ring-2 focus:ring-teal-600"
+            >
+              {SUPPORTED_LANGUAGES.map((l) => (
+                <option key={l.code} value={l.code} translate="no">
+                  {l.name}
+                </option>
+              ))}
+            </select>
           </div>
           {ALL_LINKS.map((l) => (
             <Link
