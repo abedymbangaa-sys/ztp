@@ -3,20 +3,15 @@ import { applyTranslationCookie, loadGoogleTranslate } from "./googleTranslate";
 
 const LanguageContext = createContext({ language: "en", setLanguage: () => {} });
 
-// "it" and "de" also have hand-written translations for the main menus and
+// "it" also has hand-written translations for the main menus and
 // buttons (src/lib/i18n.js). Everything else on the page (listings, blog,
 // guides, FAQ...) is translated automatically by Google Translate for every
 // non-English language - see src/lib/googleTranslate.js.
 export const SUPPORTED_LANGUAGES = [
   { code: "en", label: "EN", name: "English" },
   { code: "it", label: "IT", name: "Italiano" },
-  { code: "de", label: "DE", name: "Deutsch" },
   { code: "fr", label: "FR", name: "Français" },
   { code: "es", label: "ES", name: "Español" },
-  { code: "nl", label: "NL", name: "Nederlands" },
-  { code: "pl", label: "PL", name: "Polski" },
-  { code: "ru", label: "RU", name: "Русский" },
-  { code: "ar", label: "AR", name: "العربية" },
   { code: "sw", label: "SW", name: "Kiswahili" },
 ];
 
