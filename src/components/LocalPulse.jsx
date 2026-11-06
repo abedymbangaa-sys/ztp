@@ -125,11 +125,14 @@ export default function LocalPulse() {
                 All events &amp; filters
               </Link>
             </div>
-            <div className="space-y-2">
+            <div className="space-y-3">
               {events.map((ev) => (
                 <EventCard key={ev.id} ev={ev} compact />
               ))}
             </div>
+            <p className="mt-3 text-[11px] text-slate-400">
+              Times and prices may change. Confirm with the organizer. Full details and sources on the events page.
+            </p>
           </div>
         )}
       </div>
