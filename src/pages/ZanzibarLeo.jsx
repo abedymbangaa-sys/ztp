@@ -5,9 +5,10 @@ import { useSEO } from "../lib/useSEO";
 import { trackEvent } from "../lib/analytics";
 import { AREAS } from "../data/areas";
 import { listingPath } from "../lib/slug";
+import EventCard from "../components/EventCard";
+import { todayZanzibar, addDays, compareEvents, isPastEvent, overlaps, eventTypeLabel } from "../lib/leoEvents";
 import {
-  Radio, Sun, CloudSun, CloudRain, Waves, Wind, CalendarDays, MapPin, BadgeCheck,
-  ExternalLink, Sparkles, Bell, Loader2, Info, ShieldCheck,
+  Radio, Sun, CloudSun, CloudRain, Waves, Wind, CalendarDays, Sparkles, Bell, Loader2, Info, ShieldCheck,
 } from "lucide-react";
 
 const LAT = -6.1659;
@@ -46,10 +47,6 @@ function timeAgo(iso) {
 
 function areaName(key) {
   return AREAS.find((a) => a.key === key)?.name || "Zanzibar";
-}
-
-function formatDate(d) {
-  return new Date(d + "T00:00:00").toLocaleDateString("en-GB", { weekday: "short", day: "numeric", month: "short" });
 }
 
 function Chip({ active, onClick, children }) {
@@ -169,57 +166,6 @@ function SectionTitle({ icon: Icon, children, sub }) {
   );
 }
 
-function EventRow({ ev }) {
-  return (
-    <div className="bg-white border border-slate-200 rounded-xl p-4">
-      <div className="flex flex-wrap items-start justify-between gap-2">
-        <div className="min-w-0">
-          <p className="font-semibold text-slate-800 break-words">{ev.title}</p>
-          <p className="text-xs text-slate-500 mt-0.5 flex flex-wrap items-center gap-x-3 gap-y-1">
-            <span className="inline-flex items-center gap-1">
-              <CalendarDays className="w-3.5 h-3.5" />
-              {formatDate(ev.event_date)}
-              {ev.end_date && ev.end_date !== ev.event_date ? ` – ${formatDate(ev.end_date)}` : ""}
-            </span>
-            <span className="inline-flex items-center gap-1">
-              <MapPin className="w-3.5 h-3.5" />
-              {ev.area_key ? areaName(ev.area_key) : "Zanzibar"}
-            </span>
-          </p>
-        </div>
-        <span
-          className={
-            "inline-flex items-center gap-1 text-xs font-semibold px-2.5 py-1 rounded-full shrink-0 " +
-            (ev.verification === "verified" ? "bg-teal-50 text-teal-700" : "bg-amber-50 text-amber-700")
-          }
-        >
-          {ev.verification === "verified" ? <BadgeCheck className="w-3.5 h-3.5" /> : <Info className="w-3.5 h-3.5" />}
-          {ev.verification === "verified" ? "Verified" : "Not yet verified"}
-        </span>
-      </div>
-      {ev.description && <p className="text-sm text-slate-600 mt-2 break-words">{ev.description}</p>}
-      {(ev.organizer_name || ev.organizer_url) && (
-        <p className="text-xs text-slate-500 mt-2">
-          Organizer:{" "}
-          {ev.organizer_url ? (
-            <a
-              href={ev.organizer_url}
-              target="_blank"
-              rel="noopener noreferrer nofollow"
-              className="text-teal-700 font-semibold inline-flex items-center gap-1 hover:underline"
-              onClick={() => trackEvent?.("leo_event_organizer_click", { title: ev.title })}
-            >
-              {ev.organizer_name || "Organizer link"} <ExternalLink className="w-3 h-3" />
-            </a>
-          ) : (
-            <span className="font-semibold">{ev.organizer_name}</span>
-          )}
-        </p>
-      )}
-    </div>
-  );
-}
-
 // ---- Subscribe (WhatsApp or email digest) ----
 function SubscribeBox({ area, interest }) {
   const [channel, setChannel] = useState("whatsapp");
@@ -304,6 +250,9 @@ export default function ZanzibarLeo() {
 
   const [area, setArea] = useState("");
   const [interest, setInterest] = useState("");
+  const [eventType, setEventType] = useState("");
+  const [dateFilter, setDateFilter] = useState("any");
+  const [showPast, setShowPast] = useState(false);
   const [pulse, setPulse] = useState([]);
   const [events, setEvents] = useState([]);
   const [recent, setRecent] = useState([]);
@@ -311,7 +260,6 @@ export default function ZanzibarLeo() {
 
   useEffect(() => {
     let cancelled = false;
-    const today = new Date().toISOString().slice(0, 10);
     Promise.all([
       supabase
         .from("local_pulse")
@@ -324,9 +272,8 @@ export default function ZanzibarLeo() {
         .from("leo_events")
         .select("*")
         .eq("is_published", true)
-        .or(`end_date.gte.${today},and(end_date.is.null,event_date.gte.${today})`)
         .order("event_date", { ascending: true })
-        .limit(60),
+        .limit(200),
       supabase
         .from("listings")
         .select("*")
@@ -347,11 +294,31 @@ export default function ZanzibarLeo() {
     (!area || !row.area_key || row.area_key === area) && (!interest || !row.interest || row.interest === interest);
 
   const pulseShown = useMemo(() => pulse.filter(matches).slice(0, 6), [pulse, area, interest]);
-  const eventsShown = useMemo(() => events.filter(matches), [events, area, interest]);
 
-  const weekEnd = new Date(Date.now() + 7 * 86400000).toISOString().slice(0, 10);
-  const thisWeek = eventsShown.filter((ev) => ev.event_date <= weekEnd);
-  const later = eventsShown.filter((ev) => ev.event_date > weekEnd);
+  const today = todayZanzibar();
+  const typeOptions = useMemo(
+    () => Array.from(new Set(events.map((e) => e.event_type).filter(Boolean))),
+    [events]
+  );
+
+  const filtered = useMemo(() => {
+    const windows = {
+      today: [today, today],
+      week: [today, addDays(today, 7)],
+      month: [today, addDays(today, 30)],
+    };
+    return events
+      .filter(matches)
+      .filter((ev) => !eventType || ev.event_type === eventType)
+      .filter((ev) => dateFilter === "any" || overlaps(ev, ...windows[dateFilter]))
+      .sort(compareEvents);
+  }, [events, area, interest, eventType, dateFilter, today]);
+
+  const upcoming = filtered.filter((ev) => !isPastEvent(ev, today));
+  const pastEvents = filtered.filter((ev) => isPastEvent(ev, today)).reverse();
+  const weekEnd = addDays(today, 7);
+  const thisWeek = dateFilter === "any" ? upcoming.filter((ev) => ev.event_date <= weekEnd) : [];
+  const later = dateFilter === "any" ? upcoming.filter((ev) => ev.event_date > weekEnd) : upcoming;
 
   const recommendations = useMemo(() => {
     return recent
@@ -404,6 +371,25 @@ export default function ZanzibarLeo() {
               ))}
             </div>
           </div>
+          <div>
+            <p className="text-xs font-semibold uppercase tracking-wide text-slate-400 mb-2">Event date</p>
+            <div className="flex flex-wrap gap-2">
+              {[["any", "Any date"], ["today", "Today"], ["week", "Next 7 days"], ["month", "Next 30 days"]].map(([k, l]) => (
+                <Chip key={k} active={dateFilter === k} onClick={() => setDateFilter(k)}>{l}</Chip>
+              ))}
+            </div>
+          </div>
+          {typeOptions.length > 0 && (
+            <div>
+              <p className="text-xs font-semibold uppercase tracking-wide text-slate-400 mb-2">Event type</p>
+              <div className="flex flex-wrap gap-2">
+                <Chip active={!eventType} onClick={() => setEventType("")}>All types</Chip>
+                {typeOptions.map((t) => (
+                  <Chip key={t} active={eventType === t} onClick={() => setEventType(t)}>{eventTypeLabel(t)}</Chip>
+                ))}
+              </div>
+            </div>
+          )}
         </section>
 
         {loading ? (
@@ -437,22 +423,42 @@ export default function ZanzibarLeo() {
               <SectionTitle icon={CalendarDays} sub="Always check the organizer before you travel. Dates can change.">
                 Events
               </SectionTitle>
-              {eventsShown.length === 0 ? (
+              {upcoming.length === 0 ? (
                 <p className="text-sm text-slate-500 bg-white border border-dashed border-slate-300 rounded-xl p-4">
-                  No events listed for this selection yet. Subscribe below and we'll tell you when something is added.
+                  No upcoming events for this selection. Try another date or area, or subscribe below and we'll tell
+                  you when something is added.
                 </p>
               ) : (
                 <div className="space-y-4">
                   {thisWeek.length > 0 && (
                     <div>
                       <p className="text-sm font-bold text-teal-800 mb-2">This week</p>
-                      <div className="space-y-2">{thisWeek.map((ev) => <EventRow key={ev.id} ev={ev} />)}</div>
+                      <div className="space-y-2">{thisWeek.map((ev) => <EventCard key={ev.id} ev={ev} />)}</div>
                     </div>
                   )}
                   {later.length > 0 && (
                     <div>
-                      <p className="text-sm font-bold text-slate-600 mb-2">Coming up</p>
-                      <div className="space-y-2">{later.map((ev) => <EventRow key={ev.id} ev={ev} />)}</div>
+                      <p className="text-sm font-bold text-slate-600 mb-2">
+                        {dateFilter === "any" ? "Coming up" : "Upcoming events"}
+                      </p>
+                      <div className="space-y-2">{later.map((ev) => <EventCard key={ev.id} ev={ev} />)}</div>
+                    </div>
+                  )}
+                </div>
+              )}
+
+              {pastEvents.length > 0 && (
+                <div className="mt-4">
+                  <button
+                    type="button"
+                    onClick={() => setShowPast((v) => !v)}
+                    className="text-sm font-semibold text-slate-500 hover:text-teal-700"
+                  >
+                    {showPast ? "Hide" : "Show"} past events ({pastEvents.length})
+                  </button>
+                  {showPast && (
+                    <div className="space-y-2 mt-2">
+                      {pastEvents.map((ev) => <EventCard key={ev.id} ev={ev} past />)}
                     </div>
                   )}
                 </div>
