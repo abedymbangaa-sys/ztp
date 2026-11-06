@@ -42,6 +42,7 @@ const ReviewQuick = lazy(() => import("./pages/ReviewQuick"));
 const PhotoSpots = lazy(() => import("./pages/PhotoSpots"));
 const Sustainable = lazy(() => import("./pages/Sustainable"));
 const FindLocalHost = lazy(() => import("./pages/FindLocalHost"));
+const ZanzibarLeo = lazy(() => import("./pages/ZanzibarLeo"));
 const Collections = lazy(() => import("./pages/Collections"));
 const CollectionDetail = lazy(() => import("./pages/CollectionDetail"));
 const NearMe = lazy(() => import("./pages/NearMe"));
@@ -82,6 +83,7 @@ export default function App() {
             <Route path="/partner/dashboard" element={<PartnerDashboard />} />
             <Route path="/admin/login" element={<AdminLogin />} />
             <Route path="/admin/dashboard" element={<AdminDashboard />} />
+            <Route path="/zanzibar-leo" element={<ZanzibarLeo />} />
             <Route path="/blog" element={<Blog />} />
             <Route path="/blog/:slug" element={<BlogPost />} />
             <Route path="/itinerary" element={<Itinerary />} />
