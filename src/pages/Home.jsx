@@ -278,35 +278,36 @@ export default function Home() {
           5 categories used by the My Zanzibar Passport stamps (see
           src/lib/stamps.js), so the whole site tells one consistent
           story instead of two separate systems. */}
-      <section className="max-w-6xl mx-auto px-4 py-16">
-        <div className="mb-8 text-center">
-          <p className="text-teal-700 font-semibold text-sm uppercase tracking-wide">Where do you start?</p>
-          <h2 className="text-2xl sm:text-3xl font-bold text-slate-900">What Kind of Zanzibar Are You Looking For?</h2>
-          <p className="text-slate-500 mt-1 max-w-xl mx-auto">
+      <section className="max-w-6xl mx-auto px-4 py-10 sm:py-16">
+        <div className="mb-5 sm:mb-8 text-center">
+          <p className="text-teal-700 font-semibold text-xs sm:text-sm uppercase tracking-wide">Where do you start?</p>
+          <h2 className="text-xl sm:text-3xl font-bold text-slate-900">What Kind of Zanzibar Are You Looking For?</h2>
+          <p className="text-slate-500 mt-1 max-w-xl mx-auto text-sm sm:text-base">
             Beach days, Stone Town heritage, island flavours, wild nature, or experiences that bring you closer to
             local life — save places along the way and earn the matching Passport stamp.
           </p>
         </div>
-        <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-4">
+        <div className="flex gap-3 overflow-x-auto snap-x -mx-4 px-4 pb-1 [scrollbar-width:none] [&::-webkit-scrollbar]:hidden sm:mx-0 sm:px-0 sm:pb-0 sm:grid sm:grid-cols-3 lg:grid-cols-5 sm:gap-4 sm:overflow-visible">
           {["beach", "heritage", "food", "nature", "local"].map((key) => {
             const meta = STAMP_TYPES[key];
             return (
               <Link
                 key={key}
                 to={meta.route}
-                className="group rounded-2xl border p-5 flex flex-col items-center text-center gap-2 bg-white hover:shadow-lg transition"
+                className="group shrink-0 w-28 sm:w-auto snap-start rounded-2xl border p-3 sm:p-5 flex flex-col items-center text-center gap-1.5 sm:gap-2 bg-white hover:shadow-lg transition"
                 style={{ borderColor: `${meta.color}33` }}
               >
                 <span
-                  className="flex items-center justify-center w-14 h-14 rounded-full mb-1 group-hover:scale-105 transition"
+                  className="flex items-center justify-center w-11 h-11 sm:w-14 sm:h-14 rounded-full sm:mb-1 group-hover:scale-105 transition"
                   style={{ backgroundColor: `${meta.color}14` }}
                 >
                   <StampSeal stampKey={key} color={meta.color} size={30} />
                 </span>
                 <p className="font-bold text-slate-900 text-sm">{meta.label.replace(" Stamp", "")}</p>
-                <p className="text-xs text-slate-500 leading-snug">{meta.description}</p>
+                <p className="hidden sm:block text-xs text-slate-500 leading-snug">{meta.description}</p>
                 <span className="text-xs font-semibold mt-1" style={{ color: meta.color }}>
-                  Start this story →
+                  <span className="sm:hidden">Explore →</span>
+                  <span className="hidden sm:inline">Start this story →</span>
                 </span>
               </Link>
             );
