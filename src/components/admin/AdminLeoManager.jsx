@@ -23,6 +23,7 @@ const emptyForm = {
   price_info: "",
   ticket_url: "",
   source_url: "",
+  source_label: "",
   source_checked: false,
   notice: "",
 };
@@ -94,6 +95,7 @@ export default function AdminLeoManager() {
         price_info: form.price_info.trim() || null,
         ticket_url: form.ticket_url.trim() || null,
         source_url: form.source_url.trim() || null,
+        source_label: form.source_label.trim() || null,
         source_checked: form.source_checked,
         source_checked_at: form.source_checked ? new Date().toISOString() : null,
         notice: form.notice.trim() || null,
@@ -227,6 +229,10 @@ export default function AdminLeoManager() {
               <label className={labelClass}>Source link</label>
               <input name="source_url" value={form.source_url} onChange={change} placeholder="https://..." className={inputClass} />
             </div>
+            <div className="sm:col-span-2">
+              <label className={labelClass}>Source name (say exactly what it is, e.g. "Official festival website")</label>
+              <input name="source_label" value={form.source_label} onChange={change} className={inputClass} />
+            </div>
           </div>
           <div>
             <label className={labelClass}>Notice shown on the card (optional)</label>
@@ -234,7 +240,7 @@ export default function AdminLeoManager() {
           </div>
           <label className="flex items-start gap-2 text-sm text-slate-600">
             <input type="checkbox" name="source_checked" checked={form.source_checked} onChange={change} className="mt-1" />
-            <span>I opened the source link and the details above match it (shows "Details checked against the source").</span>
+            <span>I opened the source link and the date matches it (shows "Date confirmed"). Leave unticked to show "Needs verification".</span>
           </label>
           <div>
             <label className={labelClass}>Verification</label>
