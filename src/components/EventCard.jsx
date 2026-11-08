@@ -65,6 +65,15 @@ export default function EventCard({ ev, compact = false, past = false }) {
           )}
           <p className="font-semibold text-slate-800 break-words">{ev.title}</p>
         </div>
+        <span
+          className={
+            "inline-flex items-center gap-1 text-xs font-semibold px-2.5 py-1 rounded-full shrink-0 " +
+            (ev.source_checked ? "bg-teal-50 text-teal-700" : "bg-amber-50 text-amber-700")
+          }
+        >
+          {ev.source_checked ? <ShieldCheck className="w-3.5 h-3.5" /> : <Info className="w-3.5 h-3.5" />}
+          {ev.source_checked ? "Date confirmed" : "Needs verification"}
+        </span>
         {ev.verification === "verified" && (
           <span className="inline-flex items-center gap-1 text-xs font-semibold px-2.5 py-1 rounded-full shrink-0 bg-teal-50 text-teal-700">
             <BadgeCheck className="w-3.5 h-3.5" /> Confirmed by organizer
@@ -119,15 +128,14 @@ export default function EventCard({ ev, compact = false, past = false }) {
             <Ticket className="w-3.5 h-3.5" /> View tickets
           </a>
         )}
-        {ev.source_checked && ev.source_url && (
+        {ev.source_url && (
           <a
             href={ev.source_url}
             target="_blank"
             rel="noopener noreferrer nofollow"
             className="inline-flex items-center gap-1 text-xs text-teal-700 font-semibold hover:underline"
           >
-            <ShieldCheck className="w-3.5 h-3.5" /> Details checked against the source{" "}
-            <ExternalLink className="w-3 h-3" />
+            Source{ev.source_label ? `: ${ev.source_label}` : ""} <ExternalLink className="w-3 h-3" />
           </a>
         )}
       </div>
