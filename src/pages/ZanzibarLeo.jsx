@@ -55,7 +55,7 @@ function Chip({ active, onClick, children }) {
       type="button"
       onClick={onClick}
       className={
-        "text-sm font-semibold px-3.5 py-1.5 rounded-full border transition whitespace-nowrap " +
+        "text-xs font-semibold px-3 py-1.5 rounded-full border transition whitespace-nowrap shrink-0 " +
         (active
           ? "bg-teal-700 border-teal-700 text-white"
           : "bg-white border-slate-300 text-slate-600 hover:border-teal-400")
@@ -352,10 +352,10 @@ export default function ZanzibarLeo() {
       <div className="max-w-4xl mx-auto px-4 -mt-6 space-y-6">
         <ConditionsCard />
 
-        <section className="bg-white border border-slate-200 rounded-2xl p-5 space-y-4">
+        <section className="bg-white border border-slate-200 rounded-2xl px-4 py-3 space-y-2.5">
           <div>
-            <p className="text-xs font-semibold uppercase tracking-wide text-slate-400 mb-2">Area</p>
-            <div className="flex flex-wrap gap-2">
+            <p className="text-[10px] font-semibold uppercase tracking-wide text-slate-400 mb-1">Area</p>
+            <div className="flex gap-2 overflow-x-auto -mx-4 px-4 pb-1 [scrollbar-width:none] [&::-webkit-scrollbar]:hidden">
               <Chip active={!area} onClick={() => setArea("")}>All Zanzibar</Chip>
               {AREAS.map((a) => (
                 <Chip key={a.key} active={area === a.key} onClick={() => setArea(a.key)}>{a.name}</Chip>
@@ -363,8 +363,8 @@ export default function ZanzibarLeo() {
             </div>
           </div>
           <div>
-            <p className="text-xs font-semibold uppercase tracking-wide text-slate-400 mb-2">Interest</p>
-            <div className="flex flex-wrap gap-2">
+            <p className="text-[10px] font-semibold uppercase tracking-wide text-slate-400 mb-1">Interest</p>
+            <div className="flex gap-2 overflow-x-auto -mx-4 px-4 pb-1 [scrollbar-width:none] [&::-webkit-scrollbar]:hidden">
               <Chip active={!interest} onClick={() => setInterest("")}>Everything</Chip>
               {LEO_INTERESTS.map((i) => (
                 <Chip key={i.key} active={interest === i.key} onClick={() => setInterest(i.key)}>{i.label}</Chip>
@@ -372,8 +372,8 @@ export default function ZanzibarLeo() {
             </div>
           </div>
           <div>
-            <p className="text-xs font-semibold uppercase tracking-wide text-slate-400 mb-2">Event date</p>
-            <div className="flex flex-wrap gap-2">
+            <p className="text-[10px] font-semibold uppercase tracking-wide text-slate-400 mb-1">Event date</p>
+            <div className="flex gap-2 overflow-x-auto -mx-4 px-4 pb-1 [scrollbar-width:none] [&::-webkit-scrollbar]:hidden">
               {[["any", "Any date"], ["today", "Today"], ["week", "Next 7 days"], ["month", "Next 30 days"]].map(([k, l]) => (
                 <Chip key={k} active={dateFilter === k} onClick={() => setDateFilter(k)}>{l}</Chip>
               ))}
@@ -381,8 +381,8 @@ export default function ZanzibarLeo() {
           </div>
           {typeOptions.length > 0 && (
             <div>
-              <p className="text-xs font-semibold uppercase tracking-wide text-slate-400 mb-2">Event type</p>
-              <div className="flex flex-wrap gap-2">
+              <p className="text-[10px] font-semibold uppercase tracking-wide text-slate-400 mb-1">Event type</p>
+              <div className="flex gap-2 overflow-x-auto -mx-4 px-4 pb-1 [scrollbar-width:none] [&::-webkit-scrollbar]:hidden">
                 <Chip active={!eventType} onClick={() => setEventType("")}>All types</Chip>
                 {typeOptions.map((t) => (
                   <Chip key={t} active={eventType === t} onClick={() => setEventType(t)}>{eventTypeLabel(t)}</Chip>
