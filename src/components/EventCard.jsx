@@ -1,4 +1,5 @@
 import { Link } from "react-router-dom";
+import ImageWithFallback from "./ImageWithFallback";
 import { CalendarDays, Clock, MapPin, Ticket, BadgeCheck, Info, ExternalLink, Banknote, ShieldCheck } from "lucide-react";
 import { AREAS } from "../data/areas";
 import { trackEvent } from "../lib/analytics";
@@ -55,7 +56,23 @@ export default function EventCard({ ev, compact = false, past = false }) {
   }
 
   return (
-    <div className={"bg-white border border-slate-200 rounded-xl p-4 " + (past ? "opacity-75" : "")}>
+    <div className={"bg-white border border-slate-200 rounded-xl overflow-hidden " + (past ? "opacity-75" : "")}>
+      {ev.image_url && (
+        <div className="relative">
+          <ImageWithFallback
+            src={ev.image_url}
+            alt={ev.title}
+            loading="lazy"
+            className="w-full aspect-[16/9] object-cover bg-slate-100"
+          />
+          {ev.image_credit && (
+            <span className="absolute bottom-1.5 right-2 text-[10px] text-white/90 bg-black/45 rounded px-1.5 py-0.5">
+              Photo: {ev.image_credit}
+            </span>
+          )}
+        </div>
+      )}
+      <div className="p-4">
       <div className="flex flex-wrap items-start justify-between gap-2">
         <div className="min-w-0">
           {ev.event_type && (
@@ -157,6 +174,7 @@ export default function EventCard({ ev, compact = false, past = false }) {
           )}
         </p>
       )}
+      </div>
     </div>
   );
 }
