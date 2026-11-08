@@ -2,6 +2,7 @@ import { useEffect, useState } from "react";
 import { supabase } from "../../lib/supabase";
 import { AREAS } from "../../data/areas";
 import { LEO_INTERESTS } from "../../pages/ZanzibarLeo";
+import { SinglePhotoUploader } from "../ImageUploader";
 
 const inputClass =
   "w-full border border-slate-300 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-teal-600";
@@ -24,6 +25,8 @@ const emptyForm = {
   ticket_url: "",
   source_url: "",
   source_label: "",
+  image_url: "",
+  image_credit: "",
   source_checked: false,
   notice: "",
 };
@@ -37,6 +40,7 @@ export default function AdminLeoManager() {
   const [error, setError] = useState("");
   const [busyId, setBusyId] = useState(null);
   const [copied, setCopied] = useState("");
+  const [photoFor, setPhotoFor] = useState(null);
 
   async function load() {
     setLoading(true);
@@ -96,6 +100,8 @@ export default function AdminLeoManager() {
         ticket_url: form.ticket_url.trim() || null,
         source_url: form.source_url.trim() || null,
         source_label: form.source_label.trim() || null,
+        image_url: form.image_url || null,
+        image_credit: form.image_credit.trim() || null,
         source_checked: form.source_checked,
         source_checked_at: form.source_checked ? new Date().toISOString() : null,
         notice: form.notice.trim() || null,
@@ -235,6 +241,23 @@ export default function AdminLeoManager() {
             </div>
           </div>
           <div>
+            <SinglePhotoUploader
+              label="Event photo (optional)"
+              value={form.image_url}
+              onChange={(url) => setForm((f) => ({ ...f, image_url: url }))}
+            />
+            <p className="text-xs text-slate-500 mt-1">
+              Use only your own photo, or one the organizer gave you permission to use. Photos are compressed automatically.
+            </p>
+            <input
+              name="image_credit"
+              value={form.image_credit}
+              onChange={change}
+              placeholder="Photo credit (e.g. Kendwa Rocks)"
+              className={inputClass + " mt-2"}
+            />
+          </div>
+          <div>
             <label className={labelClass}>Notice shown on the card (optional)</label>
             <input name="notice" value={form.notice} onChange={change} placeholder="Times and prices may change. Confirm with the organizer." className={inputClass} />
           </div>
@@ -292,6 +315,12 @@ export default function AdminLeoManager() {
                     {ev.verification === "verified" ? "Verified" : "Unverified"}
                   </button>
                   <button
+                    onClick={() => setPhotoFor(photoFor === ev.id ? null : ev.id)}
+                    className="text-xs font-semibold px-3 py-1.5 rounded-full bg-slate-100 text-slate-700"
+                  >
+                    {ev.image_url ? "Change photo" : "Add photo"}
+                  </button>
+                  <button
                     onClick={() => patch(ev.id, { is_published: !ev.is_published })}
                     disabled={busyId === ev.id}
                     className={
@@ -309,6 +338,20 @@ export default function AdminLeoManager() {
                     Delete
                   </button>
                 </div>
+                {photoFor === ev.id && (
+                  <div className="w-full border-t border-slate-100 pt-3 space-y-2">
+                    <SinglePhotoUploader
+                      value={ev.image_url || ""}
+                      onChange={(url) => patch(ev.id, { image_url: url || null })}
+                    />
+                    <input
+                      defaultValue={ev.image_credit || ""}
+                      onBlur={(e) => patch(ev.id, { image_credit: e.target.value.trim() || null })}
+                      placeholder="Photo credit (e.g. Kendwa Rocks)"
+                      className={inputClass}
+                    />
+                  </div>
+                )}
               </div>
             ))}
           </div>
