@@ -7,6 +7,9 @@ const TZ = "Africa/Dar_es_Salaam";
 
 export const EVENT_TYPES = {
   sports: "Sports",
+  nightlife: "Music / Nightlife",
+  festival: "Music / Festival",
+  holiday: "Public holiday",
 };
 
 export function eventTypeLabel(key) {
