@@ -1,4 +1,5 @@
 import { useEffect } from "react";
+import { normalizeBrand } from "./brand";
 
 function setMetaContent(selector, attr, value) {
   if (!value) return;
@@ -12,7 +13,10 @@ function setMetaContent(selector, attr, value) {
 // crawlers see before JS runs. This hook keeps the SAME tags correct once
 // React mounts and the visitor navigates client-side (browser tab title,
 // and any share-sheet/preview grabbed after JS has run).
-export function useSEO({ title, description, canonical, image, structuredData }) {
+export function useSEO({ title: rawTitle, description: rawDescription, canonical, image, structuredData }) {
+  // Keep the brand name consistent with the domain on every page.
+  const title = normalizeBrand(rawTitle);
+  const description = normalizeBrand(rawDescription);
   useEffect(() => {
     const prevTitle = document.title;
     if (title) document.title = title;
