@@ -212,8 +212,8 @@ async function main() {
 
     try {
       writeStaticPage(template, `/${cat.key}`, {
-        title: `${cat.title || cat.key} | Zanzibar Paradise Tours`,
-        description: `${cat.title || cat.key} in Zanzibar — ${catListings.length} listings, curated by Zanzibar Paradise Tours.`,
+        title: `${cat.title || cat.key} | Visit Zanzibar Paradise`,
+        description: `${cat.title || cat.key} in Zanzibar — ${catListings.length} listings, curated by Visit Zanzibar Paradise.`,
         bodyHtml: `<h1>${escapeHtml(cat.title || cat.key)}</h1><ul>${listItems}</ul>`,
         preload: { type: "listings", categoryKey: cat.key, data: catListings },
       });
@@ -237,7 +237,7 @@ async function main() {
         const stats = reviewStatsByListing[l.id];
         const samples = sampleReviewsByListing[l.id] || [];
         const listingPage = {
-          title: `${l.title} | ${cat.title || cat.key} | Zanzibar Paradise Tours`,
+          title: `${l.title} | ${cat.title || cat.key} | Visit Zanzibar Paradise`,
           description: (l.description || "").slice(0, 155),
           image: l.image_url,
           url: pageUrl,
@@ -302,7 +302,7 @@ async function main() {
         .join("");
       const pageUrl = `${SITE_URL}/area/${area.key}`;
       writeStaticPage(template, `/area/${area.key}`, {
-        title: `${area.name} Zanzibar — Hotels, Tours & Things to Do | Zanzibar Paradise Tours`,
+        title: `${area.name} Zanzibar — Hotels, Tours & Things to Do | Visit Zanzibar Paradise`,
         description: area.description.slice(0, 155),
         image: area.heroImage,
         url: pageUrl,
@@ -335,7 +335,7 @@ async function main() {
       .map((g) => `<li><a href="/guides/${escapeHtml(g.slug)}">${escapeHtml(g.title)}</a></li>`)
       .join("");
     writeStaticPage(template, "/guides", {
-      title: "Zanzibar Travel Guides — Airport, Ferry, Money & More | Zanzibar Paradise Tours",
+      title: "Zanzibar Travel Guides — Airport, Ferry, Money & More | Visit Zanzibar Paradise",
       description:
         "Practical Zanzibar travel guides: airport transfers, the Dar es Salaam ferry, tide times, best time to visit, money & costs, and local etiquette.",
       bodyHtml: `<h1>Zanzibar Travel Guides</h1><ul>${listItems}</ul>`,
@@ -348,7 +348,7 @@ async function main() {
         const pageUrl = `${SITE_URL}/guides/${g.slug}`;
         const description = g.excerpt || (g.content || "").slice(0, 155);
         writeStaticPage(template, `/guides/${g.slug}`, {
-          title: `${g.title} | Zanzibar Paradise Tours`,
+          title: `${g.title} | Visit Zanzibar Paradise`,
           description,
           image: g.cover_image,
           url: pageUrl,
@@ -361,8 +361,8 @@ async function main() {
             image: g.cover_image ? [absoluteUrl(g.cover_image)] : undefined,
             datePublished: g.created_at,
             dateModified: g.updated_at || g.created_at,
-            author: { "@type": "Organization", name: "Zanzibar Paradise Tours" },
-            publisher: { "@type": "Organization", name: "Zanzibar Paradise Tours" },
+            author: { "@type": "Organization", name: "Visit Zanzibar Paradise" },
+            publisher: { "@type": "Organization", name: "Visit Zanzibar Paradise" },
             mainEntityOfPage: pageUrl,
           },
           preload: { type: "guide", slug: g.slug, data: g },
@@ -389,7 +389,7 @@ async function main() {
       )
       .join("");
     writeStaticPage(template, "/things-to-do", {
-      title: "Things to Do in Zanzibar | Zanzibar Paradise Tours",
+      title: "Things to Do in Zanzibar | Visit Zanzibar Paradise",
       description:
         "The best things to do in Zanzibar — tours, attractions, heritage sites, caves, nature spots and unique experiences, curated by locals.",
       bodyHtml: `<h1>Things to Do in Zanzibar</h1><ul>${listItems}</ul>`,
@@ -408,7 +408,7 @@ async function main() {
       .map((p) => `<li><a href="/blog/${escapeHtml(p.slug)}">${escapeHtml(p.title)}</a></li>`)
       .join("");
     writeStaticPage(template, "/kwa-watanzania", {
-      title: "Safari Zanzibar Kwa Watanzania | Zanzibar Paradise Tours",
+      title: "Safari Zanzibar Kwa Watanzania | Visit Zanzibar Paradise",
       description: "Vidokezo, bei, na maelezo ya safari za Zanzibar kwa Watanzania — kwa lugha ya Kiswahili.",
       bodyHtml: `<h1>Safari za Zanzibar Kwa Watanzania</h1><ul>${listItems}</ul>`,
     });
@@ -427,7 +427,7 @@ async function main() {
         const pageUrl = `${SITE_URL}/blog/${post.slug}`;
         const description = post.excerpt || (post.content || "").slice(0, 155);
         writeStaticPage(template, `/blog/${post.slug}`, {
-          title: `${post.title} | Zanzibar Paradise Tours Blog`,
+          title: `${post.title} | Visit Zanzibar Paradise Blog`,
           description,
           image: post.cover_image,
           url: pageUrl,
@@ -440,8 +440,8 @@ async function main() {
             image: post.cover_image ? [absoluteUrl(post.cover_image)] : undefined,
             datePublished: post.created_at,
             dateModified: post.updated_at || post.created_at,
-            author: { "@type": "Organization", name: "Zanzibar Paradise Tours" },
-            publisher: { "@type": "Organization", name: "Zanzibar Paradise Tours" },
+            author: { "@type": "Organization", name: "Visit Zanzibar Paradise" },
+            publisher: { "@type": "Organization", name: "Visit Zanzibar Paradise" },
             mainEntityOfPage: pageUrl,
           },
           preload: { type: "blog_post", slug: post.slug, data: post },
@@ -469,7 +469,7 @@ async function main() {
       .join("");
 
     writeStaticPage(template, "/itinerary", {
-      title: "Free 5-Day Zanzibar Itinerary PDF | Zanzibar Paradise Tours",
+      title: "Free 5-Day Zanzibar Itinerary PDF | Visit Zanzibar Paradise",
       description:
         "Download a free practical 5-day Zanzibar itinerary with beaches, Stone Town, spice farms, Jozani Forest and marine activities.",
       bodyHtml: `<h1>Free Zanzibar Itinerary Guides</h1><ul>${listItems}</ul>`,
@@ -482,7 +482,7 @@ async function main() {
         const slug = slugify(g.title);
         const pageUrl = `${SITE_URL}/itinerary/${slug}`;
         writeStaticPage(template, `/itinerary/${slug}`, {
-          title: `${g.title} | Free Online Itinerary | Zanzibar Paradise Tours`,
+          title: `${g.title} | Free Online Itinerary | Visit Zanzibar Paradise`,
           description: g.description || "A free, practical day-by-day Zanzibar itinerary.",
           image: g.cover_image,
           url: pageUrl,
@@ -569,9 +569,9 @@ async function main() {
         <nav aria-label="Categories" class="max-w-6xl mx-auto px-4 py-8"><ul class="flex flex-wrap gap-3 list-none p-0 m-0">${categoryLinks}</ul></nav>
         <nav aria-label="Areas of Zanzibar" class="max-w-6xl mx-auto px-4 py-4"><ul class="flex flex-wrap gap-3 list-none p-0 m-0">${areaLinks}</ul></nav>
         <section aria-label="Featured listings" class="max-w-6xl mx-auto px-4 py-4"><ul class="flex flex-wrap gap-3 list-none p-0 m-0">${listingLinks}</ul></section>
-        <section aria-label="About Zanzibar Paradise Tours" class="max-w-3xl mx-auto px-4 py-8 pb-16 text-slate-700 leading-relaxed">
+        <section aria-label="About Visit Zanzibar Paradise" class="max-w-3xl mx-auto px-4 py-8 pb-16 text-slate-700 leading-relaxed">
           <h2 class="text-2xl font-bold text-slate-900 mb-3">Plan your Zanzibar trip with real local information</h2>
-          <p class="mb-3">Zanzibar Paradise Tours is a directory of hotels, tours, restaurants, beaches, caves, nature spots and heritage sites across Zanzibar &mdash; from Stone Town and the north coast beaches of Nungwi and Kendwa to Paje, Jambiani and Pemba.</p>
+          <p class="mb-3">Visit Zanzibar Paradise is a directory of hotels, tours, restaurants, beaches, caves, nature spots and heritage sites across Zanzibar &mdash; from Stone Town and the north coast beaches of Nungwi and Kendwa to Paje, Jambiani and Pemba.</p>
           <p class="mb-3">We are not a booking agent and we do not charge booking fees or commissions. Every listing is reviewed before it goes live, and you contact hotels and tour operators directly on WhatsApp to ask questions and arrange your trip on your own terms.</p>
           <p class="mb-3">New to the island? Start with our <a href="/itinerary/5-days-in-zanzibar" class="text-teal-700 font-semibold">free 5-day Zanzibar itinerary</a>, read the <a href="/guides" class="text-teal-700 font-semibold">practical travel guides</a> (airport, ferry, money, best time to visit), or see <a href="/how-we-verify" class="text-teal-700 font-semibold">how we verify listings</a>, <a href="/faq" class="text-teal-700 font-semibold">common questions</a> and <a href="/about" class="text-teal-700 font-semibold">who we are</a>.</p>
         </section>
@@ -579,7 +579,7 @@ async function main() {
     `;
 
     let html = template
-      .replace(/<meta name="description" content=".*?"\s*\/?>/s, `<meta name="description" content="${escapeHtml("Zanzibar Paradise Tours - a trusted directory of hotels, tours, beaches and attractions in Zanzibar, built by people who know the island well.")}" />`)
+      .replace(/<meta name="description" content=".*?"\s*\/?>/s, `<meta name="description" content="${escapeHtml("Visit Zanzibar Paradise - a trusted directory of hotels, tours, beaches and attractions in Zanzibar, built by people who know the island well.")}" />`)
       .replace('<div id="root"></div>', `<div id="root">${bodyHtml}</div>`);
 
     fs.writeFileSync(path.join(DIST_DIR, "index.html"), html, "utf8");
