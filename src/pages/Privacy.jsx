@@ -6,7 +6,7 @@ export default function Privacy() {
 
       <div className="space-y-6 text-slate-700 leading-relaxed">
         <p>
-          This Privacy Policy explains how Zanzibar Paradise Tours ("we", "us", "our") collects, uses, and
+          This Privacy Policy explains how Visit Zanzibar Paradise ("we", "us", "our") collects, uses, and
           protects information when you use our website.
         </p>
 
