@@ -1,4 +1,4 @@
-// Zanzibar Paradise Tours — logo mark (dhow silhouette) + wordmark.
+// Visit Zanzibar Paradise — logo mark (dhow silhouette) + wordmark.
 // Monoline style to match the lucide-react icons used elsewhere in the navbar.
 
 export function LogoMark({ className = "w-6 h-6", strokeWidth = 2 }) {
@@ -31,7 +31,7 @@ export default function Logo({
   return (
     <>
       <LogoMark className={iconClassName} />
-      {showText && <span className={textClassName}>Zanzibar Paradise Tours</span>}
+      {showText && <span className={textClassName}>Visit Zanzibar Paradise</span>}
     </>
   );
 }
