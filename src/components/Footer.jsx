@@ -22,7 +22,7 @@ export default function Footer() {
       <div className="max-w-6xl mx-auto px-4 py-10 text-center text-sm">
         <div className="flex items-center justify-center gap-2 mb-1">
           <LogoMark className="w-5 h-5 text-teal-400" />
-          <p className="font-bold text-white">Zanzibar Paradise Tours</p>
+          <p className="font-bold text-white">Visit Zanzibar Paradise</p>
         </div>
         {SOCIAL_LINKS.some((l) => l.url) && (
           <div className="flex flex-wrap items-center justify-center gap-2 mt-4">
@@ -33,7 +33,7 @@ export default function Footer() {
                 href={url}
                 target="_blank"
                 rel="noopener noreferrer"
-                aria-label={`Follow Zanzibar Paradise Tours on ${label}`}
+                aria-label={`Follow Visit Zanzibar Paradise on ${label}`}
                 className="inline-flex items-center gap-1.5 border border-slate-700 hover:border-teal-400 hover:text-white transition rounded-full px-3 py-1.5 text-xs font-semibold"
               >
                 <Icon className="w-3.5 h-3.5" aria-hidden="true" />
@@ -60,7 +60,7 @@ export default function Footer() {
         </div>
         <p>{t("Built by Wachu Digital Growth")}</p>
         <p className="mt-4 text-slate-500">
-          &copy; {new Date().getFullYear()} Zanzibar Paradise Tours. All rights reserved.
+          &copy; {new Date().getFullYear()} Visit Zanzibar Paradise. All rights reserved.
         </p>
       </div>
     </footer>
