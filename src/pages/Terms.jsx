@@ -1,3 +1,4 @@
+
 export default function Terms() {
   return (
     <div className="max-w-3xl mx-auto px-4 py-14">
@@ -6,13 +7,13 @@ export default function Terms() {
 
       <div className="space-y-6 text-slate-700 leading-relaxed">
         <p>
-          Please read these Terms of Service carefully before using Zanzibar Paradise Tours (the "Site").
+          Please read these Terms of Service carefully before using Visit Zanzibar Paradise (the "Site").
           By using the Site, you agree to these terms.
         </p>
 
         <h2 className="text-xl font-bold text-slate-900 pt-4">1. About This Site</h2>
         <p>
-          Zanzibar Paradise Tours is a directory and discovery platform for hotels, tours, restaurants,
+          Visit Zanzibar Paradise is a directory and discovery platform for hotels, tours, restaurants,
           beaches, and other attractions in Zanzibar. <strong>We are not a booking agent, travel agency, or
           payment processor for third-party businesses.</strong> Any booking, reservation, or transaction you
           make with a hotel, tour operator, restaurant, or other business listed on this Site is made
@@ -54,7 +55,7 @@ export default function Terms() {
 
         <h2 className="text-xl font-bold text-slate-900 pt-4">6. Limitation of Liability</h2>
         <p>
-          To the fullest extent permitted by law, Zanzibar Paradise Tours and Wachu Digital Growth shall not
+          To the fullest extent permitted by law, Visit Zanzibar Paradise and Wachu Digital Growth shall not
           be liable for any direct, indirect, incidental, or consequential damages arising from your use of
           this Site, your reliance on any listing, or any transaction or interaction you have with a
           business found through this Site.
@@ -62,7 +63,7 @@ export default function Terms() {
 
         <h2 className="text-xl font-bold text-slate-900 pt-4">7. Intellectual Property</h2>
         <p>
-          The design, branding, and original content of this Site belong to Zanzibar Paradise Tours /
+          The design, branding, and original content of this Site belong to Visit Zanzibar Paradise /
           Wachu Digital Growth. Listing photos and descriptions remain the property of their respective
           owners or submitting partners.
         </p>
