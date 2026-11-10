@@ -5,17 +5,17 @@ import { MessageCircle } from "lucide-react";
 export default function About() {
   return (
     <div className="max-w-3xl mx-auto px-4 py-14">
-      <h1 className="text-3xl md:text-4xl font-bold text-slate-900 mb-2">About Zanzibar Paradise Tours</h1>
+      <h1 className="text-3xl md:text-4xl font-bold text-slate-900 mb-2">About Visit Zanzibar Paradise</h1>
       <p className="text-slate-500 mb-10">Real Zanzibar, from the people who know it best.</p>
       <div className="space-y-6 text-slate-700 leading-relaxed">
         <p>
-          Zanzibar Paradise Tours is a trusted directory of hotels, tours, restaurants, beaches, and
+          Visit Zanzibar Paradise is a trusted directory of hotels, tours, restaurants, beaches, and
           experiences across Zanzibar. We built this platform because we love this island, and we wanted
           travelers to be able to discover it the way locals do — not through generic listings, but through
           places that are genuinely worth your time.
         </p>
         <p>
-          We are not a booking agent. Zanzibar Paradise Tours is a discovery and information platform: we
+          We are not a booking agent. Visit Zanzibar Paradise is a discovery and information platform: we
           showcase hotels, tours, and local businesses, and connect travelers directly with them via
           WhatsApp so you can ask questions, get real answers, and arrange your trip on your own terms —
           without middlemen or hidden booking fees.
@@ -37,7 +37,7 @@ export default function About() {
         <div className="flex flex-col sm:flex-row gap-5 items-start bg-slate-50 border border-slate-200 rounded-2xl p-5">
           <img
             src="/images/abedy.jpg"
-            alt="Abedy, founder of Zanzibar Paradise Tours"
+            alt="Abedy, founder of Visit Zanzibar Paradise"
             width="640"
             height="640"
             loading="lazy"
@@ -45,10 +45,10 @@ export default function About() {
           />
           <div className="min-w-0">
             <p className="font-bold text-slate-900">Abedy</p>
-            <p className="text-sm text-slate-500 mb-2">Founder, Zanzibar Paradise Tours · Dodoma, Tanzania</p>
+            <p className="text-sm text-slate-500 mb-2">Founder, Visit Zanzibar Paradise · Dodoma, Tanzania</p>
             <p className="mb-3">
               I run Wachu Digital Growth, a Tanzanian digital agency that helps tourism businesses get found
-              online. Zanzibar Paradise Tours is built and maintained by me. If you message us on WhatsApp,
+              online. Visit Zanzibar Paradise is built and maintained by me. If you message us on WhatsApp,
               you are talking to a real person, and I will point you to the right hotel or tour to ask.
             </p>
             <a
