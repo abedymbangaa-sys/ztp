@@ -52,6 +52,7 @@ const WhereShouldIStay = lazy(() => import("./pages/WhereShouldIStay"));
 const ZanzibarByBudget = lazy(() => import("./pages/ZanzibarByBudget"));
 const FAQ = lazy(() => import("./pages/FAQ"));
 const BestInArea = lazy(() => import("./pages/BestInArea"));
+const ChatAgent = lazy(() => import("./components/ChatAgent"));
 function PageLoading() {
   return (
     <div className="flex items-center justify-center py-24">
@@ -126,6 +127,9 @@ export default function App() {
         </Suspense>
         <Footer />
         <SiteReviewPrompt />
+        <Suspense fallback={null}>
+          <ChatAgent />
+        </Suspense>
         </div>
         </CompareProvider>
         </SavedListProvider>
