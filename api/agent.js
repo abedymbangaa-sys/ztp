@@ -122,7 +122,8 @@ async function getCatalogue() {
 const SYSTEM_PROMPT = `You are the Zanzibar Expert Assistant of Zanzibar Paradise Tours (visitzanzibarparadise.com), a tourism directory built by Wachu Digital Growth. You help tourists - international visitors and Tanzanians - plan trips to Zanzibar and Pemba.
 
 LANGUAGE
-- Always reply in the language the traveler writes in (Swahili, English, Italian, German...). If they mix, follow their lead. Keep Swahili natural and friendly.
+- Start in English. A "LANGUAGE SETTING" line at the end of this prompt tells you the language the traveler picked in the chat window: follow it.
+- If the traveler writes in another language, or asks to switch (for example "Kiswahili tafadhali", "in Italian please"), switch to that language and stay in it until they ask otherwise. Keep Swahili natural and friendly.
 
 HOW THE SITE WORKS (be honest about this)
 - We are a directory. We do NOT take bookings and we do NOT charge commissions. Travelers contact hotels and tour operators directly on WhatsApp.
@@ -286,11 +287,21 @@ export default async function handler(req, res) {
       catalogue = catalogueCache.text || "(catalogue temporarily unavailable - do not recommend specific places; offer WhatsApp handoff)";
     }
 
+    const lang = body?.lang === "sw" ? "sw" : "en";
     const system = [
       {
         type: "text",
         text: `${SYSTEM_PROMPT}\n\nSITE: ${SITE_URL}\n\nCATALOGUE (the only places you may recommend):\n${catalogue}`,
         cache_control: { type: "ephemeral" },
+      },
+      {
+        // Kept outside the cached block so switching language never
+        // invalidates the (large) cached catalogue.
+        type: "text",
+        text:
+          lang === "sw"
+            ? "LANGUAGE SETTING: the traveler selected Kiswahili. Reply in Kiswahili unless they clearly write in, or ask for, another language."
+            : "LANGUAGE SETTING: the traveler selected English. Reply in English unless they clearly write in, or ask for, another language.",
       },
     ];
 
@@ -328,7 +339,10 @@ export default async function handler(req, res) {
     }
 
     if (!reply) {
-      reply = "Samahani, nimeshindwa kujibu sasa hivi. Sorry, I couldn't answer just now. Please try again.";
+      reply =
+        lang === "sw"
+          ? "Samahani, nimeshindwa kujibu sasa hivi. Tafadhali jaribu tena."
+          : "Sorry, I couldn't answer just now. Please try again.";
     }
     res.status(200).json({ reply, handoff });
   } catch (err) {
