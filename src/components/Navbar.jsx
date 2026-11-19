@@ -141,7 +141,7 @@ export default function Navbar() {
             className="bg-teal-700 text-white text-xs sm:text-sm font-semibold px-3 sm:px-4 py-2 rounded-full hover:bg-teal-800 transition whitespace-nowrap"
           >
             <span className="sm:hidden">{t("Chat Now")}</span>
-            <span className="hidden sm:inline">{t("Chat with a Zanzibar Expert")}</span>
+            <span className="hidden sm:inline">{t("Talk to a Local Expert")}</span>
           </a>
 
           {/* Mobile menu toggle */}
