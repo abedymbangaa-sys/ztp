@@ -231,7 +231,11 @@ async function callClaude({ apiKey, model, system, messages, signal }) {
     },
     body: JSON.stringify({
       model,
-      max_tokens: 700,
+      // Haiku 5.5 uses adaptive thinking by default and thinking tokens count
+      // toward max_tokens, so leave generous room and keep effort low for
+      // short, fast chat replies. (Cost stays tiny: replies are short.)
+      max_tokens: 4000,
+      output_config: { effort: "low" },
       system,
       tools: TOOLS,
       messages,
@@ -317,9 +321,11 @@ export default async function handler(req, res) {
     const convo = [...messages];
     let handoff = null;
     let reply = "";
+    let lastOut = null;
 
     for (let i = 0; i < 3; i++) {
       const out = await callClaude({ apiKey, model, system, messages: convo, signal: controller.signal });
+      lastOut = out;
       const blocks = Array.isArray(out.content) ? out.content : [];
       const text = blocks
         .filter((b) => b.type === "text")
@@ -347,6 +353,11 @@ export default async function handler(req, res) {
     }
 
     if (!reply) {
+      console.error(
+        "empty reply",
+        lastOut?.stop_reason,
+        (lastOut?.content || []).map((b) => b.type).join(",")
+      );
       reply =
         lang === "sw"
           ? "Samahani, nimeshindwa kujibu sasa hivi. Tafadhali jaribu tena."
