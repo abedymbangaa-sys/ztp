@@ -1,6 +1,7 @@
 import { useEffect, useRef, useState } from "react";
 import { useLocation, useNavigate } from "react-router-dom";
-import { Compass, MessageCircle, RotateCcw, SendHorizontal, X } from "lucide-react";
+import { Compass, Headset, MessageCircle, RotateCcw, SendHorizontal, X } from "lucide-react";
+import { SITE_CONTACT_NUMBER } from "../lib/whatsapp";
 
 // Floating "Ask Expert" chat. Talks to /api/agent (api/agent.js).
 // Starts in English; the visitor can switch to Kiswahili with the EN | SW
@@ -23,6 +24,7 @@ const TEXT = {
       "Help me plan my trip",
       "Good hotels in Nungwi",
       "Best beaches in Zanzibar",
+      "Stone Town tours",
       "Budget-friendly tours",
     ],
     placeholder: "Type your question...",
@@ -32,6 +34,8 @@ const TEXT = {
     whatsapp: "Continue on WhatsApp",
     note: "AI assistant. Always confirm prices and availability with the business on WhatsApp.",
     genericError: "Something went wrong. Please try again.",
+    human: "Prefer a person? Chat with our local expert",
+    humanMsg: "Hello! I'd like to talk to a local Zanzibar expert about my trip.",
   },
   sw: {
     open: "Uliza Mtaalamu",
@@ -44,6 +48,7 @@ const TEXT = {
       "Nisaidie kupanga safari",
       "Hoteli nzuri Nungwi",
       "Fukwe bora Zanzibar",
+      "Ziara za Stone Town",
       "Tours za bei nafuu",
     ],
     placeholder: "Andika swali lako...",
@@ -53,6 +58,8 @@ const TEXT = {
     whatsapp: "Endelea kwenye WhatsApp",
     note: "Msaidizi wa AI. Thibitisha bei na upatikanaji na biashara husika kupitia WhatsApp.",
     genericError: "Kuna tatizo. Tafadhali jaribu tena.",
+    human: "Unataka mtu halisi? Ongea na mtaalamu wetu",
+    humanMsg: "Habari! Ningependa kuzungumza na mtaalamu wa Zanzibar kuhusu safari yangu.",
   },
 };
 
@@ -167,7 +174,10 @@ export default function ChatAgent() {
   const [error, setError] = useState("");
   const endRef = useRef(null);
   const inputRef = useRef(null);
+  const panelRef = useRef(null);
+  const [keyboardOpen, setKeyboardOpen] = useState(false);
   const t = TEXT[lang];
+  const humanHref = `https://wa.me/${SITE_CONTACT_NUMBER}?text=${encodeURIComponent(t.humanMsg)}`;
 
   useEffect(() => {
     try {
@@ -191,6 +201,48 @@ export default function ChatAgent() {
 
   useEffect(() => {
     if (open) setTimeout(() => inputRef.current?.focus(), 150);
+  }, [open]);
+
+  // Mobile keyboard handling: keep the panel exactly as tall as the area the
+  // visitor can actually see, so the header never scrolls off-screen when the
+  // keyboard opens (a common problem in in-app browsers such as LinkedIn or
+  // Instagram), and stop the page behind the chat from scrolling.
+  // 100dvh alone is not enough: it ignores the on-screen keyboard.
+  useEffect(() => {
+    if (!open) return undefined;
+    const el = panelRef.current;
+    const vv = window.visualViewport;
+    const isMobile = () => window.innerWidth < 640;
+    const baseHeight = window.innerHeight;
+    const prevOverflow = document.body.style.overflow;
+    if (isMobile()) document.body.style.overflow = "hidden";
+
+    function sync() {
+      if (!el) return;
+      if (vv && isMobile()) {
+        el.style.top = `${vv.offsetTop}px`;
+        el.style.height = `${vv.height}px`;
+        el.style.bottom = "auto";
+        setKeyboardOpen(vv.height < baseHeight * 0.75);
+      } else {
+        el.style.top = "";
+        el.style.height = "";
+        el.style.bottom = "";
+        setKeyboardOpen(false);
+      }
+      endRef.current?.scrollIntoView({ block: "end" });
+    }
+
+    sync();
+    vv?.addEventListener("resize", sync);
+    vv?.addEventListener("scroll", sync);
+    window.addEventListener("resize", sync);
+    return () => {
+      vv?.removeEventListener("resize", sync);
+      vv?.removeEventListener("scroll", sync);
+      window.removeEventListener("resize", sync);
+      document.body.style.overflow = prevOverflow;
+    };
   }, [open]);
 
   if (HIDDEN_PREFIXES.some((p) => location.pathname.startsWith(p))) return null;
@@ -255,6 +307,7 @@ export default function ChatAgent() {
 
       {open && (
         <div
+          ref={panelRef}
           role="dialog"
           aria-label={t.title}
           className="fixed inset-0 z-50 flex flex-col bg-white sm:inset-auto sm:bottom-4 sm:right-4 sm:h-[600px] sm:max-h-[calc(100vh-2rem)] sm:w-[380px] sm:rounded-2xl sm:border sm:border-slate-200 sm:shadow-2xl"
@@ -309,6 +362,19 @@ export default function ChatAgent() {
               <X className="h-5 w-5" aria-hidden="true" />
             </button>
           </div>
+
+          {/* Talk to a person - hidden while the keyboard is open to save space */}
+          {!keyboardOpen && (
+            <a
+              href={humanHref}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="flex items-center justify-center gap-2 border-b border-green-200 bg-green-50 px-3 py-2 text-xs font-semibold text-green-800 hover:bg-green-100"
+            >
+              <Headset className="h-4 w-4 flex-shrink-0" aria-hidden="true" />
+              <span>{t.human}</span>
+            </a>
+          )}
 
           {/* Messages */}
           <div className="flex-1 space-y-3 overflow-y-auto bg-slate-50 px-3 py-4">
