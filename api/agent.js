@@ -239,7 +239,14 @@ async function callClaude({ apiKey, model, system, messages, signal }) {
   });
   if (!res.ok) {
     const detail = await res.text().catch(() => "");
-    throw new Error(`Claude API ${res.status}: ${detail.slice(0, 300)}`);
+    const err = new Error(`Claude API ${res.status}: ${detail.slice(0, 300)}`);
+    err.status = res.status;
+    try {
+      err.type = JSON.parse(detail)?.error?.type || "";
+    } catch {
+      err.type = "";
+    }
+    throw err;
   }
   return res.json();
 }
@@ -254,7 +261,8 @@ export default async function handler(req, res) {
     return;
   }
 
-  const apiKey = process.env.ANTHROPIC_API_KEY;
+  // Trim stray spaces/newlines/quotes that often sneak in when pasting a key.
+  const apiKey = (process.env.ANTHROPIC_API_KEY || "").trim().replace(/^["']|["']$/g, "");
   if (!apiKey) {
     res.status(500).json({ error: "Assistant is not configured yet." });
     return;
@@ -347,7 +355,15 @@ export default async function handler(req, res) {
     res.status(200).json({ reply, handoff });
   } catch (err) {
     console.error("agent error", err);
-    res.status(502).json({ error: "The assistant is unavailable right now. Please try again." });
+    // Short, non-sensitive code so problems can be diagnosed from the chat
+    // window (e.g. claude_401 = bad API key, claude_404 = unknown model,
+    // claude_400 = bad request, claude_429 = rate/credit limit).
+    const code = err?.status
+      ? `claude_${err.status}${err.type ? `_${String(err.type).slice(0, 40)}` : ""}`
+      : err?.name === "AbortError"
+        ? "timeout"
+        : "network";
+    res.status(502).json({ error: "The assistant is unavailable right now. Please try again.", code });
   } finally {
     clearTimeout(timer);
   }
