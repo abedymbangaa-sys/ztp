@@ -192,8 +192,40 @@ export default function Home() {
           <SearchAutocomplete
             listings={allApproved}
             placeholder={t("Where do you want to go in Zanzibar?")}
-            className="max-w-xl mx-auto mb-10"
+            className="max-w-xl mx-auto mb-4"
           />
+
+          {/* Quick intent chips: one tap to a popular area/section, or to
+              the AI planner with the question already typed in. */}
+          <div className="flex flex-wrap justify-center gap-2 max-w-xl mx-auto mb-10 px-2">
+            {[
+              { label: "Paje", to: "/area/east" },
+              { label: "Stone Town", to: "/area/stone-town" },
+              { label: "Nungwi", to: "/area/north" },
+              { label: "Best beaches", to: "/beaches" },
+            ].map((chip) => (
+              <Link
+                key={chip.label}
+                to={chip.to}
+                className="rounded-full border border-white/30 bg-white/15 px-3.5 py-1.5 text-xs sm:text-sm font-medium text-white backdrop-blur-sm transition hover:bg-white/25"
+              >
+                {chip.label}
+              </Link>
+            ))}
+            <button
+              type="button"
+              onClick={() =>
+                window.dispatchEvent(
+                  new CustomEvent("zpt:open-agent", {
+                    detail: { prompt: "Build me a 3-day Zanzibar itinerary", source: "hero_chip" },
+                  })
+                )
+              }
+              className="rounded-full border border-white/30 bg-white/15 px-3.5 py-1.5 text-xs sm:text-sm font-medium text-white backdrop-blur-sm transition hover:bg-white/25"
+            >
+              3-day itinerary
+            </button>
+          </div>
 
           {/* CTA hierarchy: one primary action, one browsing path, one
               direct-help path — instead of 3-4 competing equal buttons,
@@ -211,15 +243,20 @@ export default function Home() {
             >
               {t("Explore Zanzibar")}
             </Link>
+          </div>
+
+          {/* Third path is a quiet text link, so the two buttons above stay
+              the clear choices (same wording as the header button). */}
+          <p className="mt-5 text-sm">
             <a
               href="https://wa.me/255635442732"
               target="_blank"
               rel="noreferrer"
-              className="border-2 border-white/80 font-bold px-7 py-3.5 rounded-full hover:bg-white/10 transition backdrop-blur-sm"
+              className="text-slate-100/90 underline underline-offset-4 decoration-white/40 hover:text-white hover:decoration-white"
             >
-              Talk to a Local Expert
+              Talk to a Local Expert on WhatsApp
             </a>
-          </div>
+          </p>
 
           {/* Trust strip - every claim here is either a fixed, true fact
               (local team, direct contact, no fees) or computed live from
