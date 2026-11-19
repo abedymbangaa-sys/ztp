@@ -213,7 +213,9 @@ export default function ChatAgent() {
         }),
       });
       const data = await res.json().catch(() => ({}));
-      if (!res.ok) throw new Error(data.error || t.genericError);
+      if (!res.ok) {
+        throw new Error(`${data.error || t.genericError}${data.code ? ` (${data.code})` : ""}`);
+      }
       setMessages((prev) => [
         ...prev,
         { role: "assistant", content: data.reply, handoff: data.handoff || null },
