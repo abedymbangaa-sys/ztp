@@ -549,13 +549,17 @@ const env = (name) => (process.env[name] || "").trim().replace(/^["']|["']$/g, "
 // Request helpers
 // ---------------------------------------------------------------------------
 async function readRaw(req) {
+  // Read the stream FIRST. Touching req.body first lets Vercel parse (and
+  // consume) it, and then the original bytes Meta signed are lost.
+  if (req.readable && !req.readableEnded) {
+    const chunks = [];
+    for await (const c of req) chunks.push(typeof c === "string" ? Buffer.from(c) : c);
+    return { raw: Buffer.concat(chunks), parsed: null };
+  }
   if (Buffer.isBuffer(req.body)) return { raw: req.body, parsed: null };
   if (typeof req.body === "string") return { raw: Buffer.from(req.body), parsed: null };
-  // If a body parser already ran, the stream is consumed and req.body is an object.
   if (req.body && typeof req.body === "object") return { raw: null, parsed: req.body };
-  const chunks = [];
-  for await (const c of req) chunks.push(c);
-  return { raw: Buffer.concat(chunks), parsed: null };
+  return { raw: Buffer.alloc(0), parsed: null };
 }
 
 function sameHex(a, b) {
@@ -577,6 +581,13 @@ function verifySignature(secret, header, raw, parsed) {
     candidates.push(Buffer.from(s));
     candidates.push(
       Buffer.from(s.replace(/[\u007f-￿]/g, (c) => `\\u${c.charCodeAt(0).toString(16).padStart(4, "0")}`))
+    );
+    candidates.push(
+      Buffer.from(
+        s
+          .replace(/[\u007f-\uffff]/g, (c) => `\\u${c.charCodeAt(0).toString(16).padStart(4, "0")}`)
+          .replace(/\//g, "\\/")
+      )
     );
   }
   return candidates.some((c) => sameHex(crypto.createHmac("sha256", secret).update(c).digest("hex"), given));
@@ -823,6 +834,12 @@ export default async function handler(req, res) {
   // 2) Only accept requests really signed by Meta
   const { raw, parsed } = await readRaw(req);
   if (!verifySignature(env("META_APP_SECRET"), req.headers["x-hub-signature-256"], raw, parsed)) {
+    console.error("bad signature", {
+      hasRaw: !!raw,
+      rawLen: raw ? raw.length : 0,
+      hasHeader: !!req.headers["x-hub-signature-256"],
+      secretLen: env("META_APP_SECRET").length,
+    });
     res.status(401).json({ error: "Bad signature" });
     return;
   }
